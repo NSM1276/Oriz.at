@@ -20,7 +20,7 @@ export default async function GuestMenuPage({
   const { data, error } = await supabase
     .from("venues")
     .select(
-      "id, slug, name, logo_url, about, currency, owner_id, created_at, sections(id, venue_id, name, position, items(id, section_id, venue_id, name, description, price_cents, image_url, is_active, position, updated_at))",
+      "id, slug, name, logo_url, about, currency, owner_id, created_at, sections(id, venue_id, name, position, items(id, section_id, venue_id, name, description, price_cents, image_url, allergens, ai_caption, is_active, position, updated_at))",
     )
     .eq("slug", venueSlug)
     .maybeSingle<Row>();
