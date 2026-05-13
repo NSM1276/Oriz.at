@@ -16,21 +16,21 @@ const garamond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "ORIZ — Quiet menus for fine restaurants",
+  title: "ORIZ — Stille Speisekarten für die Spitzengastronomie",
   description:
-    "ORIZ replaces the paper menu and the restaurant website with one calm, live surface. Frankfurt-hosted. GDPR-clean.",
+    "ORIZ ersetzt die Papierkarte und die Restaurant-Website durch eine ruhige, lebendige Oberfläche. Aus Wien. DSGVO-konform.",
   openGraph: {
-    title: "ORIZ — Digital Excellence",
+    title: "ORIZ — Digitale Exzellenz",
     description:
-      "The quiet replacement for the paper menu — and the restaurant website.",
+      "Der stille Ersatz für die Papierkarte — und die Restaurant-Website.",
     siteName: "ORIZ",
-    locale: "en_EU",
+    locale: "de_AT",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ORIZ — Digital Excellence",
-    description: "The quiet replacement for the paper menu — and the restaurant website.",
+    title: "ORIZ — Digitale Exzellenz",
+    description: "Der stille Ersatz für die Papierkarte — und die Restaurant-Website.",
   },
 };
 
@@ -40,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${garamond.variable}`}>
+    <html lang="de" className={`${inter.variable} ${garamond.variable}`}>
       <body className="font-sans bg-parchment text-onyx">{children}</body>
     </html>
   );
