@@ -9,6 +9,7 @@ export function ItemEditor({ initial }: { initial: Item }) {
   const [priceInput, setPriceInput] = useState(
     (initial.price_cents / 100).toFixed(2),
   );
+  const [allergensInput, setAllergensInput] = useState(initial.allergens ?? "");
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const supabase = createClient();
@@ -40,6 +41,27 @@ export function ItemEditor({ initial }: { initial: Item }) {
     });
   }
 
+  async function commitAllergens() {
+    const val = allergensInput.trim() || null;
+    if (val === (item.allergens ?? null)) return;
+    const prev = item;
+    const next = { ...item, allergens: val };
+    setItem(next);
+    startTransition(async () => {
+      const { error } = await supabase
+        .from("items")
+        .update({ allergens: val })
+        .eq("id", item.id);
+      if (error) {
+        setItem(prev);
+        setAllergensInput(prev.allergens ?? "");
+        setError(error.message);
+      } else {
+        setError(null);
+      }
+    });
+  }
+
   async function toggleActive() {
     const prev = item;
     const next = { ...item, is_active: !item.is_active };
@@ -60,47 +82,64 @@ export function ItemEditor({ initial }: { initial: Item }) {
 
   return (
     <li
-      className={`grid grid-cols-[1fr_auto_auto] items-center gap-4 py-4 border-b border-onyx/10 ${
-        item.is_active ? "" : "opacity-50"
-      }`}
+      className={`py-4 border-b border-onyx/10 ${item.is_active ? "" : "opacity-50"}`}
     >
-      <div className="min-w-0">
-        <div className="font-display text-xl text-onyx truncate">{item.name}</div>
-        {item.description && (
-          <div className="font-sans text-xs text-onyx/60 truncate">
-            {item.description}
-          </div>
-        )}
+      <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4">
+        <div className="min-w-0">
+          <div className="font-display text-xl text-onyx">{item.name}</div>
+          {item.description && (
+            <div className="font-sans text-xs text-onyx/60 truncate">
+              {item.description}
+            </div>
+          )}
+        </div>
+
+        <label className="flex items-center gap-2">
+          <input
+            type="text"
+            inputMode="decimal"
+            value={priceInput}
+            onChange={(e) => setPriceInput(e.target.value)}
+            onBlur={commitPrice}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+            }}
+            className="w-24 text-right bg-transparent border-b border-onyx/40 focus:border-gold outline-none font-sans tabular-nums py-1"
+          />
+          <span className="font-sans text-xs text-onyx/60">€</span>
+        </label>
+
+        <button
+          onClick={toggleActive}
+          className={`font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 border transition ${
+            item.is_active
+              ? "border-onyx/30 text-onyx hover:border-onyx"
+              : "border-gold text-gold hover:bg-gold hover:text-parchment"
+          }`}
+        >
+          {item.is_active ? "Verfügbar" : "Ausverkauft"}
+        </button>
       </div>
 
-      <label className="flex items-center gap-2">
+      <div className="mt-2 flex items-center gap-2">
+        <span className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 w-20 shrink-0">
+          Allergene
+        </span>
         <input
           type="text"
-          inputMode="decimal"
-          value={priceInput}
-          onChange={(e) => setPriceInput(e.target.value)}
-          onBlur={commitPrice}
+          value={allergensInput}
+          onChange={(e) => setAllergensInput(e.target.value)}
+          onBlur={commitAllergens}
           onKeyDown={(e) => {
             if (e.key === "Enter") (e.target as HTMLInputElement).blur();
           }}
-          className="w-24 text-right bg-transparent border-b border-onyx/40 focus:border-gold outline-none font-sans tabular-nums py-1"
+          placeholder="z.B. A, C, G, L"
+          className="flex-1 bg-transparent border-b border-onyx/20 focus:border-gold outline-none font-sans text-xs text-onyx/70 py-1"
         />
-        <span className="font-sans text-xs text-onyx/60">€</span>
-      </label>
-
-      <button
-        onClick={toggleActive}
-        className={`font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 border transition ${
-          item.is_active
-            ? "border-onyx/30 text-onyx hover:border-onyx"
-            : "border-gold text-gold hover:bg-gold hover:text-parchment"
-        }`}
-      >
-        {item.is_active ? "Available" : "Sold out"}
-      </button>
+      </div>
 
       {error && (
-        <p className="col-span-3 text-xs text-red-700 font-sans">{error}</p>
+        <p className="mt-1 text-xs text-red-700 font-sans">{error}</p>
       )}
     </li>
   );

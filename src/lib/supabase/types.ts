@@ -25,6 +25,7 @@ export type Item = {
   price_cents: number;
   image_url: string | null;
   ai_caption: string | null;
+  allergens: string | null;
   is_active: boolean;
   position: number;
   updated_at: string;
