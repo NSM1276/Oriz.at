@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+}
+
+html, body {
+  background: #F5F0EC;
+  color: #0A0A0A;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #C69B3C 50%, transparent);
+  opacity: 0.6;
+}
