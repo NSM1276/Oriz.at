@@ -14,7 +14,10 @@ export function SectionBlock({
   return (
     <section className="mt-16">
       <header className="mb-6 flex items-center gap-4">
-        <span className="font-sans text-[11px] tracking-regal uppercase text-gold">
+        <span
+          className="font-sans text-[11px] tracking-regal uppercase"
+          style={{ color: 'var(--accent)' }}
+        >
           {section.name}
         </span>
         <div className="flex-1 h-px bg-onyx/15" />

@@ -58,8 +58,13 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
     });
   }, [sections, items]);
 
+  const accent = venue.color_primary ?? '#C69B3C';
+
   return (
-    <main className="max-w-3xl mx-auto px-6 pt-20 pb-8">
+    <main
+      className="max-w-3xl mx-auto px-6 pt-20 pb-8"
+      style={{ '--accent': accent } as React.CSSProperties}
+    >
       <header className="text-center">
         <VenueLogo name={venue.name} logoUrl={venue.logo_url} />
         {venue.about && (

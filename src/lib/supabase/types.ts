@@ -5,6 +5,7 @@ export type Venue = {
   logo_url: string | null;
   about: string | null;
   currency: string;
+  color_primary: string | null;
   owner_id: string | null;
   created_at: string;
 };
