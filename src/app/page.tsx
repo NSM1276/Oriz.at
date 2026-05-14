@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { ContactForm } from "@/components/landing/ContactForm";
 
 const STATS = [
   {
@@ -49,11 +51,12 @@ const PLANS = [
     badge: null,
     features: [
       "Alle Starter-Funktionen inklusive",
-      "Kein Kreditkarte nötig",
+      "Keine Kreditkarte nötig",
       "Kein Vertrag, jederzeit kündbar",
       "Persönlicher Onboarding-Support",
     ],
     cta: "Kostenlos testen",
+    plan: "trial",
     accent: false,
   },
   {
@@ -70,6 +73,7 @@ const PLANS = [
       "20+ Sprachen automatisch",
     ],
     cta: "Starter wählen",
+    plan: "starter",
     accent: true,
   },
   {
@@ -87,6 +91,7 @@ const PLANS = [
       "Priority Support",
     ],
     cta: "Pro wählen",
+    plan: "pro",
     accent: false,
   },
 ];
@@ -442,7 +447,7 @@ export default function Landing() {
             <p className="font-sans text-sm text-onyx/40 mt-4">Monatlich kündbar. Keine Einrichtungsgebühr.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PLANS.map(({ name, price, sub, badge, features, cta, accent }) => (
+            {PLANS.map(({ name, price, sub, badge, features, cta, plan, accent }) => (
               <div
                 key={name}
                 className={`border p-8 flex flex-col ${
@@ -472,7 +477,7 @@ export default function Landing() {
                   ))}
                 </ul>
                 <a
-                  href="#kontakt"
+                  href={`/?plan=${plan}#kontakt`}
                   className={`font-sans text-[11px] tracking-regal uppercase py-3 text-center transition-colors duration-300 ${
                     accent
                       ? "bg-gold text-onyx hover:bg-gold/80"
@@ -501,42 +506,9 @@ export default function Landing() {
           <p className="font-display text-lg text-parchment/50 italic mb-12">
             Schreiben Sie uns — wir melden uns innerhalb von 24 Stunden.
           </p>
-          <form
-            action="mailto:contact@oriz.at"
-            method="get"
-            encType="text/plain"
-            className="flex flex-col gap-6 text-left"
-          >
-            <div className="flex flex-col gap-1">
-              <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">
-                Ihre E-Mail
-              </label>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="chef@restaurant.at"
-                className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">
-                Restaurant & Anfrage
-              </label>
-              <textarea
-                name="body"
-                rows={4}
-                placeholder="Erzählen Sie uns von Ihrem Lokal."
-                className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors resize-none"
-              />
-            </div>
-            <button
-              type="submit"
-              className="mt-2 font-sans text-[11px] tracking-regal uppercase text-onyx bg-gold px-10 py-4 hover:bg-gold/80 transition-colors duration-300 self-center"
-            >
-              Anfrage senden
-            </button>
-          </form>
+          <Suspense fallback={null}>
+            <ContactForm />
+          </Suspense>
           <Link
             href="/admin"
             className="mt-16 inline-block font-sans text-[10px] tracking-regal uppercase text-parchment/20 border-b border-parchment/10 pb-1 hover:text-gold hover:border-gold transition-colors"
