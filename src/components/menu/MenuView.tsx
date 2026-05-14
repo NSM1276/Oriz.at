@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { SectionBlock } from "./SectionBlock";
 import { VenueLogo } from "@/components/brand/VenueLogo";
-import { PoweredByOriz } from "@/components/brand/PoweredByOriz";
 import type { Item, MenuPayload } from "@/lib/supabase/types";
 
 export function MenuView({ initial }: { initial: MenuPayload }) {
@@ -44,9 +43,7 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [venue.id]);
 
   const sectionsWithItems = useMemo(() => {
@@ -58,33 +55,42 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
     });
   }, [sections, items]);
 
-  const accent = venue.color_primary ?? '#C69B3C';
+  const isDark = !!venue.color_bg;
+  const bg      = venue.color_bg      ?? '#F5F0EC';
+  const text    = isDark ? '#F5F0EC'  : '#0A0A0A';
+  const dim     = isDark ? 'rgba(245,240,236,0.60)' : 'rgba(10,10,10,0.60)';
+  const muted   = isDark ? 'rgba(245,240,236,0.30)' : 'rgba(10,10,10,0.30)';
+  const border  = isDark ? 'rgba(245,240,236,0.10)' : 'rgba(10,10,10,0.10)';
+  const accent  = venue.color_primary ?? '#C69B3C';
+
+  const cssVars = {
+    '--color-bg': bg, '--color-text': text, '--color-dim': dim,
+    '--color-muted': muted, '--color-border': border, '--accent': accent,
+  } as React.CSSProperties;
 
   return (
-    <main
-      className="max-w-3xl mx-auto px-6 pt-20 pb-8"
-      style={{ '--accent': accent } as React.CSSProperties}
-    >
-      <header className="text-center">
-        <VenueLogo name={venue.name} logoUrl={venue.logo_url} />
-        {venue.about && (
-          <p className="font-display italic text-onyx/70 text-lg md:text-xl mt-6 max-w-xl mx-auto">
-            {venue.about}
-          </p>
-        )}
-        <div className="hairline w-24 mx-auto mt-8" />
-      </header>
+    <div style={{ backgroundColor: bg, minHeight: '100vh' }}>
+      <main className="max-w-3xl mx-auto px-6 pt-20 pb-8" style={cssVars}>
+        <header className="text-center">
+          <VenueLogo name={venue.name} logoUrl={venue.logo_url} textColor={text} />
+          {venue.about && (
+            <p className="font-display italic text-lg md:text-xl mt-6 max-w-xl mx-auto" style={{ color: dim }}>
+              {venue.about}
+            </p>
+          )}
+          <div className="w-24 h-px mx-auto mt-8" style={{ backgroundColor: accent, opacity: 0.6 }} />
+        </header>
 
-      {sectionsWithItems.map((s) => (
-        <SectionBlock
-          key={s.id}
-          section={s}
-          items={s.items}
-          currency={venue.currency}
-        />
-      ))}
+        {sectionsWithItems.map((s) => (
+          <SectionBlock key={s.id} section={s} items={s.items} currency={venue.currency} />
+        ))}
 
-      <PoweredByOriz />
-    </main>
+        <footer className="mt-24 mb-10 flex justify-center">
+          <span className="font-sans text-[11px] tracking-regal uppercase" style={{ color: muted }}>
+            Powered by ORIZ
+          </span>
+        </footer>
+      </main>
+    </div>
   );
 }

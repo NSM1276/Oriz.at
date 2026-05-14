@@ -6,6 +6,7 @@ export type Venue = {
   about: string | null;
   currency: string;
   color_primary: string | null;
+  color_bg: string | null;
   owner_id: string | null;
   created_at: string;
 };

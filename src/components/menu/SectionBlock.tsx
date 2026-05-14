@@ -20,7 +20,7 @@ export function SectionBlock({
         >
           {section.name}
         </span>
-        <div className="flex-1 h-px bg-onyx/15" />
+        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-border)' }} />
       </header>
       <ul>
         {items.map((item) => (
