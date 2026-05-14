@@ -44,19 +44,25 @@ const STEPS = [
 const PLANS = [
   {
     name: "Trial",
-    price: "Kostenlos",
-    sub: "zum Kennenlernen",
-    features: ["1 Menü", "Bis zu 30 Gerichte", "Echtzeit-Updates", "Persönlicher Menü-Link"],
-    cta: "Jetzt starten",
+    price: "14 Tage",
+    sub: "kostenlos — alle Funktionen",
+    badge: null,
+    features: [
+      "Alle Starter-Funktionen inklusive",
+      "Kein Kreditkarte nötig",
+      "Kein Vertrag, jederzeit kündbar",
+      "Persönlicher Onboarding-Support",
+    ],
+    cta: "Kostenlos testen",
     accent: false,
   },
   {
     name: "Starter",
     price: "€ 29",
     sub: "pro Monat",
+    badge: "Empfohlen",
     features: [
-      "1 Menü",
-      "Unbegrenzte Gerichte",
+      "1 Menü · unbegrenzte Gerichte",
       "Echtzeit-Updates",
       "Persönlicher Menü-Link",
       "Instagram & Maps Verlinkung",
@@ -70,13 +76,14 @@ const PLANS = [
     name: "Pro",
     price: "€ 59",
     sub: "pro Monat",
+    badge: null,
     features: [
-      "Bis zu 3 Menüs",
+      "Mehrere Standorte oder Karten",
       "Unbegrenzte Gerichte",
       "Echtzeit-Updates",
       "20+ Sprachen automatisch",
-      "Professionelle Gerichtsfotos (bald)",
-      "Automatische Social-Posts (bald)",
+      "Erweiterte Seiten (bald)",
+      "Post-Assistent (bald)",
       "Priority Support",
     ],
     cta: "Pro wählen",
@@ -392,26 +399,26 @@ export default function Landing() {
           <div className="text-center mb-14">
             <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Bald verfügbar</span>
             <h2 className="font-display text-4xl md:text-5xl mt-6 mb-6 font-light">
-              Die nächste Ebene
+              Mehr als eine Speisekarte
             </h2>
             <p className="font-display text-xl text-parchment/55 italic max-w-2xl mx-auto">
-              ORIZ wird zur vollständigen Plattform für Ihre Außendarstellung —
-              Fotos, Social Media, tägliche Inhalte.
+              ORIZ wächst mit Ihrem Restaurant — kleine, nützliche Erweiterungen,
+              die echten Aufwand sparen.
             </p>
           </div>
           <div className="grid sm:grid-cols-3 gap-5">
             {[
               {
-                title: "Professionelle Gerichtsfotos",
-                body: "Foto per Telegram schicken — ORIZ liefert ein hochwertiges Produktbild für Ihre Karte. In Sekunden.",
+                title: "Post-Assistent",
+                body: "Foto ins System laden — ORIZ formuliert einen fertigen Instagram-Text auf Basis Ihres Tagesgerichts. Sie posten, wann Sie möchten.",
               },
               {
-                title: "Automatische Social-Posts",
-                body: "Tagesmenü automatisch aufbereitet und auf Instagram gepostet — ohne dass Sie etwas tun müssen.",
+                title: "Erweiterte Seiten",
+                body: "Neben dem Menü: eine Seite über Ihr Restaurant, Öffnungszeiten, Team, saisonale Angebote. Ein kleiner Auftritt, der für Sie arbeitet.",
               },
               {
-                title: "Tägliche Inhalte per Chat",
-                body: "Schreiben Sie uns das Tagesmenü — wir posten es, aktualisieren die Karte und antworten Ihren Gästen.",
+                title: "Foto-Aufwertung",
+                body: "Handyfoto eines Gerichts hochladen — ORIZ liefert eine aufgewertete Version für Ihre digitale Karte. Kein Fotograf nötig.",
               },
             ].map(({ title, body }) => (
               <div key={title} className="border border-parchment/10 p-7">
@@ -435,16 +442,16 @@ export default function Landing() {
             <p className="font-sans text-sm text-onyx/40 mt-4">Monatlich kündbar. Keine Einrichtungsgebühr.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PLANS.map(({ name, price, sub, features, cta, accent }) => (
+            {PLANS.map(({ name, price, sub, badge, features, cta, accent }) => (
               <div
                 key={name}
                 className={`border p-8 flex flex-col ${
                   accent ? "border-gold bg-onyx text-parchment" : "border-onyx/10"
                 }`}
               >
-                {accent && (
-                  <div className="font-sans text-[9px] tracking-regal uppercase text-gold border border-gold/40 px-2 py-1 self-start mb-4">
-                    Empfohlen
+                {badge && (
+                  <div className={`font-sans text-[9px] tracking-regal uppercase border px-2 py-1 self-start mb-4 ${accent ? "text-gold border-gold/40" : "text-onyx/40 border-onyx/20"}`}>
+                    {badge}
                   </div>
                 )}
                 <div className={`font-sans text-[10px] tracking-regal uppercase mb-5 ${accent ? "text-gold" : "text-onyx/35"}`}>
