@@ -83,6 +83,7 @@ function StepIndicator({ current }: { current: number }) {
 export function ContactForm() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [fileName, setFileName] = useState<string | null>(null);
   const [state, setState] = useState<State>({
     step: 0,
     venueType: "",
@@ -223,6 +224,47 @@ export function ContactForm() {
                 />
               </div>
             ))}
+
+            {/* Website URL */}
+            <div className="flex flex-col gap-1">
+              <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">
+                Ihre Website (optional)
+              </label>
+              <input
+                type="url"
+                name="Website"
+                placeholder="https://ihr-restaurant.at"
+                className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors"
+              />
+              <span className="font-sans text-[10px] text-parchment/20 mt-1">
+                Falls Ihr Menü dort zu finden ist — wir übernehmen den Rest.
+              </span>
+            </div>
+
+            {/* PDF upload */}
+            <div className="flex flex-col gap-2">
+              <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">
+                Menü als PDF (optional)
+              </label>
+              <label className="flex items-center gap-4 border border-dashed border-parchment/15 px-5 py-4 cursor-pointer hover:border-parchment/30 transition-colors group">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-parchment/30 group-hover:text-parchment/50 transition-colors">
+                  <path d="M8 1v9M4 6l4-4 4 4M2 13h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className={`font-sans text-xs transition-colors ${fileName ? "text-gold" : "text-parchment/30 group-hover:text-parchment/50"}`}>
+                  {fileName ?? "PDF auswählen oder hierher ziehen"}
+                </span>
+                <input
+                  type="file"
+                  name="attachment"
+                  accept=".pdf"
+                  className="sr-only"
+                  onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+                />
+              </label>
+              <span className="font-sans text-[10px] text-parchment/20">
+                Max. 5 MB · Wird direkt an uns übermittelt.
+              </span>
+            </div>
           </div>
         </div>
       )}
