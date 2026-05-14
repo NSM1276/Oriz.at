@@ -10,6 +10,8 @@ export type Venue = {
   owner_id: string | null;
   created_at: string;
   plan?: string;
+  instagram_url?: string | null;
+  google_maps_url?: string | null;
 };
 
 export type Section = {

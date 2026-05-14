@@ -22,9 +22,20 @@ const planDot: Record<string, string> = {
   pro: "#22c55e",
 };
 
+function isLight(hex: string) {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 128;
+}
+
 export function VenueCard({ name, slug, colorBg, colorPrimary, plan, itemCount, onEdit, onQR }: Props) {
   const bg = colorBg ?? "#1a1a1a";
   const accent = colorPrimary ?? "#C69B3C";
+  const light = isLight(bg);
+  const badgeBg = light ? "rgba(0,0,0,0.75)" : "rgba(0,0,0,0.45)";
+  const nameColor = light ? "#0A0A0A" : "#F5F0EC";
 
   return (
     <div className="overflow-hidden border border-onyx/10 hover:border-onyx/25 transition-colors">
@@ -41,7 +52,7 @@ export function VenueCard({ name, slug, colorBg, colorPrimary, plan, itemCount, 
         <span
           className="absolute top-3 right-3 font-sans text-[10px] tracking-regal uppercase px-2 py-0.5"
           style={{
-            backgroundColor: "rgba(0,0,0,0.35)",
+            backgroundColor: badgeBg,
             color: planDot[plan] ?? "#94a3b8",
           }}
         >
@@ -56,7 +67,8 @@ export function VenueCard({ name, slug, colorBg, colorPrimary, plan, itemCount, 
 
         {/* Venue name bottom-left */}
         <span
-          className="absolute bottom-4 left-4 font-display text-xl leading-tight text-parchment drop-shadow"
+          className="absolute bottom-4 left-4 font-display text-xl leading-tight drop-shadow"
+          style={{ color: nameColor }}
         >
           {name}
         </span>

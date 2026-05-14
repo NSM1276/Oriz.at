@@ -25,7 +25,7 @@ export default async function AdminPage() {
   if (isSuperAdmin) {
     const { data: venues } = await supabase
       .from("venues")
-      .select("id, slug, name, about, color_bg, color_primary, plan, sections(id, items(id))")
+      .select("id, slug, name, about, color_bg, color_primary, plan, instagram_url, google_maps_url, sections(id, items(id))")
       .order("created_at", { ascending: true })
       .returns<VenueRow[]>();
 
@@ -37,6 +37,8 @@ export default async function AdminPage() {
       color_bg: v.color_bg ?? null,
       color_primary: v.color_primary ?? null,
       plan: v.plan ?? "trial",
+      instagram_url: (v as { instagram_url?: string | null }).instagram_url ?? null,
+      google_maps_url: (v as { google_maps_url?: string | null }).google_maps_url ?? null,
       itemCount: v.sections?.reduce((acc, s) => acc + (s.items?.length ?? 0), 0) ?? 0,
     }));
 
