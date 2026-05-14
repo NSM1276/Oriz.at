@@ -55,6 +55,13 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
     });
   }, [sections, items]);
 
+  useEffect(() => {
+    if (venue.color_bg) {
+      document.body.style.backgroundColor = venue.color_bg;
+      return () => { document.body.style.backgroundColor = ''; };
+    }
+  }, [venue.color_bg]);
+
   const isDark = !!venue.color_bg;
   const bg      = venue.color_bg      ?? '#F5F0EC';
   const text    = isDark ? '#F5F0EC'  : '#0A0A0A';
