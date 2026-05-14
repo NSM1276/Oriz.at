@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ItemEditor } from "@/components/admin/ItemEditor";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
-import { VenueCard } from "@/components/admin/VenueCard";
+import { SuperAdminView } from "@/components/admin/SuperAdminView";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
 export const revalidate = 0;
@@ -25,64 +25,22 @@ export default async function AdminPage() {
   if (isSuperAdmin) {
     const { data: venues } = await supabase
       .from("venues")
-      .select("id, slug, name, color_bg, color_primary, plan, sections(id, items(id))")
+      .select("id, slug, name, about, color_bg, color_primary, plan, sections(id, items(id))")
       .order("created_at", { ascending: true })
       .returns<VenueRow[]>();
 
-    const list = venues ?? [];
+    const list = (venues ?? []).map(v => ({
+      id: v.id,
+      slug: v.slug,
+      name: v.name,
+      about: v.about ?? null,
+      color_bg: v.color_bg ?? null,
+      color_primary: v.color_primary ?? null,
+      plan: v.plan ?? "trial",
+      itemCount: v.sections?.reduce((acc, s) => acc + (s.items?.length ?? 0), 0) ?? 0,
+    }));
 
-    return (
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-between mb-12">
-          <div>
-            <span className="font-sans text-[11px] tracking-regal uppercase text-gold">
-              ORIZ · Super Admin
-            </span>
-            <h1 className="font-display text-3xl text-onyx mt-1">All Venues</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="font-sans text-[11px] tracking-regal uppercase text-onyx/40">
-              {list.length} venues
-            </span>
-            <SignOutButton />
-          </div>
-        </div>
-
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-6 mb-12">
-          {[
-            { label: "Total venues", value: list.length },
-            { label: "Pro", value: list.filter(v => v.plan === "pro").length },
-            { label: "Trial", value: list.filter(v => v.plan === "trial").length },
-          ].map((stat) => (
-            <div key={stat.label} className="border border-onyx/10 px-6 py-5">
-              <div className="font-display text-4xl text-onyx">{stat.value}</div>
-              <div className="font-sans text-[11px] tracking-regal uppercase text-onyx/50 mt-1">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Venue grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {list.map((v) => {
-            const itemCount = v.sections?.reduce(
-              (acc, s) => acc + (s.items?.length ?? 0), 0
-            ) ?? 0;
-            return (
-              <VenueCard
-                key={v.id}
-                name={v.name}
-                slug={v.slug}
-                colorBg={v.color_bg}
-                colorPrimary={v.color_primary}
-                plan={v.plan}
-                itemCount={itemCount}
-              />
-            );
-          })}
-        </div>
-      </main>
-    );
+    return <SuperAdminView venues={list} />;
   }
 
   // Regular owner view
