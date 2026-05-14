@@ -5,10 +5,12 @@ export function SectionBlock({
   section,
   items,
   currency,
+  onItemClick,
 }: {
   section: Section;
   items: Item[];
   currency: string;
+  onItemClick: (item: Item) => void;
 }) {
   if (items.length === 0) return null;
   return (
@@ -24,7 +26,7 @@ export function SectionBlock({
       </header>
       <ul>
         {items.map((item) => (
-          <ItemRow key={item.id} item={item} currency={currency} />
+          <ItemRow key={item.id} item={item} currency={currency} onClick={onItemClick} />
         ))}
       </ul>
     </section>
