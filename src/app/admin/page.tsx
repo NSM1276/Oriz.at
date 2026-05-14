@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ItemEditor } from "@/components/admin/ItemEditor";
 import { SignOutButton } from "@/components/admin/SignOutButton";
+import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
 export const revalidate = 0;
@@ -38,7 +39,10 @@ export default async function AdminPage() {
             {venue ? venue.name : "No venue yet"}
           </h1>
         </div>
-        <SignOutButton />
+        <div className="flex items-center gap-4">
+          <ChangePasswordButton />
+          <SignOutButton />
+        </div>
       </div>
 
       {!venue ? (
