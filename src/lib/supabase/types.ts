@@ -9,6 +9,7 @@ export type Venue = {
   color_bg: string | null;
   owner_id: string | null;
   created_at: string;
+  plan?: string;
 };
 
 export type Section = {
