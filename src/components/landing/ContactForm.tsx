@@ -10,16 +10,10 @@ const PLAN_OPTIONS = [
   "Noch nicht sicher",
 ];
 
-const TO = "office@na-max.com";
-
 export function ContactForm() {
   const searchParams = useSearchParams();
   const [plan, setPlan] = useState("Noch nicht sicher");
-  const [name, setName] = useState("");
-  const [restaurant, setRestaurant] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   useEffect(() => {
     const p = searchParams.get("plan");
@@ -28,25 +22,46 @@ export function ContactForm() {
     else if (p === "pro") setPlan("Pro (€ 59 / Monat)");
   }, [searchParams]);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const subject = `ORIZ Anfrage: ${restaurant} — ${plan}`;
-    const body = [
-      `Paket: ${plan}`,
-      `Restaurant: ${restaurant}`,
-      `Name: ${name || "—"}`,
-      `E-Mail: ${email}`,
-      `Telefon: ${phone || "—"}`,
-      ``,
-      `Nachricht:`,
-      message || "—",
-    ].join("\n");
+    setStatus("sending");
+    const form = e.currentTarget;
+    const data = new FormData(form);
 
-    window.location.href = `mailto:${TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    try {
+      const res = await fetch("https://formsubmit.co/ajax/office@na-max.com", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: data,
+      });
+      const json = await res.json();
+      setStatus(json.success === "true" || json.success === true ? "sent" : "error");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  if (status === "sent") {
+    return (
+      <div className="text-center py-12">
+        <div className="w-10 h-px bg-gold/50 mx-auto mb-8" />
+        <p className="font-display text-2xl text-parchment/80 italic mb-3">
+          Vielen Dank.
+        </p>
+        <p className="font-sans text-sm text-parchment/40">
+          Wir melden uns innerhalb von 24 Stunden bei Ihnen.
+        </p>
+      </div>
+    );
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-left">
+      {/* FormSubmit config — hidden fields */}
+      <input type="hidden" name="_captcha" value="false" />
+      <input type="hidden" name="_template" value="table" />
+      <input type="hidden" name="_subject" value={`ORIZ Anfrage — ${plan}`} />
+
       {/* Plan selector */}
       <div className="flex flex-col gap-1">
         <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">
@@ -57,7 +72,7 @@ export function ContactForm() {
             <label key={opt} className="flex items-center gap-3 cursor-pointer">
               <input
                 type="radio"
-                name="plan"
+                name="Paket"
                 value={opt}
                 checked={plan === opt}
                 onChange={() => setPlan(opt)}
@@ -79,58 +94,29 @@ export function ContactForm() {
       </div>
 
       {/* Fields */}
-      <div className="flex flex-col gap-1">
-        <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">Restaurant / Lokal *</label>
-        <input
-          type="text"
-          required
-          value={restaurant}
-          onChange={e => setRestaurant(e.target.value)}
-          placeholder="Café Sacher Wien"
-          className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">Ihr Name</label>
-        <input
-          type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Max Mustermann"
-          className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">E-Mail-Adresse *</label>
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="chef@restaurant.at"
-          className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">Telefon</label>
-        <input
-          type="tel"
-          value={phone}
-          onChange={e => setPhone(e.target.value)}
-          placeholder="+43 …"
-          className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors"
-        />
-      </div>
+      {[
+        { name: "Restaurant", label: "Restaurant / Lokal", placeholder: "Café Sacher Wien", required: true, type: "text" },
+        { name: "Name", label: "Ihr Name", placeholder: "Max Mustermann", required: false, type: "text" },
+        { name: "E-Mail", label: "E-Mail-Adresse", placeholder: "chef@restaurant.at", required: true, type: "email" },
+        { name: "Telefon", label: "Telefon (optional)", placeholder: "+43 …", required: false, type: "tel" },
+      ].map(({ name, label, placeholder, required, type }) => (
+        <div key={name} className="flex flex-col gap-1">
+          <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">{label}</label>
+          <input
+            type={type}
+            name={name}
+            required={required}
+            placeholder={placeholder}
+            className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors"
+          />
+        </div>
+      ))}
 
       <div className="flex flex-col gap-1">
         <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">Nachricht</label>
         <textarea
+          name="Nachricht"
           rows={3}
-          value={message}
-          onChange={e => setMessage(e.target.value)}
           placeholder="Erzählen Sie uns von Ihrem Lokal."
           className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors resize-none"
         />
@@ -138,14 +124,17 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="mt-2 font-sans text-[11px] tracking-regal uppercase text-onyx bg-gold px-10 py-4 hover:bg-gold/80 transition-colors duration-300 self-center"
+        disabled={status === "sending"}
+        className="mt-2 font-sans text-[11px] tracking-regal uppercase text-onyx bg-gold px-10 py-4 hover:bg-gold/80 transition-colors duration-300 self-center disabled:opacity-50"
       >
-        Anfrage senden
+        {status === "sending" ? "Wird gesendet …" : "Anfrage senden"}
       </button>
 
-      <p className="text-center font-sans text-[10px] text-parchment/20">
-        Es öffnet sich Ihr E-Mail-Programm mit dem ausgefüllten Formular.
-      </p>
+      {status === "error" && (
+        <p className="text-center font-sans text-xs text-red-400">
+          Fehler beim Senden. Bitte versuchen Sie es erneut.
+        </p>
+      )}
     </form>
   );
 }
