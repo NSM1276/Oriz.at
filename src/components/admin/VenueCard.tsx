@@ -7,6 +7,7 @@ type Props = {
   plan: string;
   itemCount: number;
   onEdit: () => void;
+  onQR: () => void;
 };
 
 const planLabel: Record<string, string> = {
@@ -21,7 +22,7 @@ const planDot: Record<string, string> = {
   pro: "#22c55e",
 };
 
-export function VenueCard({ name, slug, colorBg, colorPrimary, plan, itemCount, onEdit }: Props) {
+export function VenueCard({ name, slug, colorBg, colorPrimary, plan, itemCount, onEdit, onQR }: Props) {
   const bg = colorBg ?? "#1a1a1a";
   const accent = colorPrimary ?? "#C69B3C";
 
@@ -66,13 +67,22 @@ export function VenueCard({ name, slug, colorBg, colorPrimary, plan, itemCount, 
         <span className="font-sans text-[11px] text-onyx/50">
           {itemCount} {itemCount === 1 ? "item" : "items"}
         </span>
-        <button
-          onClick={onEdit}
-          className="font-sans text-[11px] tracking-regal uppercase text-onyx/60 hover:text-onyx transition-colors"
-          style={{ color: accent }}
-        >
-          Edit →
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={onQR} title="QR Code" className="text-onyx/30 hover:text-onyx/70 transition-colors">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <rect x="1" y="1" width="5" height="5" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
+              <rect x="9" y="1" width="5" height="5" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
+              <rect x="1" y="9" width="5" height="5" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
+              <rect x="2.5" y="2.5" width="2" height="2" fill="currentColor"/>
+              <rect x="10.5" y="2.5" width="2" height="2" fill="currentColor"/>
+              <rect x="2.5" y="10.5" width="2" height="2" fill="currentColor"/>
+              <path d="M9 9h2v2H9zM11 11h2v2h-2zM9 13h2M13 9v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+          </button>
+          <button onClick={onEdit} className="font-sans text-[11px] tracking-regal uppercase transition-colors" style={{ color: accent }}>
+            Edit →
+          </button>
+        </div>
       </div>
     </div>
   );
