@@ -213,6 +213,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
           position: 'fixed', inset: 0, zIndex: 40,
           backgroundColor: "rgba(10,10,10,0.70)",
           opacity: modalVisible ? 1 : 0,
+          pointerEvents: modalVisible ? 'auto' : 'none',
           transition: 'opacity 180ms',
         }}
       />
