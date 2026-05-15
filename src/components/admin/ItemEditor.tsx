@@ -295,18 +295,19 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
           {/* Modal footer */}
           <div
             style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-              padding: '16px 24px', borderTop: '1px solid var(--color-border)', flexShrink: 0,
+              padding: '12px 20px 16px', borderTop: '1px solid var(--color-border)', flexShrink: 0,
             }}
           >
+            {/* AI row */}
             <button
               type="button"
               onClick={generateCaption}
               disabled={aiBusy || !canUseAi}
               title={!canUseAi ? "Monatliches AI-Limit erreicht" : "Text generieren"}
               style={{
+                width: '100%', marginBottom: 10,
                 fontFamily: 'var(--font-inter, sans-serif)', fontSize: 11, letterSpacing: '0.1em',
-                textTransform: 'uppercase', padding: '10px 16px', cursor: 'pointer',
+                textTransform: 'uppercase', padding: '11px 16px', cursor: 'pointer',
                 border: '1px solid var(--accent)', color: 'var(--accent)', background: 'none',
                 opacity: (aiBusy || !canUseAi) ? 0.3 : 1,
               }}
@@ -314,13 +315,15 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
               {aiBusy ? "Generiert…" : "✦ Generieren"}
             </button>
 
+            {/* Action row */}
             <div style={{ display: 'flex', gap: 8 }}>
               <button
                 type="button"
                 onClick={closeCaptionModal}
                 style={{
+                  flex: 1,
                   fontFamily: 'var(--font-inter, sans-serif)', fontSize: 11, letterSpacing: '0.1em',
-                  textTransform: 'uppercase', padding: '10px 16px', cursor: 'pointer',
+                  textTransform: 'uppercase', padding: '11px 16px', cursor: 'pointer',
                   border: '1px solid var(--color-border)', color: 'var(--color-dim)', background: 'none',
                 }}
               >
@@ -330,8 +333,9 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
                 type="button"
                 onClick={saveCaptionModal}
                 style={{
+                  flex: 1,
                   fontFamily: 'var(--font-inter, sans-serif)', fontSize: 11, letterSpacing: '0.1em',
-                  textTransform: 'uppercase', padding: '10px 16px', cursor: 'pointer',
+                  textTransform: 'uppercase', padding: '11px 16px', cursor: 'pointer',
                   border: 'none', backgroundColor: 'var(--accent)', color: '#fff',
                 }}
               >
