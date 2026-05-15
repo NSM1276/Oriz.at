@@ -80,7 +80,7 @@ export default async function DemoPage() {
           className="font-sans text-[11px] tracking-regal uppercase"
           style={{ color: getLuminance(accent) > 0.4 ? "#0A0A0A" : "#F5F0EC" }}
         >
-          Live-Demo · Änderungen werden alle 30 Minuten zurückgesetzt
+          Live-Demo · Änderungen werden täglich zurückgesetzt
         </span>
       </div>
 

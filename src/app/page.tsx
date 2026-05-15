@@ -288,7 +288,7 @@ export default function Landing() {
             ))}
           </div>
           <p className="text-center font-sans text-[10px] text-onyx/25 mt-8 tracking-wide uppercase">
-            Demo-Daten · frei erfunden · Änderungen alle 30 Minuten zurückgesetzt
+            Demo-Daten · frei erfunden · Änderungen täglich zurückgesetzt
           </p>
         </div>
       </section>
