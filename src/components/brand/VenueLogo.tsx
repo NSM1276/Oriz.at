@@ -14,7 +14,7 @@ export function VenueLogo({ name, logoUrl, size = "lg", textColor, isDarkBg }: P
       <img
         src={logoUrl}
         alt={name}
-        className={size === "lg" ? "h-16 w-auto" : "h-10 w-auto"}
+        className={size === "lg" ? "h-28 md:h-40 w-auto" : "h-10 w-auto"}
         style={style}
       />
     );
