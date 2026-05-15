@@ -134,7 +134,31 @@ export default async function AdminPage() {
           </div>
         )}
 
-        {venue && <QRCodeBlock slug={venue.slug} />}
+        {venue && (
+          <>
+            <QRCodeBlock slug={venue.slug} />
+            <div className="mb-10 flex gap-3">
+              <a
+                href={`/${venue.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-70"
+                style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
+              >
+                Menü ansehen →
+              </a>
+              <a
+                href={`/${venue.slug}/print`}
+                target="_blank"
+                rel="noreferrer"
+                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-70"
+                style={{ border: '1px solid var(--accent)', color: 'var(--accent)' }}
+              >
+                Menü drucken / PDF ↓
+              </a>
+            </div>
+          </>
+        )}
 
         {!venue ? (
           <div className="border border-dashed p-10 text-center" style={{ borderColor: border }}>
