@@ -295,7 +295,8 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
           {/* Modal footer */}
           <div
             style={{
-              padding: '12px 20px 16px', borderTop: '1px solid var(--color-border)', flexShrink: 0,
+              padding: '12px 20px calc(16px + env(safe-area-inset-bottom))',
+              borderTop: '1px solid var(--color-border)', flexShrink: 0,
             }}
           >
             {/* AI row */}
