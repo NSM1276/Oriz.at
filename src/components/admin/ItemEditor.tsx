@@ -1,9 +1,8 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ImageUploadError, uploadItemImage, extractStoragePath } from "@/lib/imageUpload";
 import type { Item } from "@/lib/supabase/types";
 
 type Props = {
@@ -14,7 +13,6 @@ type Props = {
 export function ItemEditor({ initial, canUseAi = true }: Props) {
   const router = useRouter();
   const supabase = createClient();
-  const fileRef = useRef<HTMLInputElement | null>(null);
 
   const [item, setItem] = useState<Item>(initial);
   const [priceInput, setPriceInput] = useState((initial.price_cents / 100).toFixed(2));
@@ -22,7 +20,6 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
   const [captionInput, setCaptionInput] = useState(initial.ai_caption ?? "");
 
   const [error, setError] = useState<string | null>(null);
-  const [photoBusy, setPhotoBusy] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
   const [priceFocused, setPriceFocused] = useState(false);
   const [captionFocused, setCaptionFocused] = useState(false);
@@ -98,59 +95,6 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
     });
   }
 
-  // ── photo upload ───────────────────────────────────────────────────────
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setError(null);
-    setPhotoBusy(true);
-    try {
-      const url = await uploadItemImage({
-        supabase,
-        file,
-        venueId: item.venue_id,
-        itemId: item.id,
-        previousUrl: item.image_url,
-      });
-      const { error: dbErr } = await supabase
-        .from("items")
-        .update({ image_url: url })
-        .eq("id", item.id);
-      if (dbErr) throw new ImageUploadError(dbErr.message);
-      setItem({ ...item, image_url: url });
-    } catch (err) {
-      const msg = err instanceof ImageUploadError ? err.message : "Upload fehlgeschlagen.";
-      setError(msg);
-    } finally {
-      setPhotoBusy(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }
-  }
-
-  async function removePhoto() {
-    if (!item.image_url) return;
-    setError(null);
-    setPhotoBusy(true);
-    const previousUrl = item.image_url;
-    try {
-      const { error: dbErr } = await supabase
-        .from("items")
-        .update({ image_url: null })
-        .eq("id", item.id);
-      if (dbErr) throw new ImageUploadError(dbErr.message);
-      setItem({ ...item, image_url: null });
-      const path = extractStoragePath(previousUrl);
-      if (path) {
-        supabase.storage.from("item-images").remove([path]).catch(() => { /* ignore */ });
-      }
-    } catch (err) {
-      const msg = err instanceof ImageUploadError ? err.message : "Löschen fehlgeschlagen.";
-      setError(msg);
-    } finally {
-      setPhotoBusy(false);
-    }
-  }
-
   // ── AI caption generation ──────────────────────────────────────────────
   async function generateCaption() {
     setError(null);
@@ -178,66 +122,19 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
 
   return (
     <li
-      className={`py-6 ${item.is_active ? "" : "opacity-60"}`}
+      className={`py-5 ${item.is_active ? "" : "opacity-60"}`}
       style={{ borderBottom: '1px solid var(--color-border)' }}
     >
-      <div className="grid grid-cols-[88px_1fr_auto_auto] items-start gap-4">
-        {/* Photo */}
-        <div
-          className="relative w-[88px] h-[88px] overflow-hidden group"
-          style={{ backgroundColor: 'var(--color-border)', border: '1px solid var(--color-border)' }}
-        >
-          {item.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.image_url} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--color-muted)' }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="5" width="18" height="14" stroke="currentColor" strokeWidth="1.2"/>
-                <circle cx="8.5" cy="10.5" r="1.5" fill="currentColor"/>
-                <path d="M3 17l5-5 4 4 3-3 6 6" stroke="currentColor" strokeWidth="1.2"/>
-              </svg>
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={photoBusy}
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center font-sans text-[10px] tracking-regal uppercase disabled:opacity-100"
-            style={{ backgroundColor: 'rgba(10,10,10,0.75)', color: '#F5F0EC' }}
-            aria-label="Foto hochladen"
-          >
-            {photoBusy ? "…" : item.image_url ? "Ersetzen" : "Hochladen"}
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleFile}
-            className="hidden"
-          />
-        </div>
-
+      <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
         {/* Name + meta */}
         <div className="min-w-0">
-          <div className="font-display text-xl leading-tight" style={{ color: 'var(--color-text)' }}>
+          <div className="font-display text-lg leading-tight" style={{ color: 'var(--color-text)' }}>
             {item.name}
           </div>
           {item.description && (
             <div className="font-sans text-xs mt-0.5 truncate" style={{ color: 'var(--color-dim)' }}>
               {item.description}
             </div>
-          )}
-          {item.image_url && (
-            <button
-              type="button"
-              onClick={removePhoto}
-              disabled={photoBusy}
-              className="mt-2 font-sans text-[10px] tracking-regal uppercase underline-offset-4 hover:underline disabled:opacity-50"
-              style={{ color: 'var(--color-muted)' }}
-            >
-              Foto entfernen
-            </button>
           )}
         </div>
 
@@ -274,7 +171,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
       </div>
 
       {/* AI caption */}
-      <div className="mt-3 ml-[104px] flex items-start gap-3">
+      <div className="mt-3 ml-0 flex items-start gap-3">
         <span
           className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0 pt-2"
           style={{ color: 'var(--color-muted)' }}
@@ -308,7 +205,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
       </div>
 
       {/* Allergens */}
-      <div className="mt-3 ml-[104px] flex items-center gap-3">
+      <div className="mt-3 ml-0 flex items-center gap-3">
         <span
           className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0"
           style={{ color: 'var(--color-muted)' }}
@@ -331,7 +228,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
         />
       </div>
 
-      {error && <p className="mt-2 ml-[104px] text-xs text-red-700 font-sans">{error}</p>}
+      {error && <p className="mt-2 ml-0 text-xs text-red-700 font-sans">{error}</p>}
     </li>
   );
 }
