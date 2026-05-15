@@ -107,6 +107,40 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
           <div className="w-24 h-px mx-auto mt-8" style={{ backgroundColor: accent, opacity: 0.6 }} />
         </header>
 
+        {/* Section jump nav */}
+        {sectionsWithItems.length > 1 && (
+          <div
+            className="sticky top-0 z-20 mt-8 -mx-6 px-6 overflow-x-auto"
+            style={{
+              backgroundColor: bg,
+              borderBottom: `1px solid ${border}`,
+              scrollbarWidth: 'none',
+            }}
+          >
+            <div className="flex gap-0 py-3 whitespace-nowrap">
+              {sectionsWithItems.map((s, i) => (
+                <button
+                  key={s.id}
+                  onClick={() => {
+                    const el = document.getElementById(`section-${s.id}`);
+                    if (!el) return;
+                    const top = el.getBoundingClientRect().top + window.scrollY - 56;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                  }}
+                  className="font-sans text-[11px] tracking-regal uppercase px-4 py-1.5 transition-opacity hover:opacity-70"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: accent,
+                    borderRight: i < sectionsWithItems.length - 1 ? `1px solid ${border}` : 'none',
+                  }}
+                >
+                  {s.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {sectionsWithItems.map((s) => (
           <SectionBlock key={s.id} section={s} items={s.items} currency={venue.currency} onItemClick={openItem} />
         ))}

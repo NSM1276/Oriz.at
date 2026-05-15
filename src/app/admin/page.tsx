@@ -2,6 +2,7 @@ import React from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ItemEditor } from "@/components/admin/ItemEditor";
+import { SectionNav } from "@/components/admin/SectionNav";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
 import { SuperAdminView } from "@/components/admin/SuperAdminView";
@@ -166,31 +167,39 @@ export default async function AdminPage() {
               You have no venue attached to this account.
             </p>
           </div>
-        ) : (
-          venue.sections
-            ?.slice()
-            .sort((a, b) => a.position - b.position)
-            .map((section) => {
-              const items = (section.items ?? [])
-                .slice()
-                .sort((a, b) => a.position - b.position);
-              return (
-                <section key={section.id} className="mt-10">
-                  <header className="mb-4 flex items-center gap-4">
-                    <span className="font-sans text-[11px] tracking-regal uppercase" style={{ color: accent }}>
-                      {section.name}
-                    </span>
-                    <div className="flex-1 h-px" style={{ backgroundColor: border }} />
-                  </header>
-                  <ul>
-                    {items.map((item) => (
-                      <ItemEditor key={item.id} initial={item} canUseAi={canUseAi} />
-                    ))}
-                  </ul>
-                </section>
-              );
-            })
-        )}
+        ) : (() => {
+          const sorted = (venue.sections ?? [])
+            .slice()
+            .sort((a, b) => a.position - b.position);
+          return (
+            <>
+              <SectionNav sections={sorted.map(s => ({ id: s.id, name: s.name }))} />
+              {sorted.map((section) => {
+                const items = (section.items ?? [])
+                  .slice()
+                  .sort((a, b) => a.position - b.position);
+                return (
+                  <section key={section.id} id={`section-${section.id}`} className="mt-12">
+                    <header className="mb-5 flex items-center gap-4 pt-2">
+                      <span
+                        className="font-sans text-sm tracking-regal uppercase shrink-0"
+                        style={{ color: accent, fontWeight: 600 }}
+                      >
+                        {section.name}
+                      </span>
+                      <div className="flex-1 h-px" style={{ backgroundColor: accent, opacity: 0.25 }} />
+                    </header>
+                    <ul>
+                      {items.map((item) => (
+                        <ItemEditor key={item.id} initial={item} canUseAi={canUseAi} />
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
+            </>
+          );
+        })()}
 
         <p className="mt-16 font-sans text-xs text-center" style={{ color: muted }}>
           Changes appear instantly on{" "}

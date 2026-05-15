@@ -378,7 +378,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
               onFocus={() => setPriceFocused(true)}
               onBlur={() => { setPriceFocused(false); commitPrice(); }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="w-24 text-right bg-transparent outline-none font-sans tabular-nums py-1"
+              className="w-24 text-right bg-transparent outline-none font-sans tabular-nums text-base py-2"
               style={{
                 borderBottom: `1px solid ${priceFocused ? 'var(--accent)' : 'var(--color-dim)'}`,
                 color: 'var(--color-text)',
@@ -389,7 +389,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
 
           <button
             onClick={toggleActive}
-            className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition shrink-0"
+            className="font-sans text-xs tracking-regal uppercase px-4 py-3 transition shrink-0"
             style={item.is_active
               ? { border: '1px solid var(--color-dim)', color: 'var(--color-text)' }
               : { border: '1px solid var(--accent)', color: 'var(--accent)' }
@@ -423,7 +423,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
                     type="button"
                     onClick={() => fileRef.current?.click()}
                     disabled={photoBusy}
-                    className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
+                    className="font-sans text-xs tracking-regal uppercase px-4 py-3 transition disabled:opacity-30"
                     style={{ border: '1px solid var(--color-dim)', color: 'var(--color-dim)' }}
                   >
                     {photoBusy ? "Lädt hoch…" : "Ändern"}
@@ -432,7 +432,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
                     type="button"
                     onClick={removePhoto}
                     disabled={photoBusy}
-                    className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
+                    className="font-sans text-xs tracking-regal uppercase px-4 py-3 transition disabled:opacity-30"
                     style={{ border: '1px solid var(--color-border)', color: 'var(--color-muted)' }}
                   >
                     {photoBusy ? "Löscht…" : "Entfernen"}
@@ -444,7 +444,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 disabled={photoBusy}
-                className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
+                className="font-sans text-xs tracking-regal uppercase px-4 py-3 transition disabled:opacity-30"
                 style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
               >
                 {photoBusy ? "Lädt hoch…" : "Foto hinzufügen"}
@@ -485,7 +485,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
           <button
             type="button"
             onClick={openCaptionModal}
-            className="shrink-0 font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition"
+            className="shrink-0 font-sans text-xs tracking-regal uppercase px-4 py-3 transition"
             style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
           >
             Bearbeiten

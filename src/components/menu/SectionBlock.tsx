@@ -14,7 +14,7 @@ export function SectionBlock({
 }) {
   if (items.length === 0) return null;
   return (
-    <section className="mt-16">
+    <section id={`section-${section.id}`} className="mt-16">
       <header className="mb-6 flex items-center gap-4">
         <span
           className="font-sans text-[11px] tracking-regal uppercase"
