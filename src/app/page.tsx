@@ -98,8 +98,22 @@ const PLANS = [
 ];
 
 const DEMO_VENUES = [
-  { slug: "prime-steakhouse", name: "PRIME Steakhouse", type: "Steakhouse · Wien" },
-  { slug: "steakhouse-mariahilf", name: "Steakhaus Mariahilf", type: "Österreichische Küche" },
+  {
+    slug:   "prime-steakhouse",
+    name:   "PRIME Argentinian Steakhouse",
+    type:   "Dry-Aged · Wagyu · Naschmarkt",
+    items:  "46 Gerichte",
+    bg:     "#0F0000",
+    accent: "#CC0000",
+  },
+  {
+    slug:   "steakhouse-mariahilf",
+    name:   "Steakhaus Mariahilf",
+    type:   "US Dry-Aged · Wagyu · 6. Bezirk",
+    items:  "44 Gerichte",
+    bg:     "#111111",
+    accent: "#D4AF37",
+  },
 ];
 
 const TESTIMONIALS = [
@@ -204,20 +218,67 @@ export default function Landing() {
               Klicken Sie rein.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
-            {DEMO_VENUES.map(({ slug, name, type }) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+            {DEMO_VENUES.map(({ slug, name, type, items, bg, accent }) => (
               <a
                 key={slug}
                 href={`/${slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="group border border-onyx/10 hover:border-gold/50 p-10 text-center transition-colors duration-300 relative overflow-hidden"
+                className="group relative overflow-hidden flex flex-col justify-between p-8 transition-transform duration-500 hover:-translate-y-1"
+                style={{ backgroundColor: bg, aspectRatio: "4/5" }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-gold/0 to-gold/[0.03] opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="font-display text-2xl mb-2 group-hover:text-gold transition-colors duration-300">{name}</div>
-                <div className="font-sans text-[10px] tracking-regal uppercase text-onyx/30 mb-6">{type}</div>
-                <div className="font-sans text-[10px] tracking-regal uppercase text-onyx/25 group-hover:text-gold/70 transition-colors duration-300">
-                  Menü öffnen ↗
+                {/* radial glow on hover */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{ background: `radial-gradient(ellipse 80% 50% at 50% 0%, ${accent}22 0%, transparent 70%)` }}
+                />
+                {/* bottom edge accent line — brightens on hover */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-px transition-opacity duration-500 opacity-20 group-hover:opacity-70"
+                  style={{ backgroundColor: accent }}
+                />
+
+                {/* top: cuisine type */}
+                <div className="relative z-10">
+                  <span
+                    className="font-sans text-[9px] tracking-regal uppercase"
+                    style={{ color: `${accent}99` }}
+                  >
+                    {type}
+                  </span>
+                </div>
+
+                {/* center: name + item count */}
+                <div className="relative z-10">
+                  <h3
+                    className="font-display font-light leading-snug text-parchment mb-3 transition-colors duration-300 group-hover:text-white"
+                    style={{ fontSize: "clamp(1.4rem, 2.8vw, 2rem)" }}
+                  >
+                    {name}
+                  </h3>
+                  <span className="font-sans text-[9px] tracking-regal uppercase text-parchment/20">
+                    {items}
+                  </span>
+                </div>
+
+                {/* bottom: hairline + CTA */}
+                <div className="relative z-10">
+                  <div
+                    className="w-10 h-px mb-5 transition-all duration-500 opacity-30 group-hover:opacity-80 group-hover:w-full"
+                    style={{ backgroundColor: accent }}
+                  />
+                  <div className="flex items-center justify-between">
+                    <span className="font-sans text-[9px] tracking-regal uppercase text-parchment/35 group-hover:text-parchment/65 transition-colors duration-300">
+                      Menü öffnen
+                    </span>
+                    <span
+                      className="font-sans text-[11px] transition-transform duration-300 group-hover:translate-x-1"
+                      style={{ color: accent }}
+                    >
+                      ↗
+                    </span>
+                  </div>
                 </div>
               </a>
             ))}
