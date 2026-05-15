@@ -535,6 +535,18 @@ export default function Landing() {
           <Suspense fallback={null}>
             <ContactForm />
           </Suspense>
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <div className="w-8 h-px bg-parchment/10" />
+            <a
+              href="https://wa.me/4367764292055"
+              target="_blank"
+              rel="noreferrer"
+              className="font-sans text-[10px] tracking-regal uppercase text-parchment/25 hover:text-gold transition-colors"
+            >
+              oder direkt auf WhatsApp schreiben →
+            </a>
+            <div className="w-8 h-px bg-parchment/10" />
+          </div>
           <Link
             href="/admin"
             className="mt-16 inline-block font-sans text-[10px] tracking-regal uppercase text-parchment/20 border-b border-parchment/10 pb-1 hover:text-gold hover:border-gold transition-colors"
