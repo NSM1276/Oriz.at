@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { uploadItemImage, extractStoragePath, ImageUploadError } from "@/lib/imageUpload";
@@ -24,10 +24,31 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
   const [aiBusy, setAiBusy] = useState(false);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [priceFocused, setPriceFocused] = useState(false);
-  const [captionFocused, setCaptionFocused] = useState(false);
   const [allergensFocused, setAllergensFocused] = useState(false);
+  const [captionModalOpen, setCaptionModalOpen] = useState(false);
+  const [modalDraft, setModalDraft] = useState("");
   const [, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
+  const modalTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Close modal on Escape
+  useEffect(() => {
+    if (!captionModalOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeCaptionModal(); };
+    document.addEventListener("keydown", handler);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
+  }, [captionModalOpen]);
+
+  // Focus textarea when modal opens
+  useEffect(() => {
+    if (captionModalOpen) {
+      setTimeout(() => modalTextareaRef.current?.focus(), 50);
+    }
+  }, [captionModalOpen]);
 
   // ── price ──────────────────────────────────────────────────────────────
   async function commitPrice() {
@@ -68,9 +89,20 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
     });
   }
 
-  // ── ai_caption (manual edit) ───────────────────────────────────────────
-  async function commitCaption() {
-    const val = captionInput.trim() || null;
+  // ── ai_caption ────────────────────────────────────────────────────────
+  function openCaptionModal() {
+    setModalDraft(captionInput);
+    setCaptionModalOpen(true);
+  }
+
+  function closeCaptionModal() {
+    setCaptionModalOpen(false);
+  }
+
+  async function saveCaptionModal() {
+    const val = modalDraft.trim() || null;
+    setCaptionInput(modalDraft);
+    setCaptionModalOpen(false);
     if (val === (item.ai_caption ?? null)) return;
     const prev = item;
     setItem({ ...item, ai_caption: val });
@@ -157,6 +189,8 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
       }
       setItem({ ...item, ai_caption: json.caption });
       setCaptionInput(json.caption);
+      // update modal draft too if modal is open
+      setModalDraft(json.caption);
       router.refresh();
     } catch {
       setError("Netzwerkfehler.");
@@ -166,162 +200,274 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
   }
 
   return (
-    <li
-      className={`py-5 ${item.is_active ? "" : "opacity-60"}`}
-      style={{ borderBottom: '1px solid var(--color-border)' }}
-    >
-      {/* Row 1: Name + description */}
-      <div className="mb-3">
-        <div className="font-display text-lg leading-tight" style={{ color: 'var(--color-text)' }}>
-          {item.name}
-        </div>
-        {item.description && (
-          <div className="font-sans text-xs mt-0.5" style={{ color: 'var(--color-dim)' }}>
-            {item.description}
+    <>
+      <li
+        className={`py-5 ${item.is_active ? "" : "opacity-60"}`}
+        style={{ borderBottom: '1px solid var(--color-border)' }}
+      >
+        {/* Row 1: Name + description */}
+        <div className="mb-3">
+          <div className="font-display text-lg leading-tight" style={{ color: 'var(--color-text)' }}>
+            {item.name}
           </div>
-        )}
-      </div>
+          {item.description && (
+            <div className="font-sans text-xs mt-0.5" style={{ color: 'var(--color-dim)' }}>
+              {item.description}
+            </div>
+          )}
+        </div>
 
-      {/* Row 2: Price + Toggle */}
-      <div className="flex items-center justify-between gap-3">
-        <label className="flex items-center gap-2">
-          <input
-            type="text"
-            inputMode="decimal"
-            value={priceInput}
-            onChange={(e) => setPriceInput(e.target.value)}
-            onFocus={() => setPriceFocused(true)}
-            onBlur={() => { setPriceFocused(false); commitPrice(); }}
-            onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-            className="w-24 text-right bg-transparent outline-none font-sans tabular-nums py-1"
-            style={{
-              borderBottom: `1px solid ${priceFocused ? 'var(--accent)' : 'var(--color-dim)'}`,
-              color: 'var(--color-text)',
-            }}
-          />
-          <span className="font-sans text-xs" style={{ color: 'var(--color-dim)' }}>€</span>
-        </label>
+        {/* Row 2: Price + Toggle */}
+        <div className="flex items-center justify-between gap-3">
+          <label className="flex items-center gap-2">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={priceInput}
+              onChange={(e) => setPriceInput(e.target.value)}
+              onFocus={() => setPriceFocused(true)}
+              onBlur={() => { setPriceFocused(false); commitPrice(); }}
+              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              className="w-24 text-right bg-transparent outline-none font-sans tabular-nums py-1"
+              style={{
+                borderBottom: `1px solid ${priceFocused ? 'var(--accent)' : 'var(--color-dim)'}`,
+                color: 'var(--color-text)',
+              }}
+            />
+            <span className="font-sans text-xs" style={{ color: 'var(--color-dim)' }}>€</span>
+          </label>
 
-        <button
-          onClick={toggleActive}
-          className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition shrink-0"
-          style={item.is_active
-            ? { border: '1px solid var(--color-dim)', color: 'var(--color-text)' }
-            : { border: '1px solid var(--accent)', color: 'var(--accent)' }
-          }
-        >
-          {item.is_active ? "Verfügbar" : "Ausverkauft"}
-        </button>
-      </div>
+          <button
+            onClick={toggleActive}
+            className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition shrink-0"
+            style={item.is_active
+              ? { border: '1px solid var(--color-dim)', color: 'var(--color-text)' }
+              : { border: '1px solid var(--accent)', color: 'var(--accent)' }
+            }
+          >
+            {item.is_active ? "Verfügbar" : "Ausverkauft"}
+          </button>
+        </div>
 
-      {/* Photo */}
-      <div className="mt-3 ml-0 flex items-start gap-3">
-        <span
-          className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0 pt-2"
-          style={{ color: 'var(--color-muted)' }}
-        >
-          Foto
-        </span>
-        <div className="flex-1 flex items-center gap-3">
-          {item.image_url ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.image_url}
-                alt={item.name}
-                className="w-16 h-16 object-cover shrink-0"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-              />
+        {/* Photo */}
+        <div className="mt-3 ml-0 flex items-start gap-3">
+          <span
+            className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0 pt-2"
+            style={{ color: 'var(--color-muted)' }}
+          >
+            Foto
+          </span>
+          <div className="flex-1 flex items-center gap-3">
+            {item.image_url ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.image_url}
+                  alt={item.name}
+                  className="w-16 h-16 object-cover shrink-0"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <button
+                  type="button"
+                  onClick={removePhoto}
+                  disabled={photoBusy}
+                  className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
+                  style={{ border: '1px solid var(--color-dim)', color: 'var(--color-dim)' }}
+                >
+                  {photoBusy ? "Löscht…" : "Entfernen"}
+                </button>
+              </>
+            ) : (
               <button
                 type="button"
-                onClick={removePhoto}
+                onClick={() => fileRef.current?.click()}
                 disabled={photoBusy}
                 className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
-                style={{ border: '1px solid var(--color-dim)', color: 'var(--color-dim)' }}
+                style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
               >
-                {photoBusy ? "Löscht…" : "Entfernen"}
+                {photoBusy ? "Lädt hoch…" : "Foto hinzufügen"}
               </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              disabled={photoBusy}
-              className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
-              style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
-            >
-              {photoBusy ? "Lädt hoch…" : "Foto hinzufügen"}
-            </button>
-          )}
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleFile}
+            />
+          </div>
+        </div>
+
+        {/* Story — compact preview row */}
+        <div className="mt-3 ml-0 flex items-center gap-3">
+          <span
+            className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0"
+            style={{ color: 'var(--color-muted)' }}
+          >
+            Story
+          </span>
+          <div className="flex-1 min-w-0">
+            {captionInput ? (
+              <p
+                className="font-display italic text-sm leading-snug truncate"
+                style={{ color: 'var(--color-dim)' }}
+              >
+                {captionInput}
+              </p>
+            ) : (
+              <p className="font-sans text-xs" style={{ color: 'var(--color-muted)' }}>
+                Noch keine Story
+              </p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={openCaptionModal}
+            className="shrink-0 font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition"
+            style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
+          >
+            Bearbeiten
+          </button>
+        </div>
+
+        {/* Allergens */}
+        <div className="mt-3 ml-0 flex items-center gap-3">
+          <span
+            className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0"
+            style={{ color: 'var(--color-muted)' }}
+          >
+            Allergene
+          </span>
           <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFile}
+            type="text"
+            value={allergensInput}
+            onChange={(e) => setAllergensInput(e.target.value)}
+            onFocus={() => setAllergensFocused(true)}
+            onBlur={() => { setAllergensFocused(false); commitAllergens(); }}
+            onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+            placeholder="z.B. A, C, G, L"
+            className="flex-1 bg-transparent outline-none font-sans text-xs py-1"
+            style={{
+              borderBottom: `1px solid ${allergensFocused ? 'var(--accent)' : 'var(--color-border)'}`,
+              color: 'var(--color-dim)',
+            }}
           />
         </div>
-      </div>
 
-      {/* AI caption */}
-      <div className="mt-3 ml-0 flex items-start gap-3">
-        <span
-          className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0 pt-2"
-          style={{ color: 'var(--color-muted)' }}
-        >
-          Story
-        </span>
-        <textarea
-          value={captionInput}
-          onChange={(e) => setCaptionInput(e.target.value)}
-          onFocus={() => setCaptionFocused(true)}
-          onBlur={() => { setCaptionFocused(false); commitCaption(); }}
-          rows={4}
-          maxLength={280}
-          placeholder="Eine elegante Beschreibung — oder per Klick generieren."
-          className="flex-1 resize-none bg-transparent outline-none font-display italic text-sm px-3 py-2 leading-relaxed placeholder:not-italic placeholder:font-sans placeholder:text-xs"
+        {error && <p className="mt-2 ml-0 text-xs text-red-700 font-sans">{error}</p>}
+      </li>
+
+      {/* ── Caption editing modal ─────────────────────────────────────────── */}
+      {/* Backdrop */}
+      <div
+        onClick={closeCaptionModal}
+        className="fixed inset-0 z-40 transition-opacity duration-200"
+        style={{
+          backgroundColor: "rgba(10,10,10,0.70)",
+          opacity: captionModalOpen ? 1 : 0,
+          pointerEvents: captionModalOpen ? "auto" : "none",
+        }}
+      />
+
+      {/* Panel */}
+      <div
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-0 sm:px-4 pointer-events-none"
+      >
+        <div
+          className="w-full sm:max-w-lg pointer-events-auto transition-all duration-200 flex flex-col"
           style={{
-            border: `1px solid ${captionFocused ? 'var(--accent)' : 'var(--color-border)'}`,
-            color: 'var(--color-text)',
+            backgroundColor: "var(--color-bg, #F5F0EC)",
+            opacity: captionModalOpen ? 1 : 0,
+            transform: captionModalOpen ? "translateY(0)" : "translateY(24px)",
+            maxHeight: "90dvh",
           }}
-        />
-        <button
-          type="button"
-          onClick={generateCaption}
-          disabled={aiBusy || !canUseAi}
-          title={!canUseAi ? "Monatliches AI-Limit erreicht" : "Text generieren"}
-          className="shrink-0 font-sans text-[10px] tracking-regal uppercase px-3 py-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          style={{ border: '1px solid var(--accent)', color: 'var(--accent)' }}
         >
-          {aiBusy ? "Generiert…" : "Generieren"}
-        </button>
-      </div>
+          {/* Modal header */}
+          <div
+            className="flex items-center justify-between px-6 py-4 shrink-0"
+            style={{ borderBottom: "1px solid var(--color-border)" }}
+          >
+            <div>
+              <p className="font-sans text-[10px] tracking-regal uppercase" style={{ color: 'var(--color-muted)' }}>
+                Story
+              </p>
+              <p className="font-display text-lg leading-tight mt-0.5" style={{ color: 'var(--color-text)' }}>
+                {item.name}
+              </p>
+            </div>
+            <button
+              onClick={closeCaptionModal}
+              className="w-8 h-8 flex items-center justify-center transition-opacity hover:opacity-50"
+              style={{ color: "var(--color-dim)" }}
+              aria-label="Schließen"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
 
-      {/* Allergens */}
-      <div className="mt-3 ml-0 flex items-center gap-3">
-        <span
-          className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0"
-          style={{ color: 'var(--color-muted)' }}
-        >
-          Allergene
-        </span>
-        <input
-          type="text"
-          value={allergensInput}
-          onChange={(e) => setAllergensInput(e.target.value)}
-          onFocus={() => setAllergensFocused(true)}
-          onBlur={() => { setAllergensFocused(false); commitAllergens(); }}
-          onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-          placeholder="z.B. A, C, G, L"
-          className="flex-1 bg-transparent outline-none font-sans text-xs py-1"
-          style={{
-            borderBottom: `1px solid ${allergensFocused ? 'var(--accent)' : 'var(--color-border)'}`,
-            color: 'var(--color-dim)',
-          }}
-        />
-      </div>
+          {/* Textarea */}
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            <textarea
+              ref={modalTextareaRef}
+              value={modalDraft}
+              onChange={(e) => setModalDraft(e.target.value)}
+              maxLength={280}
+              placeholder="Eine elegante Beschreibung für dieses Gericht…"
+              className="w-full resize-none bg-transparent outline-none font-display italic text-base leading-relaxed placeholder:not-italic placeholder:font-sans placeholder:text-sm"
+              style={{
+                color: 'var(--color-text)',
+                minHeight: '160px',
+                height: 'auto',
+              }}
+              rows={8}
+            />
+            <div
+              className="mt-2 font-sans text-[11px] text-right"
+              style={{ color: 'var(--color-muted)' }}
+            >
+              {modalDraft.length} / 280
+            </div>
+          </div>
 
-      {error && <p className="mt-2 ml-0 text-xs text-red-700 font-sans">{error}</p>}
-    </li>
+          {/* Modal footer */}
+          <div
+            className="flex items-center justify-between gap-3 px-6 py-4 shrink-0"
+            style={{ borderTop: "1px solid var(--color-border)" }}
+          >
+            <button
+              type="button"
+              onClick={generateCaption}
+              disabled={aiBusy || !canUseAi}
+              title={!canUseAi ? "Monatliches AI-Limit erreicht" : "Text generieren"}
+              className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ border: '1px solid var(--accent)', color: 'var(--accent)' }}
+            >
+              {aiBusy ? "Generiert…" : "✦ Generieren"}
+            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={closeCaptionModal}
+                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition"
+                style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                onClick={saveCaptionModal}
+                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition"
+                style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
+              >
+                Speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
