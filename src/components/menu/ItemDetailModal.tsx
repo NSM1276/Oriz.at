@@ -100,25 +100,34 @@ export function ItemDetailModal({ item, currency, onClose }: Props) {
                 {/* Gold hairline */}
                 <div className="w-8 h-px mb-5" style={{ backgroundColor: "var(--accent, #C69B3C)", opacity: 0.7 }} />
 
-                {/* Story */}
-                {item.ai_caption && (
+                {/* Story — AI caption if available, otherwise description promoted to story style */}
+                {item.ai_caption ? (
+                  <>
+                    <p
+                      className="font-display text-lg italic leading-relaxed mb-4"
+                      style={{ color: "var(--color-dim, rgba(10,10,10,0.65))" }}
+                    >
+                      {item.ai_caption}
+                    </p>
+                    {/* Description below story as ingredient line */}
+                    {item.description && (
+                      <p
+                        className="font-sans text-sm leading-relaxed mb-3"
+                        style={{ color: "var(--color-muted, rgba(10,10,10,0.40))" }}
+                      >
+                        {item.description}
+                      </p>
+                    )}
+                  </>
+                ) : item.description ? (
+                  /* No AI caption — description takes the Story slot */
                   <p
-                    className="font-display text-lg italic leading-relaxed mb-4"
+                    className="font-display text-xl italic leading-relaxed mb-4"
                     style={{ color: "var(--color-dim, rgba(10,10,10,0.65))" }}
-                  >
-                    {item.ai_caption}
-                  </p>
-                )}
-
-                {/* Short description */}
-                {item.description && (
-                  <p
-                    className="font-sans text-sm leading-relaxed mb-3"
-                    style={{ color: "var(--color-dim, rgba(10,10,10,0.55))" }}
                   >
                     {item.description}
                   </p>
-                )}
+                ) : null}
 
                 {/* Allergens */}
                 {item.allergens && (
