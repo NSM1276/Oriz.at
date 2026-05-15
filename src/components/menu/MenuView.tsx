@@ -67,7 +67,21 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
     }
   }, [venue.color_bg]);
 
-  const isDark = !!venue.color_bg;
+  // Compute relative luminance (WCAG formula) to decide text colour.
+  // isDark = true  → use light text (parchment)
+  // isDark = false → use dark text (onyx)
+  function getLuminance(hex: string): number {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const toLinear = (c: number) =>
+      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  }
+
+  const isDark = venue.color_bg
+    ? getLuminance(venue.color_bg) < 0.4
+    : false;
   const bg      = venue.color_bg      ?? '#F5F0EC';
   const text    = isDark ? '#F5F0EC'  : '#0A0A0A';
   const dim     = isDark ? 'rgba(245,240,236,0.60)' : 'rgba(10,10,10,0.60)';
