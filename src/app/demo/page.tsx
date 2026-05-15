@@ -1,6 +1,8 @@
 import React from "react";
 import { createClient } from "@supabase/supabase-js";
 import { DemoItemEditor } from "@/components/demo/DemoItemEditor";
+import { QRCodeBlock } from "@/components/admin/QRCodeBlock";
+import { SectionNav } from "@/components/admin/SectionNav";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
 export const revalidate = 0;
@@ -26,6 +28,8 @@ function getLuminance(hex: string): number {
     c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
+
+const BANNER_HEIGHT = 41;
 
 export default async function DemoPage() {
   const supabase = serviceClient();
@@ -61,7 +65,10 @@ export default async function DemoPage() {
 
   const sorted = (venue.sections ?? [])
     .slice()
-    .sort((a, b) => a.position - b.position);
+    .sort((a, b) => a.position - b.position)
+    .filter((s) => (s.items ?? []).length > 0);
+
+  const sectionNavItems = sorted.map((s) => ({ id: s.id, name: s.name }));
 
   return (
     <div style={{ backgroundColor: bg, minHeight: "100dvh" }}>
@@ -74,6 +81,10 @@ export default async function DemoPage() {
           position: "sticky",
           top: 0,
           zIndex: 50,
+          height: BANNER_HEIGHT,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <span
@@ -97,31 +108,68 @@ export default async function DemoPage() {
             <h1 className="font-display text-3xl mt-1" style={{ color: text }}>
               {venue.name}
             </h1>
-            <p
-              className="font-sans text-[11px] mt-2 max-w-xs"
-              style={{ color: muted }}
-            >
-              Preise ändern · Gerichte ein-/ausblenden · Beschreibungen bearbeiten
-            </p>
           </div>
+        </div>
+
+        {/* Plan bar */}
+        <div
+          className="mb-10 flex items-center justify-between gap-4 px-5 py-3"
+          style={{
+            border: `1px solid ${border}`,
+            backgroundColor: isDark ? "rgba(245,240,236,0.05)" : "rgba(10,10,10,0.03)",
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="font-sans text-[10px] tracking-regal uppercase" style={{ color: muted }}>
+              Plan
+            </span>
+            <span className="font-display text-lg capitalize" style={{ color: text }}>Demo</span>
+          </div>
+          <div className="text-right">
+            <div className="font-sans text-[10px] tracking-regal uppercase" style={{ color: muted }}>
+              AI-Texte diesen Monat
+            </div>
+            <div className="font-display text-lg tabular-nums">
+              <span style={{ color: muted }}>0 / 20</span>
+            </div>
+          </div>
+        </div>
+
+        {/* QR code */}
+        <QRCodeBlock slug={venue.slug} />
+
+        {/* Action links */}
+        <div className="mb-10 flex gap-3">
           <a
             href={`/${venue.slug}`}
             target="_blank"
             rel="noreferrer"
-            className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-70 shrink-0"
+            className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-70"
             style={{ border: `1px solid ${border}`, color: dim }}
           >
-            Gästeansicht →
+            Menü ansehen →
+          </a>
+          <a
+            href={`/${venue.slug}/print`}
+            target="_blank"
+            rel="noreferrer"
+            className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-70"
+            style={{ border: `1px solid ${accent}`, color: accent }}
+          >
+            Menü drucken / PDF ↓
           </a>
         </div>
 
+        {/* Section nav */}
+        <SectionNav sections={sectionNavItems} topOffset={BANNER_HEIGHT} />
+
+        {/* Menu sections */}
         {sorted.map((section) => {
           const items = (section.items ?? [])
             .slice()
             .sort((a, b) => a.position - b.position);
-          if (items.length === 0) return null;
           return (
-            <section key={section.id} className="mt-12">
+            <section key={section.id} id={`section-${section.id}`} className="mt-12">
               <header className="mb-5 flex items-center gap-4 pt-2">
                 <span
                   className="font-sans text-sm tracking-regal uppercase shrink-0"

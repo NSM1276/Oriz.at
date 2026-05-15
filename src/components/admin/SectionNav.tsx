@@ -2,9 +2,10 @@
 
 type Props = {
   sections: { id: string; name: string }[];
+  topOffset?: number;
 };
 
-export function SectionNav({ sections }: Props) {
+export function SectionNav({ sections, topOffset = 0 }: Props) {
   function jump(id: string) {
     const el = document.getElementById(`section-${id}`);
     if (!el) return;
@@ -17,7 +18,7 @@ export function SectionNav({ sections }: Props) {
     <div
       style={{
         position: "sticky",
-        top: 0,
+        top: topOffset,
         zIndex: 30,
         backgroundColor: "var(--color-bg)",
         borderBottom: "1px solid var(--color-border)",
