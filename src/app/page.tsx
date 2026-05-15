@@ -101,18 +101,22 @@ const DEMO_VENUES = [
   {
     slug:   "prime-steakhouse",
     name:   "PRIME Argentinian Steakhouse",
-    type:   "Dry-Aged · Wagyu · Naschmarkt",
+    type:   "Gästeansicht · So sehen Ihre Gäste das Menü",
     items:  "46 Gerichte",
     bg:     "#0F0000",
     accent: "#CC0000",
+    cta:    "Menü öffnen",
+    isAdmin: false,
   },
   {
-    slug:   "steakhouse-mariahilf",
-    name:   "Steakhaus Mariahilf",
-    type:   "US Dry-Aged · Wagyu · 6. Bezirk",
-    items:  "44 Gerichte",
-    bg:     "#111111",
-    accent: "#D4AF37",
+    slug:   "demo",
+    name:   "Admin-Panel",
+    type:   "Ihre Ansicht · Preise, Verfügbarkeit, Texte",
+    items:  "Live · Änderungen sofort sichtbar",
+    bg:     "#0A0A0A",
+    accent: "#C69B3C",
+    cta:    "Ausprobieren",
+    isAdmin: true,
   },
 ];
 
@@ -211,18 +215,18 @@ export default function Landing() {
           <div className="text-center mb-16">
             <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Live-Demo</span>
             <h2 className="font-display text-4xl md:text-5xl mt-6 font-light">
-              So sehen Ihre Gäste das Menü
+              Zwei Perspektiven. Ein System.
             </h2>
             <p className="font-sans text-sm text-onyx/40 mt-4 max-w-md mx-auto leading-relaxed">
-              Echte Menüs — auf dem gleichen System, das Ihr Restaurant nutzen würde.
-              Klicken Sie rein.
+              Links: was Ihr Gast sieht. Rechts: was Sie als Inhaber steuern.
+              Beides live — klicken Sie rein.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-            {DEMO_VENUES.map(({ slug, name, type, items, bg, accent }) => (
+            {DEMO_VENUES.map(({ slug, name, type, items, bg, accent, cta, isAdmin }) => (
               <a
                 key={slug}
-                href={`/${slug}`}
+                href={isAdmin ? "/demo" : `/${slug}`}
                 target="_blank"
                 rel="noreferrer"
                 className="group relative overflow-hidden flex flex-col justify-between p-8 transition-transform duration-500 hover:-translate-y-1"
@@ -239,7 +243,7 @@ export default function Landing() {
                   style={{ backgroundColor: accent }}
                 />
 
-                {/* top: cuisine type */}
+                {/* top: type label */}
                 <div className="relative z-10">
                   <span
                     className="font-sans text-[9px] tracking-regal uppercase"
@@ -249,7 +253,7 @@ export default function Landing() {
                   </span>
                 </div>
 
-                {/* center: name + item count */}
+                {/* center: name + subtitle */}
                 <div className="relative z-10">
                   <h3
                     className="font-display font-light leading-snug text-parchment mb-3 transition-colors duration-300 group-hover:text-white"
@@ -270,7 +274,7 @@ export default function Landing() {
                   />
                   <div className="flex items-center justify-between">
                     <span className="font-sans text-[9px] tracking-regal uppercase text-parchment/35 group-hover:text-parchment/65 transition-colors duration-300">
-                      Menü öffnen
+                      {cta}
                     </span>
                     <span
                       className="font-sans text-[11px] transition-transform duration-300 group-hover:translate-x-1"
@@ -284,7 +288,7 @@ export default function Landing() {
             ))}
           </div>
           <p className="text-center font-sans text-[10px] text-onyx/25 mt-8 tracking-wide uppercase">
-            Demo-Menüs — Daten frei erfunden
+            Demo-Daten · frei erfunden · Änderungen alle 30 Minuten zurückgesetzt
           </p>
         </div>
       </section>
