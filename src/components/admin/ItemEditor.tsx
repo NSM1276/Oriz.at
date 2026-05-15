@@ -8,7 +8,6 @@ import type { Item } from "@/lib/supabase/types";
 
 type Props = {
   initial: Item;
-  /** Tells the editor whether a "Generate AI text" call would be allowed. */
   canUseAi?: boolean;
 };
 
@@ -25,6 +24,9 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
+  const [priceFocused, setPriceFocused] = useState(false);
+  const [captionFocused, setCaptionFocused] = useState(false);
+  const [allergensFocused, setAllergensFocused] = useState(false);
   const [, startTransition] = useTransition();
 
   // ── price ──────────────────────────────────────────────────────────────
@@ -166,7 +168,6 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
       }
       setItem({ ...item, ai_caption: json.caption });
       setCaptionInput(json.caption);
-      // Refresh server data so the page-level credit counter updates.
       router.refresh();
     } catch {
       setError("Netzwerkfehler.");
@@ -176,15 +177,21 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
   }
 
   return (
-    <li className={`py-6 border-b border-onyx/10 ${item.is_active ? "" : "opacity-60"}`}>
+    <li
+      className={`py-6 ${item.is_active ? "" : "opacity-60"}`}
+      style={{ borderBottom: '1px solid var(--color-border)' }}
+    >
       <div className="grid grid-cols-[88px_1fr_auto_auto] items-start gap-4">
         {/* Photo */}
-        <div className="relative w-[88px] h-[88px] bg-onyx/5 border border-onyx/10 overflow-hidden group">
+        <div
+          className="relative w-[88px] h-[88px] overflow-hidden group"
+          style={{ backgroundColor: 'var(--color-border)', border: '1px solid var(--color-border)' }}
+        >
           {item.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={item.image_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-onyx/20">
+            <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--color-muted)' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <rect x="3" y="5" width="18" height="14" stroke="currentColor" strokeWidth="1.2"/>
                 <circle cx="8.5" cy="10.5" r="1.5" fill="currentColor"/>
@@ -196,7 +203,8 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={photoBusy}
-            className="absolute inset-0 bg-onyx/70 text-parchment text-[10px] tracking-regal uppercase opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center disabled:opacity-100 disabled:bg-onyx/50"
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center font-sans text-[10px] tracking-regal uppercase disabled:opacity-100"
+            style={{ backgroundColor: 'rgba(10,10,10,0.75)', color: '#F5F0EC' }}
             aria-label="Foto hochladen"
           >
             {photoBusy ? "…" : item.image_url ? "Ersetzen" : "Hochladen"}
@@ -212,16 +220,21 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
 
         {/* Name + meta */}
         <div className="min-w-0">
-          <div className="font-display text-xl text-onyx leading-tight">{item.name}</div>
+          <div className="font-display text-xl leading-tight" style={{ color: 'var(--color-text)' }}>
+            {item.name}
+          </div>
           {item.description && (
-            <div className="font-sans text-xs text-onyx/60 mt-0.5 truncate">{item.description}</div>
+            <div className="font-sans text-xs mt-0.5 truncate" style={{ color: 'var(--color-dim)' }}>
+              {item.description}
+            </div>
           )}
           {item.image_url && (
             <button
               type="button"
               onClick={removePhoto}
               disabled={photoBusy}
-              className="mt-2 font-sans text-[10px] tracking-regal uppercase text-onyx/40 hover:text-onyx underline-offset-4 hover:underline disabled:opacity-50"
+              className="mt-2 font-sans text-[10px] tracking-regal uppercase underline-offset-4 hover:underline disabled:opacity-50"
+              style={{ color: 'var(--color-muted)' }}
             >
               Foto entfernen
             </button>
@@ -235,21 +248,26 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
             inputMode="decimal"
             value={priceInput}
             onChange={(e) => setPriceInput(e.target.value)}
-            onBlur={commitPrice}
+            onFocus={() => setPriceFocused(true)}
+            onBlur={() => { setPriceFocused(false); commitPrice(); }}
             onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-            className="w-24 text-right bg-transparent border-b border-onyx/40 focus:border-gold outline-none font-sans tabular-nums py-1"
+            className="w-24 text-right bg-transparent outline-none font-sans tabular-nums py-1"
+            style={{
+              borderBottom: `1px solid ${priceFocused ? 'var(--accent)' : 'var(--color-dim)'}`,
+              color: 'var(--color-text)',
+            }}
           />
-          <span className="font-sans text-xs text-onyx/60">€</span>
+          <span className="font-sans text-xs" style={{ color: 'var(--color-dim)' }}>€</span>
         </label>
 
         {/* Active toggle */}
         <button
           onClick={toggleActive}
-          className={`font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 border transition ${
-            item.is_active
-              ? "border-onyx/30 text-onyx hover:border-onyx"
-              : "border-gold text-gold hover:bg-gold hover:text-parchment"
-          }`}
+          className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition"
+          style={item.is_active
+            ? { border: '1px solid var(--color-dim)', color: 'var(--color-text)' }
+            : { border: '1px solid var(--accent)', color: 'var(--accent)' }
+          }
         >
           {item.is_active ? "Verfügbar" : "Ausverkauft"}
         </button>
@@ -257,24 +275,33 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
 
       {/* AI caption */}
       <div className="mt-3 ml-[104px] flex items-start gap-3">
-        <span className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 w-20 shrink-0 pt-2">
+        <span
+          className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0 pt-2"
+          style={{ color: 'var(--color-muted)' }}
+        >
           Story
         </span>
         <textarea
           value={captionInput}
           onChange={(e) => setCaptionInput(e.target.value)}
-          onBlur={commitCaption}
+          onFocus={() => setCaptionFocused(true)}
+          onBlur={() => { setCaptionFocused(false); commitCaption(); }}
           rows={2}
           maxLength={280}
           placeholder="Eine elegante Beschreibung — oder per Klick generieren."
-          className="flex-1 resize-none bg-transparent border border-onyx/15 focus:border-gold outline-none font-display italic text-sm text-onyx/80 px-3 py-2 leading-relaxed placeholder:not-italic placeholder:font-sans placeholder:text-onyx/30 placeholder:text-xs"
+          className="flex-1 resize-none bg-transparent outline-none font-display italic text-sm px-3 py-2 leading-relaxed placeholder:not-italic placeholder:font-sans placeholder:text-xs"
+          style={{
+            border: `1px solid ${captionFocused ? 'var(--accent)' : 'var(--color-border)'}`,
+            color: 'var(--color-text)',
+          }}
         />
         <button
           type="button"
           onClick={generateCaption}
           disabled={aiBusy || !canUseAi}
           title={!canUseAi ? "Monatliches AI-Limit erreicht" : "Text generieren"}
-          className="shrink-0 font-sans text-[10px] tracking-regal uppercase border border-gold text-gold px-3 py-2 hover:bg-gold hover:text-parchment transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gold"
+          className="shrink-0 font-sans text-[10px] tracking-regal uppercase px-3 py-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          style={{ border: '1px solid var(--accent)', color: 'var(--accent)' }}
         >
           {aiBusy ? "Generiert…" : "Generieren"}
         </button>
@@ -282,17 +309,25 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
 
       {/* Allergens */}
       <div className="mt-3 ml-[104px] flex items-center gap-3">
-        <span className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 w-20 shrink-0">
+        <span
+          className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0"
+          style={{ color: 'var(--color-muted)' }}
+        >
           Allergene
         </span>
         <input
           type="text"
           value={allergensInput}
           onChange={(e) => setAllergensInput(e.target.value)}
-          onBlur={commitAllergens}
+          onFocus={() => setAllergensFocused(true)}
+          onBlur={() => { setAllergensFocused(false); commitAllergens(); }}
           onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
           placeholder="z.B. A, C, G, L"
-          className="flex-1 bg-transparent border-b border-onyx/15 focus:border-gold outline-none font-sans text-xs text-onyx/70 py-1"
+          className="flex-1 bg-transparent outline-none font-sans text-xs py-1"
+          style={{
+            borderBottom: `1px solid ${allergensFocused ? 'var(--accent)' : 'var(--color-border)'}`,
+            color: 'var(--color-dim)',
+          }}
         />
       </div>
 
