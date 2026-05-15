@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ContactForm } from "@/components/landing/ContactForm";
 import { HeroAtmosphere } from "@/components/landing/HeroAtmosphere";
+import { LegalLinks } from "@/components/landing/LegalLinks";
 
 const STATS = [
   {
@@ -561,6 +562,9 @@ export default function Landing() {
               </a>
             ))}
           </div>
+        </div>
+        <div className="max-w-5xl mx-auto px-6 mt-4 flex justify-center sm:justify-end">
+          <LegalLinks />
         </div>
       </footer>
 
