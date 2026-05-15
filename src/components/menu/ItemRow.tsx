@@ -77,23 +77,11 @@ export function ItemRow({
         )}
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
-        {/* Thumbnail if photo exists */}
-        {item.image_url && (
-          <div
-            className="w-10 h-10 overflow-hidden opacity-60 group-hover:opacity-90 transition-opacity"
-            style={{ border: '1px solid var(--color-border)' }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.image_url} alt="" className="w-full h-full object-cover" />
-          </div>
-        )}
-        <div
-          className="font-sans text-base md:text-lg tabular-nums"
-          style={{ color: 'var(--color-text)' }}
-        >
-          {formatPrice(item.price_cents, currency)}
-        </div>
+      <div
+        className="font-sans text-base md:text-lg tabular-nums shrink-0"
+        style={{ color: 'var(--color-text)' }}
+      >
+        {formatPrice(item.price_cents, currency)}
       </div>
     </li>
   );
