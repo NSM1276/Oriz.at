@@ -27,15 +27,13 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
   const [priceFocused, setPriceFocused] = useState(false);
   const [allergensFocused, setAllergensFocused] = useState(false);
   const [captionModalOpen, setCaptionModalOpen] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [modalDraft, setModalDraft] = useState("");
-  const [mounted, setMounted] = useState(false);
   const [, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
   const modalTextareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => { setMounted(true); }, []);
-
-  // Close modal on Escape
+  // Close modal on Escape + lock body scroll
   useEffect(() => {
     if (!captionModalOpen) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeCaptionModal(); };
@@ -47,10 +45,11 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
     };
   }, [captionModalOpen]);
 
-  // Focus textarea when modal opens
+  // Animate in after mount
   useEffect(() => {
     if (captionModalOpen) {
-      setTimeout(() => modalTextareaRef.current?.focus(), 50);
+      requestAnimationFrame(() => requestAnimationFrame(() => setModalVisible(true)));
+      setTimeout(() => modalTextareaRef.current?.focus(), 80);
     }
   }, [captionModalOpen]);
 
@@ -96,11 +95,13 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
   // ── ai_caption ────────────────────────────────────────────────────────
   function openCaptionModal() {
     setModalDraft(captionInput);
+    setModalVisible(false);
     setCaptionModalOpen(true);
   }
 
   function closeCaptionModal() {
-    setCaptionModalOpen(false);
+    setModalVisible(false);
+    setTimeout(() => setCaptionModalOpen(false), 180);
   }
 
   async function saveCaptionModal() {
@@ -211,9 +212,8 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
         style={{
           position: 'fixed', inset: 0, zIndex: 40,
           backgroundColor: "rgba(10,10,10,0.70)",
-          opacity: captionModalOpen ? 1 : 0,
-          pointerEvents: captionModalOpen ? "auto" : "none",
-          transition: 'opacity 200ms',
+          opacity: modalVisible ? 1 : 0,
+          transition: 'opacity 180ms',
         }}
       />
 
@@ -229,10 +229,10 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
           style={{
             width: '100%', maxWidth: 560,
             backgroundColor: "var(--color-bg, #F5F0EC)",
-            opacity: captionModalOpen ? 1 : 0,
-            transform: captionModalOpen ? "translateY(0)" : "translateY(32px)",
-            transition: 'opacity 200ms, transform 200ms',
-            pointerEvents: captionModalOpen ? 'auto' : 'none',
+            opacity: modalVisible ? 1 : 0,
+            transform: modalVisible ? "translateY(0)" : "translateY(32px)",
+            transition: 'opacity 180ms, transform 180ms',
+            pointerEvents: 'auto',
             maxHeight: '90dvh',
             display: 'flex', flexDirection: 'column',
           }}
@@ -513,7 +513,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
         {error && <p className="mt-2 ml-0 text-xs text-red-700 font-sans">{error}</p>}
       </li>
 
-      {mounted && createPortal(modal, document.body)}
+      {captionModalOpen && createPortal(modal, document.body)}
     </>
   );
 }
