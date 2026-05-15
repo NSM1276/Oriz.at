@@ -98,7 +98,7 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
     <div style={{ backgroundColor: bg, minHeight: '100vh' }}>
       <main className="max-w-3xl mx-auto px-6 pt-20 pb-8" style={cssVars}>
         <header className="text-center">
-          <VenueLogo name={venue.name} logoUrl={venue.logo_url} textColor={text} />
+          <VenueLogo name={venue.name} logoUrl={venue.logo_url} textColor={text} isDarkBg={isDark} />
           {venue.about && (
             <p className="font-display italic text-lg md:text-xl mt-6 max-w-xl mx-auto" style={{ color: dim }}>
               {venue.about}

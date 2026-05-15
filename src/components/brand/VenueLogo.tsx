@@ -3,15 +3,19 @@ type Props = {
   logoUrl: string | null;
   size?: "lg" | "md";
   textColor?: string;
+  isDarkBg?: boolean;
 };
 
-export function VenueLogo({ name, logoUrl, size = "lg", textColor }: Props) {
+export function VenueLogo({ name, logoUrl, size = "lg", textColor, isDarkBg }: Props) {
   if (logoUrl) {
+    const isSvg = logoUrl.toLowerCase().endsWith(".svg");
+    const style = isSvg && isDarkBg ? { filter: "invert(1)" } : undefined;
     return (
       <img
         src={logoUrl}
         alt={name}
         className={size === "lg" ? "h-16 w-auto" : "h-10 w-auto"}
+        style={style}
       />
     );
   }

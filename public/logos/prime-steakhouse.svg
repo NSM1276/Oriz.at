@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -4 126 132" fill="black">
+  <!-- Left horn: sweeps upper-left, teardrop shape -->
+  <path d="M46,40 C36,22 14,7 -2,3 C2,18 20,34 44,46 Z"/>
+  <!-- Right horn: mirror -->
+  <path d="M64,40 C74,22 96,7 112,3 C108,18 90,34 66,46 Z"/>
+  <!-- Left ear -->
+  <ellipse cx="5" cy="73" rx="11" ry="15" transform="rotate(-12 5 73)"/>
+  <!-- Right ear -->
+  <ellipse cx="105" cy="73" rx="11" ry="15" transform="rotate(12 105 73)"/>
+  <!-- Main head -->
+  <path d="M55,34 C25,34 11,57 11,80 C11,104 30,124 55,124 C80,124 99,104 99,80 C99,57 85,34 55,34 Z"/>
+</svg>
