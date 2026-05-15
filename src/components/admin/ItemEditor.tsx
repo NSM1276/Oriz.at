@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { uploadItemImage, extractStoragePath, ImageUploadError } from "@/lib/imageUpload";
@@ -27,9 +28,12 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
   const [allergensFocused, setAllergensFocused] = useState(false);
   const [captionModalOpen, setCaptionModalOpen] = useState(false);
   const [modalDraft, setModalDraft] = useState("");
+  const [mounted, setMounted] = useState(false);
   const [, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
   const modalTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => { setMounted(true); }, []);
 
   // Close modal on Escape
   useEffect(() => {
@@ -198,6 +202,146 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
       setAiBusy(false);
     }
   }
+
+  const modal = (
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={closeCaptionModal}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 40,
+          backgroundColor: "rgba(10,10,10,0.70)",
+          opacity: captionModalOpen ? 1 : 0,
+          pointerEvents: captionModalOpen ? "auto" : "none",
+          transition: 'opacity 200ms',
+        }}
+      />
+
+      {/* Panel */}
+      <div
+        style={{
+          position: 'fixed', inset: 0, zIndex: 50,
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          pointerEvents: 'none',
+        }}
+      >
+        <div
+          style={{
+            width: '100%', maxWidth: 560,
+            backgroundColor: "var(--color-bg, #F5F0EC)",
+            opacity: captionModalOpen ? 1 : 0,
+            transform: captionModalOpen ? "translateY(0)" : "translateY(32px)",
+            transition: 'opacity 200ms, transform 200ms',
+            pointerEvents: captionModalOpen ? 'auto' : 'none',
+            maxHeight: '90dvh',
+            display: 'flex', flexDirection: 'column',
+          }}
+        >
+          {/* Modal header */}
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '16px 24px', borderBottom: '1px solid var(--color-border)',
+              flexShrink: 0,
+            }}
+          >
+            <div>
+              <p style={{ fontFamily: 'var(--font-inter, sans-serif)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-muted)', margin: 0 }}>
+                Story
+              </p>
+              <p style={{ fontFamily: 'var(--font-garamond, serif)', fontSize: 20, color: 'var(--color-text)', margin: '2px 0 0' }}>
+                {item.name}
+              </p>
+            </div>
+            <button
+              onClick={closeCaptionModal}
+              style={{
+                width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-dim)',
+                flexShrink: 0,
+              }}
+              aria-label="Schließen"
+            >
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Textarea */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+            <textarea
+              ref={modalTextareaRef}
+              value={modalDraft}
+              onChange={(e) => setModalDraft(e.target.value)}
+              maxLength={280}
+              placeholder="Eine elegante Beschreibung für dieses Gericht…"
+              style={{
+                width: '100%', minHeight: 180, resize: 'none',
+                background: 'transparent', border: 'none', outline: 'none',
+                fontFamily: 'var(--font-garamond, serif)', fontStyle: 'italic',
+                fontSize: 18, lineHeight: 1.65,
+                color: 'var(--color-text)',
+                boxSizing: 'border-box',
+              }}
+              rows={8}
+            />
+            <div style={{ textAlign: 'right', fontFamily: 'var(--font-inter, sans-serif)', fontSize: 11, color: 'var(--color-muted)', marginTop: 4 }}>
+              {modalDraft.length} / 280
+            </div>
+          </div>
+
+          {/* Modal footer */}
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+              padding: '16px 24px', borderTop: '1px solid var(--color-border)', flexShrink: 0,
+            }}
+          >
+            <button
+              type="button"
+              onClick={generateCaption}
+              disabled={aiBusy || !canUseAi}
+              title={!canUseAi ? "Monatliches AI-Limit erreicht" : "Text generieren"}
+              style={{
+                fontFamily: 'var(--font-inter, sans-serif)', fontSize: 11, letterSpacing: '0.1em',
+                textTransform: 'uppercase', padding: '10px 16px', cursor: 'pointer',
+                border: '1px solid var(--accent)', color: 'var(--accent)', background: 'none',
+                opacity: (aiBusy || !canUseAi) ? 0.3 : 1,
+              }}
+            >
+              {aiBusy ? "Generiert…" : "✦ Generieren"}
+            </button>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={closeCaptionModal}
+                style={{
+                  fontFamily: 'var(--font-inter, sans-serif)', fontSize: 11, letterSpacing: '0.1em',
+                  textTransform: 'uppercase', padding: '10px 16px', cursor: 'pointer',
+                  border: '1px solid var(--color-border)', color: 'var(--color-dim)', background: 'none',
+                }}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                onClick={saveCaptionModal}
+                style={{
+                  fontFamily: 'var(--font-inter, sans-serif)', fontSize: 11, letterSpacing: '0.1em',
+                  textTransform: 'uppercase', padding: '10px 16px', cursor: 'pointer',
+                  border: 'none', backgroundColor: 'var(--accent)', color: '#fff',
+                }}
+              >
+                Speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <>
@@ -369,117 +513,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
         {error && <p className="mt-2 ml-0 text-xs text-red-700 font-sans">{error}</p>}
       </li>
 
-      {/* ── Caption editing modal ─────────────────────────────────────────── */}
-      {/* Backdrop */}
-      <div
-        onClick={closeCaptionModal}
-        className="fixed inset-0 z-40 transition-opacity duration-200"
-        style={{
-          backgroundColor: "rgba(10,10,10,0.70)",
-          opacity: captionModalOpen ? 1 : 0,
-          pointerEvents: captionModalOpen ? "auto" : "none",
-        }}
-      />
-
-      {/* Panel */}
-      <div
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-0 sm:px-4 pointer-events-none"
-      >
-        <div
-          className="w-full sm:max-w-lg pointer-events-auto transition-all duration-200 flex flex-col"
-          style={{
-            backgroundColor: "var(--color-bg, #F5F0EC)",
-            opacity: captionModalOpen ? 1 : 0,
-            transform: captionModalOpen ? "translateY(0)" : "translateY(24px)",
-            maxHeight: "90dvh",
-          }}
-        >
-          {/* Modal header */}
-          <div
-            className="flex items-center justify-between px-6 py-4 shrink-0"
-            style={{ borderBottom: "1px solid var(--color-border)" }}
-          >
-            <div>
-              <p className="font-sans text-[10px] tracking-regal uppercase" style={{ color: 'var(--color-muted)' }}>
-                Story
-              </p>
-              <p className="font-display text-lg leading-tight mt-0.5" style={{ color: 'var(--color-text)' }}>
-                {item.name}
-              </p>
-            </div>
-            <button
-              onClick={closeCaptionModal}
-              className="w-8 h-8 flex items-center justify-center transition-opacity hover:opacity-50"
-              style={{ color: "var(--color-dim)" }}
-              aria-label="Schließen"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
-
-          {/* Textarea */}
-          <div className="flex-1 overflow-y-auto px-6 py-5">
-            <textarea
-              ref={modalTextareaRef}
-              value={modalDraft}
-              onChange={(e) => setModalDraft(e.target.value)}
-              maxLength={280}
-              placeholder="Eine elegante Beschreibung für dieses Gericht…"
-              className="w-full resize-none bg-transparent outline-none font-display italic text-base leading-relaxed placeholder:not-italic placeholder:font-sans placeholder:text-sm"
-              style={{
-                color: 'var(--color-text)',
-                minHeight: '160px',
-                height: 'auto',
-              }}
-              rows={8}
-            />
-            <div
-              className="mt-2 font-sans text-[11px] text-right"
-              style={{ color: 'var(--color-muted)' }}
-            >
-              {modalDraft.length} / 280
-            </div>
-          </div>
-
-          {/* Modal footer */}
-          <div
-            className="flex items-center justify-between gap-3 px-6 py-4 shrink-0"
-            style={{ borderTop: "1px solid var(--color-border)" }}
-          >
-            <button
-              type="button"
-              onClick={generateCaption}
-              disabled={aiBusy || !canUseAi}
-              title={!canUseAi ? "Monatliches AI-Limit erreicht" : "Text generieren"}
-              className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition disabled:opacity-30 disabled:cursor-not-allowed"
-              style={{ border: '1px solid var(--accent)', color: 'var(--accent)' }}
-            >
-              {aiBusy ? "Generiert…" : "✦ Generieren"}
-            </button>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={closeCaptionModal}
-                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition"
-                style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
-              >
-                Abbrechen
-              </button>
-              <button
-                type="button"
-                onClick={saveCaptionModal}
-                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition"
-                style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
-              >
-                Speichern
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {mounted && createPortal(modal, document.body)}
     </>
   );
 }
