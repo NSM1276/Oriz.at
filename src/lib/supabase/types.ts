@@ -12,6 +12,8 @@ export type Venue = {
   plan?: string;
   instagram_url?: string | null;
   google_maps_url?: string | null;
+  ai_credits_used?: number;
+  ai_credits_reset?: string;
 };
 
 export type Section = {
