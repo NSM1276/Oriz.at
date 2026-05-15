@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { uploadItemImage, extractStoragePath, ImageUploadError } from "@/lib/imageUpload";
 import type { Item } from "@/lib/supabase/types";
 
 type Props = {
@@ -21,10 +22,12 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
 
   const [error, setError] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
   const [priceFocused, setPriceFocused] = useState(false);
   const [captionFocused, setCaptionFocused] = useState(false);
   const [allergensFocused, setAllergensFocused] = useState(false);
   const [, startTransition] = useTransition();
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // ── price ──────────────────────────────────────────────────────────────
   async function commitPrice() {
@@ -93,6 +96,48 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
         setError(error.message);
       } else setError(null);
     });
+  }
+
+  // ── photo upload / remove ──────────────────────────────────────────────
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    setError(null);
+    setPhotoBusy(true);
+    try {
+      const url = await uploadItemImage({
+        supabase,
+        file,
+        venueId: item.venue_id,
+        itemId: item.id,
+        previousUrl: item.image_url,
+      });
+      const { error: dbErr } = await supabase.from("items").update({ image_url: url }).eq("id", item.id);
+      if (dbErr) throw new ImageUploadError(dbErr.message);
+      setItem({ ...item, image_url: url });
+    } catch (err) {
+      setError(err instanceof ImageUploadError ? err.message : "Upload fehlgeschlagen.");
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
+  async function removePhoto() {
+    if (!item.image_url) return;
+    setPhotoBusy(true);
+    setError(null);
+    try {
+      const path = extractStoragePath(item.image_url);
+      if (path) await supabase.storage.from("item-images").remove([path]);
+      const { error: dbErr } = await supabase.from("items").update({ image_url: null }).eq("id", item.id);
+      if (dbErr) throw new Error(dbErr.message);
+      setItem({ ...item, image_url: null });
+    } catch {
+      setError("Foto konnte nicht gelöscht werden.");
+    } finally {
+      setPhotoBusy(false);
+    }
   }
 
   // ── AI caption generation ──────────────────────────────────────────────
@@ -169,6 +214,55 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
         </button>
       </div>
 
+      {/* Photo */}
+      <div className="mt-3 ml-0 flex items-start gap-3">
+        <span
+          className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0 pt-2"
+          style={{ color: 'var(--color-muted)' }}
+        >
+          Foto
+        </span>
+        <div className="flex-1 flex items-center gap-3">
+          {item.image_url ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.image_url}
+                alt={item.name}
+                className="w-16 h-16 object-cover shrink-0"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              <button
+                type="button"
+                onClick={removePhoto}
+                disabled={photoBusy}
+                className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
+                style={{ border: '1px solid var(--color-dim)', color: 'var(--color-dim)' }}
+              >
+                {photoBusy ? "Löscht…" : "Entfernen"}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={photoBusy}
+              className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
+              style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
+            >
+              {photoBusy ? "Lädt hoch…" : "Foto hinzufügen"}
+            </button>
+          )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleFile}
+          />
+        </div>
+      </div>
+
       {/* AI caption */}
       <div className="mt-3 ml-0 flex items-start gap-3">
         <span
@@ -182,7 +276,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
           onChange={(e) => setCaptionInput(e.target.value)}
           onFocus={() => setCaptionFocused(true)}
           onBlur={() => { setCaptionFocused(false); commitCaption(); }}
-          rows={2}
+          rows={4}
           maxLength={280}
           placeholder="Eine elegante Beschreibung — oder per Klick generieren."
           className="flex-1 resize-none bg-transparent outline-none font-display italic text-sm px-3 py-2 leading-relaxed placeholder:not-italic placeholder:font-sans placeholder:text-xs"
