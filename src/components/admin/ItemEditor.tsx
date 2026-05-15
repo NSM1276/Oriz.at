@@ -125,20 +125,20 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
       className={`py-5 ${item.is_active ? "" : "opacity-60"}`}
       style={{ borderBottom: '1px solid var(--color-border)' }}
     >
-      <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
-        {/* Name + meta */}
-        <div className="min-w-0">
-          <div className="font-display text-lg leading-tight" style={{ color: 'var(--color-text)' }}>
-            {item.name}
-          </div>
-          {item.description && (
-            <div className="font-sans text-xs mt-0.5 truncate" style={{ color: 'var(--color-dim)' }}>
-              {item.description}
-            </div>
-          )}
+      {/* Row 1: Name + description */}
+      <div className="mb-3">
+        <div className="font-display text-lg leading-tight" style={{ color: 'var(--color-text)' }}>
+          {item.name}
         </div>
+        {item.description && (
+          <div className="font-sans text-xs mt-0.5" style={{ color: 'var(--color-dim)' }}>
+            {item.description}
+          </div>
+        )}
+      </div>
 
-        {/* Price */}
+      {/* Row 2: Price + Toggle */}
+      <div className="flex items-center justify-between gap-3">
         <label className="flex items-center gap-2">
           <input
             type="text"
@@ -157,10 +157,9 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
           <span className="font-sans text-xs" style={{ color: 'var(--color-dim)' }}>€</span>
         </label>
 
-        {/* Active toggle */}
         <button
           onClick={toggleActive}
-          className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition"
+          className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition shrink-0"
           style={item.is_active
             ? { border: '1px solid var(--color-dim)', color: 'var(--color-text)' }
             : { border: '1px solid var(--accent)', color: 'var(--accent)' }
