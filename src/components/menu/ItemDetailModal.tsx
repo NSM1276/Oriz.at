@@ -54,18 +54,6 @@ export function ItemDetailModal({ item, currency, onClose }: Props) {
         >
           {item && (
             <>
-              {/* Photo — fixed height, never overwhelms */}
-              {item.image_url && (
-                <div className="w-full shrink-0 overflow-hidden" style={{ height: "220px" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.image_url}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-
               {/* Content — scrollable if text is long */}
               <div className="overflow-y-auto px-7 pt-6 pb-8 relative">
 
