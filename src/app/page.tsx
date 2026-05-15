@@ -99,12 +99,12 @@ const PLANS = [
 
 const DEMO_VENUES = [
   {
-    slug:   "prime-steakhouse",
-    name:   "PRIME Argentinian Steakhouse",
+    slug:   "belvedere",
+    name:   "Trattoria Belvedere",
     type:   "Gästeansicht · So sehen Ihre Gäste das Menü",
-    items:  "46 Gerichte",
-    bg:     "#0F0000",
-    accent: "#CC0000",
+    items:  "33 Gerichte",
+    bg:     "#1C1208",
+    accent: "#C8963E",
     cta:    "Menü öffnen",
     isAdmin: false,
   },

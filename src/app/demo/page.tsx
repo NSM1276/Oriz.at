@@ -7,7 +7,7 @@ import type { Item, Section, Venue } from "@/lib/supabase/types";
 
 export const revalidate = 0;
 
-const DEMO_VENUE_ID = "47dfcb88-86af-4a94-b749-bbb3d920a911";
+const DEMO_VENUE_ID = "9019d1cf-f1af-482f-9673-2a78846fa405";
 
 type VenueRow = Venue & {
   sections: (Section & { items: Item[] })[];

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const DEMO_VENUE_ID = "47dfcb88-86af-4a94-b749-bbb3d920a911";
+const DEMO_VENUE_ID = "9019d1cf-f1af-482f-9673-2a78846fa405";
 const ALLOWED_FIELDS = ["price_cents", "is_active", "description", "ai_caption", "allergens"] as const;
 type AllowedField = (typeof ALLOWED_FIELDS)[number];
 
