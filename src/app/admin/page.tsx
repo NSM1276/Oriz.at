@@ -5,6 +5,7 @@ import { ItemEditor } from "@/components/admin/ItemEditor";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
 import { SuperAdminView } from "@/components/admin/SuperAdminView";
+import { QRCodeBlock } from "@/components/admin/QRCodeBlock";
 import { limitForPlan } from "@/lib/plans";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
@@ -132,6 +133,8 @@ export default async function AdminPage() {
             </div>
           </div>
         )}
+
+        {venue && <QRCodeBlock slug={venue.slug} />}
 
         {!venue ? (
           <div className="border border-dashed p-10 text-center" style={{ borderColor: border }}>
