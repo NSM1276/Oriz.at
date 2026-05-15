@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { ContactForm } from "@/components/landing/ContactForm";
+import { HeroAtmosphere } from "@/components/landing/HeroAtmosphere";
 
 const STATS = [
   {
@@ -124,48 +125,7 @@ export default function Landing() {
     <main className="bg-parchment text-onyx overflow-x-hidden">
 
       {/* ── Hero ── */}
-      <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(198,155,60,0.07)_0%,transparent_70%)] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
-
-        <span className="font-sans text-[10px] tracking-regal uppercase text-gold mb-10 opacity-80">
-          Digitale Speisekarten · Wien · EU-gehostet
-        </span>
-
-        <h1 className="font-display text-[clamp(5rem,18vw,13rem)] font-light tracking-widest text-onyx leading-none">
-          ORIZ
-        </h1>
-
-        <div className="w-12 h-px bg-gold/40 my-10" />
-
-        <p className="font-display text-xl md:text-3xl text-onyx/65 italic max-w-2xl leading-relaxed">
-          Ihre Speisekarte — immer aktuell, in jeder Sprache,
-          <br className="hidden md:block" /> auf jedem Gerät Ihrer Gäste.
-        </p>
-
-        <div className="mt-14 flex flex-col sm:flex-row gap-4 items-center">
-          <a
-            href="#demo"
-            className="font-sans text-[11px] tracking-regal uppercase bg-onyx text-parchment px-10 py-4 hover:bg-gold hover:text-onyx transition-colors duration-300"
-          >
-            Live-Demo ansehen
-          </a>
-          <a
-            href="#kontakt"
-            className="font-sans text-[11px] tracking-regal uppercase border border-onyx/20 text-onyx/55 px-10 py-4 hover:border-gold hover:text-gold transition-colors duration-300"
-          >
-            Anfrage stellen
-          </a>
-        </div>
-
-        <a
-          href="#problem"
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 font-sans text-[10px] tracking-regal uppercase text-onyx/25 hover:text-gold transition-colors"
-          aria-label="Weiter scrollen"
-        >
-          ↓
-        </a>
-      </section>
+      <HeroAtmosphere />
 
       {/* ── Problem ── */}
       <section id="problem" className="py-28 px-6 bg-onyx text-parchment">
