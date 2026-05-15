@@ -252,31 +252,43 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
         {/* Photo */}
         <div className="mt-3 ml-0 flex items-start gap-3">
           <span
-            className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0 pt-2"
+            className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0 pt-1"
             style={{ color: 'var(--color-muted)' }}
           >
             Foto
           </span>
-          <div className="flex-1 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
             {item.image_url ? (
-              <>
+              <div className="flex flex-col gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.image_url}
                   alt={item.name}
-                  className="w-16 h-16 object-cover shrink-0"
+                  className="w-full object-cover"
+                  style={{ maxHeight: 160, maxWidth: 280 }}
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
-                <button
-                  type="button"
-                  onClick={removePhoto}
-                  disabled={photoBusy}
-                  className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
-                  style={{ border: '1px solid var(--color-dim)', color: 'var(--color-dim)' }}
-                >
-                  {photoBusy ? "Löscht…" : "Entfernen"}
-                </button>
-              </>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    disabled={photoBusy}
+                    className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
+                    style={{ border: '1px solid var(--color-dim)', color: 'var(--color-dim)' }}
+                  >
+                    {photoBusy ? "Lädt hoch…" : "Ändern"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={removePhoto}
+                    disabled={photoBusy}
+                    className="font-sans text-[10px] tracking-regal uppercase px-3 py-1.5 transition disabled:opacity-30"
+                    style={{ border: '1px solid var(--color-border)', color: 'var(--color-muted)' }}
+                  >
+                    {photoBusy ? "Löscht…" : "Entfernen"}
+                  </button>
+                </div>
+              </div>
             ) : (
               <button
                 type="button"
