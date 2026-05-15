@@ -8,7 +8,7 @@ import { QRModal } from "@/components/admin/QRModal";
 import { SuperAdminShell } from "@/components/admin/SuperAdminShell";
 import type { Venue } from "@/lib/supabase/types";
 
-type VenueSummary = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | "color_primary"> & {
+type VenueSummary = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | "color_primary" | "logo_url" | "instagram_url" | "google_maps_url"> & {
   plan: string;
   itemCount: number;
 };

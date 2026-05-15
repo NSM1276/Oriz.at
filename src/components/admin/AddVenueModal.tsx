@@ -10,6 +10,9 @@ type NewVenue = {
   about: string | null;
   color_bg: string | null;
   color_primary: string | null;
+  logo_url: string | null;
+  instagram_url: string | null;
+  google_maps_url: string | null;
   plan: string;
   itemCount: number;
 };
@@ -56,7 +59,7 @@ export function AddVenueModal({ open, onClose, onCreated }: Props) {
     setSaving(false);
     if (err) { setError(err.message); return; }
     if (data) {
-      onCreated({ ...data, itemCount: 0 });
+      onCreated({ ...data, logo_url: null, instagram_url: null, google_maps_url: null, itemCount: 0 });
       setName(""); setSlug(""); setAbout(""); setColorBg("#0A0A0A"); setColorPrimary("#C69B3C");
     }
   }

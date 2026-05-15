@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Venue } from "@/lib/supabase/types";
 
-type EditableVenue = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | "color_primary" | "instagram_url" | "google_maps_url"> & {
+type EditableVenue = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | "color_primary" | "logo_url" | "instagram_url" | "google_maps_url"> & {
   plan: string;
 };
 
@@ -23,6 +23,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
   const [colorBg, setColorBg] = useState("#1a1a1a");
   const [colorPrimary, setColorPrimary] = useState("#C69B3C");
   const [plan, setPlan] = useState<Plan>("trial");
+  const [logoUrl, setLogoUrl] = useState("");
   const [instagram, setInstagram] = useState("");
   const [googleMaps, setGoogleMaps] = useState("");
   const [saving, setSaving] = useState(false);
@@ -35,6 +36,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
       setColorBg(venue.color_bg ?? "#1a1a1a");
       setColorPrimary(venue.color_primary ?? "#C69B3C");
       setPlan((venue.plan as Plan) ?? "trial");
+      setLogoUrl(venue.logo_url ?? "");
       setInstagram(venue.instagram_url ?? "");
       setGoogleMaps(venue.google_maps_url ?? "");
       setError(null);
@@ -53,6 +55,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
         about: about || null,
         color_bg: colorBg,
         color_primary: colorPrimary,
+        logo_url: logoUrl || null,
         plan,
         instagram_url: instagram || null,
         google_maps_url: googleMaps || null,
@@ -62,7 +65,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
     if (err) {
       setError(err.message);
     } else {
-      onSaved({ ...venue, name, about, color_bg: colorBg, color_primary: colorPrimary, plan, instagram_url: instagram || null, google_maps_url: googleMaps || null });
+      onSaved({ ...venue, name, about, color_bg: colorBg, color_primary: colorPrimary, logo_url: logoUrl || null, plan, instagram_url: instagram || null, google_maps_url: googleMaps || null });
     }
   }
 
@@ -141,6 +144,28 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
             <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">About</label>
             <textarea value={about} onChange={e => setAbout(e.target.value)} rows={2}
               className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold resize-none" />
+          </div>
+
+          {/* Logo URL */}
+          <div className="border-t border-onyx/10 pt-6">
+            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-1">Logo URL</label>
+            <p className="font-sans text-[10px] text-onyx/30 mb-2">
+              SVG aus Supabase Storage einfügen. Leer lassen = Restaurantname wird angezeigt.
+            </p>
+            <input
+              type="url"
+              value={logoUrl}
+              onChange={e => setLogoUrl(e.target.value)}
+              className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
+              placeholder="https://…/logos/restaurant.svg"
+            />
+            {logoUrl && (
+              <div className="mt-2 flex items-center gap-2 p-2 border border-onyx/10 bg-onyx/5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logoUrl} alt="Logo preview" className="h-8 w-auto max-w-[120px] object-contain" />
+                <span className="font-sans text-[10px] text-onyx/40">Vorschau</span>
+              </div>
+            )}
           </div>
 
           {/* Social links */}
