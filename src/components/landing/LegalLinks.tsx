@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useT } from "@/lib/locale-context";
+import type { Locale } from "@/lib/i18n";
 
 type Section = { heading: string; body: string };
 type Doc = { title: string; sections: Section[] };
 
-const IMPRESSUM: Doc = {
+const IMPRESSUM_DE: Doc = {
   title: "Impressum",
   sections: [
     {
@@ -32,7 +34,33 @@ const IMPRESSUM: Doc = {
   ],
 };
 
-const DATENSCHUTZ: Doc = {
+const IMPRESSUM_EN: Doc = {
+  title: "Imprint",
+  sections: [
+    {
+      heading: "Pursuant to § 5 ECG",
+      body: "Nasim Nuridinov e.U\nTscherttegasse 39, 1120 Vienna, Austria\nEmail: office@oriz.at\nPhone: +43 677 64292055",
+    },
+    {
+      heading: "Business activity",
+      body: "Web Design & Web Development",
+    },
+    {
+      heading: "VAT number",
+      body: "ATU80802758",
+    },
+    {
+      heading: "Supervisory authority",
+      body: "Magistrat der Stadt Wien · Member of WKO Wien",
+    },
+    {
+      heading: "Disclaimer",
+      body: "All content on this website has been carefully created. No guarantee is given for the accuracy, completeness or timeliness of the information provided.",
+    },
+  ],
+};
+
+const DATENSCHUTZ_DE: Doc = {
   title: "Datenschutzerklärung",
   sections: [
     {
@@ -56,6 +84,37 @@ const DATENSCHUTZ: Doc = {
       body: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenübertragbarkeit. Beschwerden können bei der Österreichischen Datenschutzbehörde (dsb.gv.at) eingereicht werden.",
     },
   ],
+};
+
+const DATENSCHUTZ_EN: Doc = {
+  title: "Privacy Policy",
+  sections: [
+    {
+      heading: "Controller under GDPR",
+      body: "Nasim Nuridinov e.U, Tscherttegasse 39, 1120 Vienna\nEmail: office@oriz.at",
+    },
+    {
+      heading: "What data we process",
+      body: "This website does not collect personal data through forms or tracking. No cookies are set.\n\nlocalStorage is used exclusively to remember your language preference (DE/EN). This is a technically necessary function and requires no consent (§ 25 (2) TDSG).",
+    },
+    {
+      heading: "Fonts (self-hosted)",
+      body: "This website uses the fonts Inter Tight and Instrument Serif, loaded exclusively from our own server. No data is transferred to third parties.",
+    },
+    {
+      heading: "Contact by email or phone",
+      body: "If you contact us by email or phone, your details will be used to process your enquiry and will not be passed on to third parties. Legal basis: Art. 6(1)(b) GDPR.",
+    },
+    {
+      heading: "Your rights",
+      body: "You have the right to access, rectification, erasure, restriction of processing and data portability. Complaints may be lodged with the Austrian Data Protection Authority (dsb.gv.at).",
+    },
+  ],
+};
+
+const DOCS: Record<Locale, { impressum: Doc; datenschutz: Doc }> = {
+  de: { impressum: IMPRESSUM_DE, datenschutz: DATENSCHUTZ_DE },
+  en: { impressum: IMPRESSUM_EN, datenschutz: DATENSCHUTZ_EN },
 };
 
 function Modal({ doc, onClose }: { doc: Doc; onClose: () => void }) {
@@ -92,7 +151,7 @@ function Modal({ doc, onClose }: { doc: Doc; onClose: () => void }) {
           <button
             onClick={onClose}
             className="font-sans text-[10px] tracking-regal uppercase text-parchment/30 hover:text-gold transition-colors"
-            aria-label="Schließen"
+            aria-label="Close"
           >
             ✕
           </button>
@@ -118,7 +177,10 @@ function Modal({ doc, onClose }: { doc: Doc; onClose: () => void }) {
 }
 
 export function LegalLinks() {
+  const { locale, t } = useT();
   const [open, setOpen] = useState<"impressum" | "datenschutz" | null>(null);
+
+  const docs = DOCS[locale];
 
   return (
     <>
@@ -127,21 +189,21 @@ export function LegalLinks() {
           onClick={() => setOpen("impressum")}
           className="font-sans text-[10px] tracking-regal uppercase text-parchment/20 hover:text-gold transition-colors"
         >
-          Impressum
+          {t.legal.impressum}
         </button>
         <button
           onClick={() => setOpen("datenschutz")}
           className="font-sans text-[10px] tracking-regal uppercase text-parchment/20 hover:text-gold transition-colors"
         >
-          Datenschutz
+          {t.legal.datenschutz}
         </button>
       </div>
 
       {open === "impressum" && (
-        <Modal doc={IMPRESSUM} onClose={() => setOpen(null)} />
+        <Modal doc={docs.impressum} onClose={() => setOpen(null)} />
       )}
       {open === "datenschutz" && (
-        <Modal doc={DATENSCHUTZ} onClose={() => setOpen(null)} />
+        <Modal doc={docs.datenschutz} onClose={() => setOpen(null)} />
       )}
     </>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useT } from "@/lib/locale-context";
 
 // ── slides ──────────────────────────────────────────────────────────────────
 const SLIDES = [
@@ -49,29 +50,30 @@ function Corner({ pos }: CornerProps) {
 
 // ── main component ────────────────────────────────────────────────────────────
 export function HeroAtmosphere() {
+  const { t } = useT();
   const [slide,   setSlide]   = useState(0);
   const [word,    setWord]    = useState(0);
   const [wordIn,  setWordIn]  = useState(true);
 
   // image cycling
   useEffect(() => {
-    const t = setInterval(
+    const timer = setInterval(
       () => setSlide(s => (s + 1) % SLIDES.length),
       SLIDE_MS,
     );
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, []);
 
   // word cycling: fade-out → swap → fade-in
   useEffect(() => {
-    const t = setInterval(() => {
+    const timer = setInterval(() => {
       setWordIn(false);
       setTimeout(() => {
         setWord(w => (w + 1) % WORDS.length);
         setWordIn(true);
       }, FADE_MS);
     }, SLIDE_MS);
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, []);
 
   return (
@@ -128,7 +130,7 @@ export function HeroAtmosphere() {
             letterSpacing: "0.32em",
           }}
         >
-          Digitale Speisekarten · Wien
+          {t.hero.eyebrow}
         </span>
 
         {/* wordmark */}
@@ -181,7 +183,7 @@ export function HeroAtmosphere() {
             lineHeight: 1.75,
           }}
         >
-          Immer aktuell. In jeder Sprache.
+          {t.hero.slogan}
         </p>
 
         {/* CTA buttons */}
@@ -195,7 +197,7 @@ export function HeroAtmosphere() {
               letterSpacing: "0.2em",
             }}
           >
-            Live-Demo ansehen
+            {t.hero.ctaDemo}
           </a>
           <a
             href="#kontakt"
@@ -207,7 +209,7 @@ export function HeroAtmosphere() {
               letterSpacing: "0.2em",
             }}
           >
-            Anfrage stellen
+            {t.hero.ctaContact}
           </a>
         </div>
       </div>
@@ -221,7 +223,7 @@ export function HeroAtmosphere() {
           <button
             key={i}
             onClick={() => setSlide(i)}
-            aria-label={`Bild ${i + 1}`}
+            aria-label={`${i + 1}`}
             style={{
               width:           i === slide ? "clamp(18px, 2.5vw, 28px)" : "5px",
               height:          "1px",

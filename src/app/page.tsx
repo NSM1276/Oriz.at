@@ -1,145 +1,57 @@
+"use client";
+
 import Link from "next/link";
 import { Suspense } from "react";
 import { ContactForm } from "@/components/landing/ContactForm";
 import { HeroAtmosphere } from "@/components/landing/HeroAtmosphere";
 import { LegalLinks } from "@/components/landing/LegalLinks";
+import { LocaleProvider } from "@/lib/locale-context";
+import { LanguageSwitcher } from "@/components/landing/LanguageSwitcher";
+import { useT } from "@/lib/locale-context";
 
-const STATS = [
-  {
-    stat: "< 1 s",
-    label: "Sofort live",
-    body: "Preis ändern, Gericht ausverkauft markieren — Ihre Gäste sehen es in Echtzeit. Kein Drucker, kein Laminator.",
-  },
-  {
-    stat: "20+",
-    label: "Sprachen",
-    body: "Deutsch, Englisch, Russisch, Arabisch, Türkisch und mehr. Das Menü erkennt die Sprache des Gastes automatisch.",
-  },
-  {
-    stat: "0",
-    label: "Apps nötig",
-    body: "Gäste öffnen das Menü direkt im Browser — ohne Download, ohne Anmeldung, ohne Wartezeit.",
-  },
-  {
-    stat: "100%",
-    label: "Ihre Marke",
-    body: "Ihre Farben, Ihr Logo, Ihre Schrift. Kein fremdes Branding auf Ihrer Karte — nur Ihr Restaurant.",
-  },
+const DEMO_SLUGS = [
+  { slug: "belvedere", bg: "#1C1208", accent: "#C8963E", name: "Trattoria Belvedere", isAdmin: false },
+  { slug: "demo",      bg: "#0A0A0A", accent: "#C69B3C", name: "Admin-Panel",         isAdmin: true  },
 ];
 
-const STEPS = [
-  {
-    n: "01",
-    title: "Zugang erhalten",
-    body: "Schreiben Sie uns — wir richten Ihr persönliches Restaurant-Konto ein und senden Ihnen die Zugangsdaten.",
-  },
-  {
-    n: "02",
-    title: "Menü befüllen",
-    body: "Gerichte, Preise, Kategorien — alles in wenigen Minuten direkt im Browser. Kein Techniker, keine Agentur.",
-  },
-  {
-    n: "03",
-    title: "Link teilen & fertig",
-    body: "Ihren persönlichen Menü-Link auf den Tisch, ins Fenster oder in die Instagram-Bio — ab sofort immer aktuell.",
-  },
+const PLAN_META = [
+  { plan: "trial",   accent: false },
+  { plan: "starter", accent: true  },
+  { plan: "pro",     accent: false },
+] as const;
+
+const LANG_GRID = [
+  { lang: "DE", name: "Deutsch" },
+  { lang: "EN", name: "English" },
+  { lang: "RU", name: "Русский" },
+  { lang: "AR", name: "العربية" },
+  { lang: "TR", name: "Türkçe" },
+  { lang: "FR", name: "Français" },
+  { lang: "IT", name: "Italiano" },
+  { lang: "ES", name: "Español" },
+  { lang: "JA", name: "日本語" },
+  { lang: "ZH", name: "中文" },
+  { lang: "PL", name: "Polski" },
+  { lang: "UK", name: "Українська" },
 ];
 
-const PLANS = [
-  {
-    name: "Trial",
-    price: "14 Tage",
-    sub: "kostenlos — alle Funktionen",
-    badge: null,
-    features: [
-      "Alle Starter-Funktionen inklusive",
-      "Keine Kreditkarte nötig",
-      "Kein Vertrag, jederzeit kündbar",
-      "Persönlicher Onboarding-Support",
-    ],
-    cta: "Kostenlos testen",
-    plan: "trial",
-    accent: false,
-  },
-  {
-    name: "Starter",
-    price: "€ 29",
-    sub: "pro Monat",
-    badge: "Empfohlen",
-    features: [
-      "1 Menü · unbegrenzte Gerichte",
-      "Echtzeit-Updates",
-      "Persönlicher Menü-Link",
-      "Instagram & Maps Verlinkung",
-      "Eigene Farben & Logo",
-      "20+ Sprachen automatisch",
-    ],
-    cta: "Starter wählen",
-    plan: "starter",
-    accent: true,
-  },
-  {
-    name: "Pro",
-    price: "€ 59",
-    sub: "pro Monat",
-    badge: null,
-    features: [
-      "Mehrere Standorte oder Karten",
-      "Unbegrenzte Gerichte",
-      "Echtzeit-Updates",
-      "20+ Sprachen automatisch",
-      "Erweiterte Seiten (bald)",
-      "Post-Assistent (bald)",
-      "Priority Support",
-    ],
-    cta: "Pro wählen",
-    plan: "pro",
-    accent: false,
-  },
-];
+function LandingContent() {
+  const { t } = useT();
 
-const DEMO_VENUES = [
-  {
-    slug:   "belvedere",
-    name:   "Trattoria Belvedere",
-    type:   "Gästeansicht · So sehen Ihre Gäste das Menü",
-    items:  "33 Gerichte",
-    bg:     "#1C1208",
-    accent: "#C8963E",
-    cta:    "Menü öffnen",
-    isAdmin: false,
-  },
-  {
-    slug:   "demo",
-    name:   "Admin-Panel",
-    type:   "Ihre Ansicht · Preise, Verfügbarkeit, Texte",
-    items:  "Live · Änderungen sofort sichtbar",
-    bg:     "#0A0A0A",
-    accent: "#C69B3C",
-    cta:    "Ausprobieren",
-    isAdmin: true,
-  },
-];
+  // Merge translation plan strings with hardcoded plan metadata
+  const plans = PLAN_META.map((meta, i) => ({
+    ...meta,
+    ...t.pricing.plans[i],
+  }));
 
-const TESTIMONIALS = [
-  {
-    quote: "Endlich kein Drucker mehr. Preis geändert, und zwei Sekunden später war es auf dem Tisch.",
-    name: "M. H.",
-    role: "Gastronom, Wien",
-  },
-  {
-    quote: "Unsere russischen Gäste haben das Menü sofort auf Russisch gelesen — ohne dass wir etwas tun mussten.",
-    name: "A. K.",
-    role: "Restaurant-Inhaberin, Wien",
-  },
-  {
-    quote: "Das sieht hochwertiger aus als jede gedruckte Karte, die wir je hatten.",
-    name: "T. B.",
-    role: "Café-Betreiber, Wien",
-  },
-];
+  // Merge translation venue strings with hardcoded slug/bg/accent/name/isAdmin
+  const demoVenues = DEMO_SLUGS.map((slug, i) => ({
+    ...slug,
+    type:  t.demo.venues[i].type,
+    items: t.demo.venues[i].items,
+    cta:   t.demo.venues[i].cta,
+  }));
 
-export default function Landing() {
   return (
     <main className="bg-parchment text-onyx overflow-x-hidden">
 
@@ -150,31 +62,17 @@ export default function Landing() {
       <section id="problem" className="py-28 px-6 bg-onyx text-parchment">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Die Realität</span>
+            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.problem.eyebrow}</span>
             <h2 className="font-display text-4xl md:text-5xl mt-6 font-light leading-tight">
-              Papier altert.<br />Websites schimmeln.<br />Gäste warten.
+              {t.problem.heading.split("\n").map((line, i) => (
+                <span key={i}>{line}{i < t.problem.heading.split("\n").length - 1 && <br />}</span>
+              ))}
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-8 text-center">
-            {[
-              {
-                icon: "✕",
-                title: "Gedruckte Karte",
-                body: "Preise ändern sich, die Karte bleibt alt. Jede Aktualisierung kostet Zeit, Geld und einen Weg zur Druckerei.",
-              },
-              {
-                icon: "✕",
-                title: "PDF auf der Website",
-                body: "Schwer lesbar auf dem Handy. Nicht aktuell. Gäste finden es kaum — und sehen dann die falschen Preise.",
-              },
-              {
-                icon: "✕",
-                title: "Fremde Plattformen",
-                body: "Ihr Restaurant in einem System mit hundert anderen — fremdes Design, fremdes Branding, Ihr Name irgendwo dazwischen.",
-              },
-            ].map(({ icon, title, body }) => (
+            {t.problem.cards.map(({ title, body }) => (
               <div key={title} className="border border-parchment/8 p-8">
-                <div className="font-display text-3xl text-parchment/15 mb-4">{icon}</div>
+                <div className="font-display text-3xl text-parchment/15 mb-4">✕</div>
                 <h3 className="font-sans text-[10px] tracking-regal uppercase text-parchment/40 mb-3">{title}</h3>
                 <p className="font-display text-sm text-parchment/50 italic leading-relaxed">{body}</p>
               </div>
@@ -183,7 +81,7 @@ export default function Landing() {
           <div className="text-center mt-16">
             <div className="w-12 h-px bg-gold/40 mx-auto mb-6" />
             <p className="font-display text-2xl md:text-3xl text-parchment/70 italic">
-              Es gibt einen anderen Weg.
+              {t.problem.outro}
             </p>
           </div>
         </div>
@@ -193,13 +91,13 @@ export default function Landing() {
       <section id="warum" className="py-28 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-20">
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Warum ORIZ</span>
+            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.stats.eyebrow}</span>
             <h2 className="font-display text-4xl md:text-5xl mt-6 font-light">
-              Was Ihre Gäste verdienen
+              {t.stats.heading}
             </h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {STATS.map(({ stat, label, body }) => (
+            {t.stats.items.map(({ stat, label, body }) => (
               <div key={label} className="border-t border-gold/25 pt-6">
                 <div className="font-display text-5xl md:text-6xl font-light text-gold mb-2">{stat}</div>
                 <div className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 mb-4">{label}</div>
@@ -214,17 +112,16 @@ export default function Landing() {
       <section id="demo" className="py-32 px-6 bg-onyx/[0.025] border-t border-onyx/6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Live-Demo</span>
+            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.demo.eyebrow}</span>
             <h2 className="font-display text-4xl md:text-5xl mt-6 font-light">
-              Zwei Perspektiven. Ein System.
+              {t.demo.heading}
             </h2>
             <p className="font-sans text-sm text-onyx/40 mt-4 max-w-md mx-auto leading-relaxed">
-              Links: was Ihr Gast sieht. Rechts: was Sie als Inhaber steuern.
-              Beides live — klicken Sie rein.
+              {t.demo.sub}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-            {DEMO_VENUES.map(({ slug, name, type, items, bg, accent, cta, isAdmin }) => (
+            {demoVenues.map(({ slug, name, type, items, bg, accent, cta, isAdmin }) => (
               <a
                 key={slug}
                 href={isAdmin ? "/demo" : `/${slug}`}
@@ -289,7 +186,7 @@ export default function Landing() {
             ))}
           </div>
           <p className="text-center font-sans text-[10px] text-onyx/25 mt-8 tracking-wide uppercase">
-            Demo-Daten · frei erfunden · Änderungen täglich zurückgesetzt
+            {t.demo.disclaimer}
           </p>
         </div>
       </section>
@@ -299,35 +196,20 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
-              <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Mehrsprachigkeit</span>
+              <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.languages.eyebrow}</span>
               <h2 className="font-display text-4xl md:text-5xl mt-6 mb-8 font-light leading-tight">
-                Jeder Gast liest in seiner Sprache
+                {t.languages.heading}
               </h2>
               <div className="w-10 h-px bg-gold/40 mb-8" />
               <p className="font-display text-lg text-parchment/60 italic leading-relaxed mb-6">
-                Wien ist international. Ihre Gäste kommen aus aller Welt —
-                aus Russland, aus der Türkei, aus dem arabischen Raum, aus Japan.
+                {t.languages.body1}
               </p>
               <p className="font-display text-lg text-parchment/60 italic leading-relaxed">
-                ORIZ erkennt automatisch die Sprache des Geräts und zeigt das Menü
-                entsprechend an. Kein Aufwand für Sie. Kein Rätselraten für den Gast.
+                {t.languages.body2}
               </p>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              {[
-                { lang: "DE", name: "Deutsch" },
-                { lang: "EN", name: "English" },
-                { lang: "RU", name: "Русский" },
-                { lang: "AR", name: "العربية" },
-                { lang: "TR", name: "Türkçe" },
-                { lang: "FR", name: "Français" },
-                { lang: "IT", name: "Italiano" },
-                { lang: "ES", name: "Español" },
-                { lang: "JA", name: "日本語" },
-                { lang: "ZH", name: "中文" },
-                { lang: "PL", name: "Polski" },
-                { lang: "UK", name: "Українська" },
-              ].map(({ lang, name }) => (
+              {LANG_GRID.map(({ lang, name }) => (
                 <div key={lang} className="border border-parchment/8 p-3 text-center">
                   <div className="font-sans text-[10px] tracking-regal uppercase text-gold mb-1">{lang}</div>
                   <div className="font-display text-xs text-parchment/40">{name}</div>
@@ -335,7 +217,7 @@ export default function Landing() {
               ))}
               <div className="col-span-3 border border-parchment/8 p-3 text-center">
                 <div className="font-sans text-[10px] tracking-regal uppercase text-parchment/25">
-                  + weitere Sprachen auf Anfrage
+                  {t.languages.more}
                 </div>
               </div>
             </div>
@@ -347,11 +229,11 @@ export default function Landing() {
       <section className="py-28 px-6 border-t border-onyx/6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Stimmen</span>
-            <h2 className="font-display text-4xl md:text-5xl mt-6 font-light">Was Gastronomen sagen</h2>
+            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.testimonials.eyebrow}</span>
+            <h2 className="font-display text-4xl md:text-5xl mt-6 font-light">{t.testimonials.heading}</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            {TESTIMONIALS.map(({ quote, name, role }) => (
+            {t.testimonials.items.map(({ quote, name, role }) => (
               <div key={name} className="border-t border-gold/20 pt-6">
                 <p className="font-display text-base text-onyx/65 italic leading-relaxed mb-6">
                   &ldquo;{quote}&rdquo;
@@ -369,31 +251,16 @@ export default function Landing() {
       {/* ── Philosophie ── */}
       <section className="py-24 px-6 bg-onyx/[0.025] border-t border-onyx/6">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Philosophie</span>
+          <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.philosophy.eyebrow}</span>
           <h2 className="font-display text-4xl md:text-5xl mt-6 mb-8 font-light">
-            So elegant wie Ihr Restaurant
+            {t.philosophy.heading}
           </h2>
           <div className="w-12 h-px bg-gold/40 mx-auto mb-10" />
           <p className="font-display text-xl md:text-2xl text-onyx/60 italic leading-relaxed mb-14">
-            Spitzengastronomie verdient eine Oberfläche, die so verfeinert ist
-            wie das Erlebnis selbst. ORIZ ist unauffällig — damit Ihr Restaurant
-            im Mittelpunkt steht.
+            {t.philosophy.body}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-left">
-            {[
-              {
-                label: "EU-gehostet",
-                body: "Server in Frankfurt. DSGVO-konform von Anfang an. Kein Cookie-Banner nötig.",
-              },
-              {
-                label: "Eigene Marke",
-                body: "Ihre Farben, Ihr Logo, Ihr Stil. Kein fremdes Branding für den Gast — nur Ihr Restaurant.",
-              },
-              {
-                label: "Immer aktuell",
-                body: "Saisonkarte? Preiserhöhung? Ein Klick im Admin-Panel — sofort live für alle Gäste.",
-              },
-            ].map(({ label, body }) => (
+            {t.philosophy.points.map(({ label, body }) => (
               <div key={label} className="border-l-2 border-gold/30 pl-5">
                 <div className="font-sans text-[10px] tracking-regal uppercase text-gold mb-2">{label}</div>
                 <p className="font-display text-sm text-onyx/55 italic leading-relaxed">{body}</p>
@@ -407,13 +274,13 @@ export default function Landing() {
       <section className="py-28 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">In 3 Schritten</span>
+            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.steps.eyebrow}</span>
             <h2 className="font-display text-4xl md:text-5xl mt-6 font-light">
-              Heute bestellt — morgen live
+              {t.steps.heading}
             </h2>
           </div>
           <div className="grid md:grid-cols-3 gap-10">
-            {STEPS.map(({ n, title, body }) => (
+            {t.steps.items.map(({ n, title, body }) => (
               <div key={n}>
                 <div className="font-display text-7xl font-light text-gold/12 leading-none mb-4">{n}</div>
                 <h3 className="font-sans text-[11px] tracking-regal uppercase text-onyx mb-3">{title}</h3>
@@ -428,30 +295,16 @@ export default function Landing() {
       <section className="py-28 px-6 bg-onyx text-parchment">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Bald verfügbar</span>
+            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.soon.eyebrow}</span>
             <h2 className="font-display text-4xl md:text-5xl mt-6 mb-6 font-light">
-              Mehr als eine Speisekarte
+              {t.soon.heading}
             </h2>
             <p className="font-display text-xl text-parchment/55 italic max-w-2xl mx-auto">
-              ORIZ wächst mit Ihrem Restaurant — kleine, nützliche Erweiterungen,
-              die echten Aufwand sparen.
+              {t.soon.sub}
             </p>
           </div>
           <div className="grid sm:grid-cols-3 gap-5">
-            {[
-              {
-                title: "Post-Assistent",
-                body: "Foto ins System laden — ORIZ formuliert einen fertigen Instagram-Text auf Basis Ihres Tagesgerichts. Sie posten, wann Sie möchten.",
-              },
-              {
-                title: "Erweiterte Seiten",
-                body: "Neben dem Menü: eine Seite über Ihr Restaurant, Öffnungszeiten, Team, saisonale Angebote. Ein kleiner Auftritt, der für Sie arbeitet.",
-              },
-              {
-                title: "Foto-Aufwertung",
-                body: "Handyfoto eines Gerichts hochladen — ORIZ liefert eine aufgewertete Version für Ihre digitale Karte. Kein Fotograf nötig.",
-              },
-            ].map(({ title, body }) => (
+            {t.soon.items.map(({ title, body }) => (
               <div key={title} className="border border-parchment/10 p-7">
                 <div className="w-4 h-px bg-gold/50 mb-5" />
                 <h3 className="font-sans text-[11px] tracking-regal uppercase text-parchment mb-3">{title}</h3>
@@ -466,14 +319,14 @@ export default function Landing() {
       <section id="preise" className="py-32 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Preise</span>
+            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.pricing.eyebrow}</span>
             <h2 className="font-display text-4xl md:text-5xl mt-6 font-light">
-              Transparent. Ohne Überraschungen.
+              {t.pricing.heading}
             </h2>
-            <p className="font-sans text-sm text-onyx/40 mt-4">Monatlich kündbar. Keine Einrichtungsgebühr.</p>
+            <p className="font-sans text-sm text-onyx/40 mt-4">{t.pricing.sub}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PLANS.map(({ name, price, sub, badge, features, cta, plan, accent }) => (
+            {plans.map(({ name, price, sub, badge, features, cta, plan, accent }) => (
               <div
                 key={name}
                 className={`border p-8 flex flex-col ${
@@ -495,7 +348,7 @@ export default function Landing() {
                   {sub}
                 </div>
                 <ul className="flex-1 space-y-3 mb-10">
-                  {features.map((f) => (
+                  {(features as readonly string[]).map((f) => (
                     <li key={f} className={`font-sans text-xs flex items-start gap-2 ${accent ? "text-parchment/65" : "text-onyx/55"}`}>
                       <span className="text-gold mt-0.5 shrink-0">—</span>
                       {f}
@@ -516,7 +369,7 @@ export default function Landing() {
             ))}
           </div>
           <p className="text-center font-sans text-[10px] text-onyx/25 mt-8 tracking-wide uppercase">
-            Alle Preise exkl. MwSt. · Monatlich kündbar · Keine Einrichtungsgebühr
+            {t.pricing.disclaimer}
           </p>
         </div>
       </section>
@@ -524,13 +377,13 @@ export default function Landing() {
       {/* ── Kontakt ── */}
       <section id="kontakt" className="py-32 px-6 bg-onyx text-parchment">
         <div className="max-w-xl mx-auto text-center">
-          <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Kontakt</span>
+          <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.contact.eyebrow}</span>
           <h2 className="font-display text-4xl md:text-5xl mt-6 mb-4 font-light">
-            ORIZ an Ihren Tisch bringen
+            {t.contact.heading}
           </h2>
           <div className="w-12 h-px bg-gold/40 mx-auto mb-4" />
           <p className="font-display text-lg text-parchment/50 italic mb-12">
-            Schreiben Sie uns — wir melden uns innerhalb von 24 Stunden.
+            {t.contact.body}
           </p>
           <Suspense fallback={null}>
             <ContactForm />
@@ -543,7 +396,7 @@ export default function Landing() {
               rel="noreferrer"
               className="font-sans text-[10px] tracking-regal uppercase text-parchment/25 hover:text-gold transition-colors"
             >
-              oder direkt auf WhatsApp schreiben →
+              {t.contact.whatsapp}
             </a>
             <div className="w-8 h-px bg-parchment/10" />
           </div>
@@ -551,7 +404,7 @@ export default function Landing() {
             href="/admin"
             className="mt-16 inline-block font-sans text-[10px] tracking-regal uppercase text-parchment/20 border-b border-parchment/10 pb-1 hover:text-gold hover:border-gold transition-colors"
           >
-            Restaurant-Login →
+            {t.contact.adminLink}
           </Link>
         </div>
       </section>
@@ -560,15 +413,10 @@ export default function Landing() {
       <footer className="py-10 border-t border-parchment/8 bg-onyx">
         <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-sans text-[10px] tracking-regal uppercase text-parchment/20">
-            © {new Date().getFullYear()} ORIZ · Wien · DSGVO-konform · EU-gehostet
+            © {new Date().getFullYear()} ORIZ · {t.footer.copy}
           </p>
           <div className="flex gap-6">
-            {[
-              { href: "#warum", label: "Warum" },
-              { href: "#demo", label: "Demo" },
-              { href: "#preise", label: "Preise" },
-              { href: "#kontakt", label: "Kontakt" },
-            ].map(({ href, label }) => (
+            {t.footer.nav.map(({ href, label }) => (
               <a key={href} href={href} className="font-sans text-[10px] tracking-regal uppercase text-parchment/20 hover:text-gold transition-colors">
                 {label}
               </a>
@@ -581,5 +429,14 @@ export default function Landing() {
       </footer>
 
     </main>
+  );
+}
+
+export default function Landing() {
+  return (
+    <LocaleProvider>
+      <LanguageSwitcher />
+      <LandingContent />
+    </LocaleProvider>
   );
 }

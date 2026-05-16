@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/locale-context";
 
 type State = {
   step: number;
@@ -19,13 +20,7 @@ type State = {
   phone: string;
 };
 
-const VENUE_TYPES = ["Restaurant", "Café", "Bar", "Hotel", "Imbiss / Bistro", "Andere"];
-const TABLES = ["1 – 10 Tische", "11 – 25 Tische", "26 – 50 Tische", "Mehr als 50"];
-const DISHES = ["Bis zu 20 Gerichte", "20 – 50 Gerichte", "50 – 100 Gerichte", "Mehr als 100"];
-const LANGUAGES = ["Nur Deutsch", "Deutsch & Englisch", "3 oder mehr Sprachen"];
-const PLANS = ["Trial (14 Tage kostenlos)", "Starter (€ 29 / Monat)", "Pro (€ 59 / Monat)", "Noch nicht sicher"];
-
-function ChipGroup({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
+function ChipGroup({ options, value, onChange }: { options: readonly string[]; value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex flex-wrap gap-2 mt-2">
       {options.map((opt) => (
@@ -46,13 +41,11 @@ function ChipGroup({ options, value, onChange }: { options: string[]; value: str
   );
 }
 
-const STEPS = ["Ihr Lokal", "Ihr Menü", "Kontakt"];
-
-function StepIndicator({ current }: { current: number }) {
+function StepIndicator({ current, steps }: { current: number; steps: readonly string[] }) {
   return (
     <div className="flex items-center gap-3 mb-10">
-      {STEPS.map((label, i) => (
-        <div key={label} className="flex items-center gap-3">
+      {steps.map((label, i) => (
+        <div key={i} className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span
               className={`w-5 h-5 flex items-center justify-center font-sans text-[10px] border transition-colors ${
@@ -71,7 +64,7 @@ function StepIndicator({ current }: { current: number }) {
               {label}
             </span>
           </div>
-          {i < STEPS.length - 1 && (
+          {i < steps.length - 1 && (
             <div className={`w-8 h-px transition-colors ${i < current ? "bg-gold/50" : "bg-parchment/10"}`} />
           )}
         </div>
@@ -82,6 +75,7 @@ function StepIndicator({ current }: { current: number }) {
 
 export function ContactForm() {
   const searchParams = useSearchParams();
+  const { t } = useT();
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [fileName, setFileName] = useState<string | null>(null);
   const [state, setState] = useState<State>({
@@ -90,19 +84,32 @@ export function ContactForm() {
     tables: "",
     dishes: "",
     languages: "",
-    plan: "Noch nicht sicher",
+    plan: t.form.plans[3],
     restaurant: "",
     name: "",
     email: "",
     phone: "",
   });
 
+  // Reset plan default when locale changes
+  useEffect(() => {
+    setState(s => ({
+      ...s,
+      plan: t.form.plans[3],
+      venueType: "",
+      tables: "",
+      dishes: "",
+      languages: "",
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
+
   useEffect(() => {
     const p = searchParams.get("plan");
-    if (p === "trial") setState((s) => ({ ...s, plan: "Trial (14 Tage kostenlos)" }));
-    else if (p === "starter") setState((s) => ({ ...s, plan: "Starter (€ 29 / Monat)" }));
-    else if (p === "pro") setState((s) => ({ ...s, plan: "Pro (€ 59 / Monat)" }));
-  }, [searchParams]);
+    if (p === "trial")   setState(s => ({ ...s, plan: t.form.plans[0] }));
+    if (p === "starter") setState(s => ({ ...s, plan: t.form.plans[1] }));
+    if (p === "pro")     setState(s => ({ ...s, plan: t.form.plans[2] }));
+  }, [searchParams, t]);
 
   const set = (key: keyof State, value: string) => setState((s) => ({ ...s, [key]: value }));
 
@@ -147,9 +154,9 @@ export function ContactForm() {
     return (
       <div className="text-center py-12">
         <div className="w-10 h-px bg-gold/50 mx-auto mb-8" />
-        <p className="font-display text-3xl text-parchment/80 italic mb-3">Vielen Dank.</p>
+        <p className="font-display text-3xl text-parchment/80 italic mb-3">{t.form.success.title}</p>
         <p className="font-sans text-sm text-parchment/40 max-w-xs mx-auto leading-relaxed">
-          Wir melden uns innerhalb von 24 Stunden bei Ihnen, {state.name || state.restaurant}.
+          {t.form.success.body} {state.name || state.restaurant}.
         </p>
       </div>
     );
@@ -157,22 +164,22 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="text-left">
-      <StepIndicator current={state.step} />
+      <StepIndicator current={state.step} steps={t.form.steps} />
 
       {/* Step 1 */}
       {state.step === 0 && (
         <div className="space-y-8">
           <div>
             <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/40">
-              Art des Lokals
+              {t.form.labels.venueType}
             </label>
-            <ChipGroup options={VENUE_TYPES} value={state.venueType} onChange={(v) => set("venueType", v)} />
+            <ChipGroup options={t.form.venueTypes} value={state.venueType} onChange={(v) => set("venueType", v)} />
           </div>
           <div>
             <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/40">
-              Anzahl der Tische
+              {t.form.labels.tables}
             </label>
-            <ChipGroup options={TABLES} value={state.tables} onChange={(v) => set("tables", v)} />
+            <ChipGroup options={t.form.tables} value={state.tables} onChange={(v) => set("tables", v)} />
           </div>
         </div>
       )}
@@ -182,15 +189,15 @@ export function ContactForm() {
         <div className="space-y-8">
           <div>
             <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/40">
-              Wie viele Gerichte hat Ihre Karte?
+              {t.form.labels.dishes}
             </label>
-            <ChipGroup options={DISHES} value={state.dishes} onChange={(v) => set("dishes", v)} />
+            <ChipGroup options={t.form.dishes} value={state.dishes} onChange={(v) => set("dishes", v)} />
           </div>
           <div>
             <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/40">
-              Welche Sprachen brauchen Sie?
+              {t.form.labels.languages}
             </label>
-            <ChipGroup options={LANGUAGES} value={state.languages} onChange={(v) => set("languages", v)} />
+            <ChipGroup options={t.form.languages} value={state.languages} onChange={(v) => set("languages", v)} />
           </div>
         </div>
       )}
@@ -200,17 +207,17 @@ export function ContactForm() {
         <div className="space-y-6">
           <div>
             <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/40">
-              Gewünschtes Paket
+              {t.form.labels.plan}
             </label>
-            <ChipGroup options={PLANS} value={state.plan} onChange={(v) => set("plan", v)} />
+            <ChipGroup options={t.form.plans} value={state.plan} onChange={(v) => set("plan", v)} />
           </div>
 
           <div className="pt-4 space-y-5">
             {[
-              { key: "restaurant", label: "Restaurant / Lokal *", placeholder: "Café Sacher Wien", type: "text", required: true },
-              { key: "name", label: "Ihr Name", placeholder: "Max Mustermann", type: "text", required: false },
-              { key: "email", label: "E-Mail-Adresse *", placeholder: "chef@restaurant.at", type: "email", required: true },
-              { key: "phone", label: "Telefon (optional)", placeholder: "+43 …", type: "tel", required: false },
+              { key: "restaurant", label: t.form.labels.restaurant, placeholder: t.form.placeholders.restaurant, type: "text", required: true },
+              { key: "name", label: t.form.labels.name, placeholder: t.form.placeholders.name, type: "text", required: false },
+              { key: "email", label: t.form.labels.email, placeholder: t.form.placeholders.email, type: "email", required: true },
+              { key: "phone", label: t.form.labels.phone, placeholder: t.form.placeholders.phone, type: "tel", required: false },
             ].map(({ key, label, placeholder, type, required }) => (
               <div key={key} className="flex flex-col gap-1">
                 <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">{label}</label>
@@ -228,30 +235,30 @@ export function ContactForm() {
             {/* Website URL */}
             <div className="flex flex-col gap-1">
               <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">
-                Ihre Website (optional)
+                {t.form.labels.website}
               </label>
               <input
                 type="url"
                 name="Website"
-                placeholder="https://ihr-restaurant.at"
+                placeholder={t.form.placeholders.website}
                 className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors"
               />
               <span className="font-sans text-[10px] text-parchment/20 mt-1">
-                Falls Ihr Menü dort zu finden ist — wir übernehmen den Rest.
+                {t.form.labels.websiteHint}
               </span>
             </div>
 
             {/* PDF upload */}
             <div className="flex flex-col gap-2">
               <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">
-                Menü als PDF (optional)
+                {t.form.labels.pdf}
               </label>
               <label className="flex items-center gap-4 border border-dashed border-parchment/15 px-5 py-4 cursor-pointer hover:border-parchment/30 transition-colors group">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-parchment/30 group-hover:text-parchment/50 transition-colors">
                   <path d="M8 1v9M4 6l4-4 4 4M2 13h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <span className={`font-sans text-xs transition-colors ${fileName ? "text-gold" : "text-parchment/30 group-hover:text-parchment/50"}`}>
-                  {fileName ?? "PDF auswählen oder hierher ziehen"}
+                  {fileName ?? t.form.labels.pdfPlaceholder}
                 </span>
                 <input
                   type="file"
@@ -262,7 +269,7 @@ export function ContactForm() {
                 />
               </label>
               <span className="font-sans text-[10px] text-parchment/20">
-                Max. 5 MB · Wird direkt an uns übermittelt.
+                {t.form.labels.pdfHint}
               </span>
             </div>
           </div>
@@ -277,7 +284,7 @@ export function ContactForm() {
             onClick={() => setState((s) => ({ ...s, step: s.step - 1 }))}
             className="font-sans text-[11px] tracking-regal uppercase text-parchment/30 hover:text-parchment transition-colors"
           >
-            ← Zurück
+            {t.form.buttons.back}
           </button>
         )}
 
@@ -288,7 +295,7 @@ export function ContactForm() {
             onClick={() => setState((s) => ({ ...s, step: s.step + 1 }))}
             className="font-sans text-[11px] tracking-regal uppercase text-onyx bg-gold px-8 py-3 hover:bg-gold/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            Weiter →
+            {t.form.buttons.next}
           </button>
         ) : (
           <button
@@ -296,14 +303,14 @@ export function ContactForm() {
             disabled={!canNext || status === "sending"}
             className="font-sans text-[11px] tracking-regal uppercase text-onyx bg-gold px-8 py-3 hover:bg-gold/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            {status === "sending" ? "Wird gesendet …" : "Anfrage senden"}
+            {status === "sending" ? t.form.buttons.sending : t.form.buttons.submit}
           </button>
         )}
       </div>
 
       {status === "error" && (
         <p className="text-center font-sans text-xs text-red-400 mt-4">
-          Fehler beim Senden. Bitte versuchen Sie es erneut.
+          {t.form.error}
         </p>
       )}
     </form>
