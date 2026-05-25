@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { InviteClientModal } from "@/components/admin/InviteClientModal";
 
 export function SuperAdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -53,6 +56,19 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
             </svg>
             Leads
           </a>
+
+          {/* Spacer */}
+          <div className="h-4" />
+
+          <button
+            onClick={() => setInviteOpen(true)}
+            className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-none text-gold hover:bg-white/5 transition font-sans text-[13px] tracking-wide"
+          >
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="shrink-0 opacity-80">
+              <path d="M7.5 2v11M2 7.5h11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+            </svg>
+            Klient einladen
+          </button>
         </nav>
 
         {/* Sign out */}
@@ -73,6 +89,8 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
+
+      <InviteClientModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
     </div>
   );
 }
