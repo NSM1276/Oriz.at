@@ -100,16 +100,39 @@ export default function CasaContactForm() {
     if (website) fd.append("Website / Booking-Link", website);
     if (message) fd.append("Nachricht", message);
 
+    // Persist to our own API (DB source of truth) + email notification.
+    const dbInsert = fetch("/api/casa/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        property_name: propertyName,
+        property_type: propertyType,
+        units,
+        languages,
+        contact_name: name,
+        email,
+        phone,
+        website,
+        message,
+        source: "casa_landing",
+      }),
+    });
+
+    const emailNotify = fetch("https://formsubmit.co/ajax/office@oriz.at", {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body: fd,
+    });
+
     try {
-      const res = await fetch("https://formsubmit.co/ajax/office@oriz.at", {
-        method: "POST",
-        headers: { Accept: "application/json" },
-        body: fd,
-      });
-      const json = await res.json();
-      setStatus(
-        json.success === "true" || json.success === true ? "sent" : "error",
-      );
+      const [dbRes, emailRes] = await Promise.allSettled([dbInsert, emailNotify]);
+      const dbOk = dbRes.status === "fulfilled" && dbRes.value.ok;
+      const emailOk = emailRes.status === "fulfilled" && emailRes.value.ok;
+      // Treat as sent if EITHER channel succeeded (we still got the lead).
+      setStatus(dbOk || emailOk ? "sent" : "error");
+      if (!dbOk && dbRes.status === "fulfilled") {
+        console.error("[CasaContactForm] DB insert failed:", dbRes.value.status);
+      }
     } catch {
       setStatus("error");
     }
