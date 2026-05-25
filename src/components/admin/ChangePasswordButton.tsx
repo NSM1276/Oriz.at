@@ -33,9 +33,13 @@ export function ChangePasswordButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="font-sans text-[11px] tracking-regal uppercase text-onyx/50 hover:text-onyx transition"
+        className="font-sans text-[11px] tracking-regal uppercase px-3 py-2 transition-opacity hover:opacity-70"
+        style={{
+          border: "1px solid var(--color-muted, rgba(10,10,10,0.3))",
+          color: "var(--color-text, #0A0A0A)",
+        }}
       >
-        Change password
+        Passwort ändern
       </button>
 
       {open && (

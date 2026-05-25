@@ -10,9 +10,13 @@ export function SignOutButton() {
         await supabase.auth.signOut();
         window.location.href = "/admin/login";
       }}
-      className="font-sans text-[11px] tracking-regal uppercase text-onyx/60 hover:text-onyx"
+      className="font-sans text-[11px] tracking-regal uppercase px-3 py-2 transition-opacity hover:opacity-70"
+      style={{
+        border: "1px solid var(--accent, #C69B3C)",
+        color: "var(--accent, #C69B3C)",
+      }}
     >
-      Sign out
+      Abmelden
     </button>
   );
 }
