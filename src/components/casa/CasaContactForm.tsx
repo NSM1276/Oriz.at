@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 // ── options ────────────────────────────────────────────────────────────────
 const PROPERTY_TYPES = [
@@ -100,16 +101,41 @@ export default function CasaContactForm() {
     if (website) fd.append("Website / Booking-Link", website);
     if (message) fd.append("Nachricht", message);
 
-    try {
-      const res = await fetch("https://formsubmit.co/ajax/office@oriz.at", {
-        method: "POST",
-        headers: { Accept: "application/json" },
-        body: fd,
+    // Persist to DB first (source of truth — never lose a lead).
+    // Email via formsubmit.co is just a notification channel.
+    const supabase = createClient();
+    const dbInsert = supabase
+      .schema("casa")
+      .from("leads")
+      .insert({
+        property_name: propertyName,
+        property_type: propertyType || null,
+        units: units || null,
+        languages: languages || null,
+        contact_name: name || null,
+        email,
+        phone: phone || null,
+        website: website || null,
+        message: message || null,
+        source: "casa_landing",
       });
-      const json = await res.json();
-      setStatus(
-        json.success === "true" || json.success === true ? "sent" : "error",
-      );
+
+    const emailNotify = fetch("https://formsubmit.co/ajax/office@oriz.at", {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body: fd,
+    });
+
+    try {
+      const [dbRes, emailRes] = await Promise.allSettled([dbInsert, emailNotify]);
+      const dbOk = dbRes.status === "fulfilled" && !dbRes.value.error;
+      const emailOk =
+        emailRes.status === "fulfilled" && emailRes.value.ok;
+      // Treat as sent if EITHER channel succeeded (we still got the lead).
+      setStatus(dbOk || emailOk ? "sent" : "error");
+      if (!dbOk && dbRes.status === "fulfilled") {
+        console.error("[CasaContactForm] DB insert failed:", dbRes.value.error);
+      }
     } catch {
       setStatus("error");
     }
