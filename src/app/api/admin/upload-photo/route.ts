@@ -169,6 +169,20 @@ export async function DELETE(req: NextRequest) {
     if (!isSuper && prop?.owner_id !== user.id) return NextResponse.json({ error: "forbidden" }, { status: 403 });
     storagePath = `casa/${block.property_id}/blocks/${id}.webp`;
     await admin.schema("casa").from("content_blocks").update({ image_url: null }).eq("id", id);
+  } else if (target === "casa-property-all" || target === "carta-venue-all") {
+    // Cascade cleanup — used when a whole property or venue is deleted.
+    // Super-admin only (regular owners don't have a delete-everything UI).
+    if (!isSuper) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    const prefix = target === "casa-property-all" ? `casa/${id}` : `carta/${id}`;
+    const { data: list } = await admin.storage.from(BUCKET).list(prefix, { limit: 1000 });
+    const paths = (list ?? []).map((f) => `${prefix}/${f.name}`);
+    // recurse one level (items/ and blocks/ subfolders)
+    for (const sub of ["items", "blocks"]) {
+      const { data: subList } = await admin.storage.from(BUCKET).list(`${prefix}/${sub}`, { limit: 1000 });
+      paths.push(...(subList ?? []).map((f) => `${prefix}/${sub}/${f.name}`));
+    }
+    if (paths.length > 0) await admin.storage.from(BUCKET).remove(paths);
+    return NextResponse.json({ ok: true, removed: paths.length });
   } else {
     return NextResponse.json({ error: "unknown target" }, { status: 400 });
   }

@@ -258,6 +258,11 @@ export function CasaAdminEditor({
     if (!confirm("Diesen Block wirklich löschen?")) return;
     const prev = blocks;
     setBlocks((bs) => bs.filter((b) => b.id !== id));
+    // Storage cleanup first — best-effort, ignore failures (file might
+    // not exist if block had no photo). Then drop the row.
+    await fetch(`/api/admin/upload-photo?target=casa-block&id=${id}`, {
+      method: "DELETE",
+    }).catch(() => {});
     const { error } = await supabase
       .schema("casa")
       .from("content_blocks")
