@@ -29,17 +29,31 @@ export function QRCodeBlock({ slug }: { slug: string }) {
         >
           {menuUrl}
         </div>
-        <a
-          href={qrDownload}
-          download={`qr-${slug}.png`}
-          className="font-sans text-[10px] tracking-regal uppercase px-4 py-2 inline-block transition-opacity hover:opacity-80"
-          style={{
-            border: '1px solid var(--color-text)',
-            color: 'var(--color-text)',
-          }}
-        >
-          Herunterladen (PNG)
-        </a>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={qrDownload}
+            download={`qr-${slug}.png`}
+            className="font-sans text-[10px] tracking-regal uppercase px-4 py-2 inline-block transition-opacity hover:opacity-80"
+            style={{
+              border: '1px solid var(--color-text)',
+              color: 'var(--color-text)',
+            }}
+          >
+            Nur QR · PNG ↓
+          </a>
+          <a
+            href={`/admin/qr/carta/${slug}`}
+            target="_blank"
+            rel="noreferrer"
+            className="font-sans text-[10px] tracking-regal uppercase px-4 py-2 inline-block transition-opacity hover:opacity-80"
+            style={{
+              backgroundColor: 'var(--accent)',
+              color: 'var(--color-bg)',
+            }}
+          >
+            Druckfertige Karte ↗
+          </a>
+        </div>
       </div>
     </div>
   );

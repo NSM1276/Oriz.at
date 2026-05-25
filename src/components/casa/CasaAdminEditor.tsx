@@ -156,20 +156,37 @@ function QRBlock({ slug }: { slug: string }) {
         >
           {url}
         </div>
-        <a
-          href={qrDownload}
-          download={`qr-casa-${slug}.png`}
-          className="mt-3 inline-block font-sans uppercase transition-opacity hover:opacity-70"
-          style={{
-            fontSize: "10px",
-            padding: "8px 14px",
-            border: "1px solid #C69B3C",
-            color: "#C69B3C",
-            letterSpacing: "0.18em",
-          }}
-        >
-          PNG herunterladen
-        </a>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <a
+            href={qrDownload}
+            download={`qr-casa-${slug}.png`}
+            className="inline-block font-sans uppercase transition-opacity hover:opacity-70"
+            style={{
+              fontSize: "10px",
+              padding: "8px 14px",
+              border: "1px solid rgba(10,10,10,0.30)",
+              color: "#0A0A0A",
+              letterSpacing: "0.18em",
+            }}
+          >
+            Nur QR · PNG ↓
+          </a>
+          <a
+            href={`/admin/qr/casa/${slug}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block font-sans uppercase transition-opacity hover:opacity-70"
+            style={{
+              fontSize: "10px",
+              padding: "8px 14px",
+              background: "#0A0A0A",
+              color: "#F5F0EC",
+              letterSpacing: "0.18em",
+            }}
+          >
+            Druckfertige Karte ↗
+          </a>
+        </div>
       </div>
     </div>
   );

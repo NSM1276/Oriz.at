@@ -62,11 +62,19 @@ export function QRModal({ slug, name, onClose }: Props) {
             </div>
           </div>
 
-          <div className="px-6 pb-6">
+          <div className="px-6 pb-6 space-y-2">
             <button onClick={handleDownload}
               className="w-full bg-onyx text-parchment font-sans text-[11px] tracking-regal uppercase py-3 hover:bg-onyx/85 transition-colors">
-              Download QR ↓
+              Nur QR · PNG ↓
             </button>
+            <a
+              href={`/admin/qr/carta/${slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="block text-center w-full font-sans text-[11px] tracking-regal uppercase py-3 border border-onyx text-onyx hover:bg-onyx hover:text-parchment transition-colors"
+            >
+              Druckfertige Karte (A6) ↗
+            </a>
           </div>
         </div>
       </div>
