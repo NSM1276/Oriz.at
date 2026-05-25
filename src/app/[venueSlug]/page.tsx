@@ -20,7 +20,7 @@ export default async function GuestMenuPage({
   const { data, error } = await supabase
     .from("venues")
     .select(
-      "id, slug, name, logo_url, about, currency, color_primary, color_bg, owner_id, created_at, instagram_url, google_maps_url, sections(id, venue_id, name, position, items(id, section_id, venue_id, name, description, price_cents, image_url, allergens, ai_caption, is_active, position, updated_at))",
+      "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, owner_id, created_at, instagram_url, google_maps_url, sections(id, venue_id, name, position, items(id, section_id, venue_id, name, description, price_cents, image_url, allergens, ai_caption, is_active, position, updated_at))",
     )
     .eq("slug", venueSlug)
     .maybeSingle<Row>();
@@ -42,6 +42,7 @@ export default async function GuestMenuPage({
       slug: data.slug,
       name: data.name,
       logo_url: data.logo_url,
+      logo_svg: (data as typeof data & { logo_svg?: string | null }).logo_svg ?? null,
       about: data.about,
       currency: data.currency,
       color_primary: data.color_primary,

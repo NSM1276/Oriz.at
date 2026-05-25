@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { VenueLogo } from "@/components/brand/VenueLogo";
 
 // Small icon row of owner-managed external links: website, IG, FB,
 // Google Maps, phone, email. Each renders only if the URL is set,
@@ -279,6 +280,7 @@ type Property = {
   color_bg: string | null;
   color_primary: string | null;
   logo_url: string | null;
+  logo_svg: string | null;
   cover_url: string | null;
   website_url: string | null;
   instagram_url: string | null;
@@ -411,6 +413,19 @@ export function CasaGuestView({
           >
             {labels.willkommen}
           </p>
+          {property.logo_svg || property.logo_url ? (
+            <div className="flex justify-center mb-4">
+              <VenueLogo
+                svg={property.logo_svg}
+                url={property.logo_url}
+                name={property.name}
+                bg={bg}
+                accent={accent}
+                color="auto"
+                height={72}
+              />
+            </div>
+          ) : null}
           <h1
             className="font-display font-light"
             style={{

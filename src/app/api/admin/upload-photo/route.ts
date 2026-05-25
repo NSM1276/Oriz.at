@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
+import { normalizeLogoSvg } from "@/lib/svg-normalize";
 
 const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 const BUCKET = "oriz-photos";
@@ -52,6 +53,57 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = svc();
+
+  // Logo targets are handled specially — SVG stored as text in DB,
+  // PNG/JPG stored in Storage like a normal photo.
+  if (target === "carta-venue-logo" || target === "casa-property-logo") {
+    const ownerCheck =
+      target === "carta-venue-logo"
+        ? await admin.from("venues").select("owner_id").eq("id", id).maybeSingle<{ owner_id: string | null }>()
+        : await admin.schema("casa").from("properties").select("owner_id").eq("id", id).maybeSingle<{ owner_id: string | null }>();
+    if (!ownerCheck.data) return NextResponse.json({ error: "not found" }, { status: 404 });
+    if (!isSuper && ownerCheck.data.owner_id !== user.id) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
+
+    const isSvg = file.type === "image/svg+xml" || /\.svg$/i.test((file as File).name ?? "");
+    if (isSvg) {
+      const text = await file.text();
+      let normalized: string;
+      try {
+        normalized = normalizeLogoSvg(text);
+      } catch (err) {
+        return NextResponse.json(
+          { error: err instanceof Error ? err.message : "invalid svg" },
+          { status: 400 },
+        );
+      }
+      // Store SVG inline; clear any old PNG url too so VenueLogo prefers the SVG.
+      const update = { logo_svg: normalized, logo_url: null as string | null };
+      if (target === "carta-venue-logo") {
+        await admin.from("venues").update(update).eq("id", id);
+      } else {
+        await admin.schema("casa").from("properties").update(update).eq("id", id);
+      }
+      return NextResponse.json({ ok: true, kind: "svg" });
+    }
+    // PNG/JPG fallback: same Storage pipeline as photos, but store URL in logo_url.
+    const buf = Buffer.from(await file.arrayBuffer());
+    const path = target === "carta-venue-logo" ? `carta/${id}/logo.webp` : `casa/${id}/logo.webp`;
+    const { error: upErr } = await admin.storage
+      .from(BUCKET)
+      .upload(path, buf, { contentType: "image/webp", upsert: true, cacheControl: "3600" });
+    if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
+    const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(path);
+    const url = `${pub.publicUrl}?v=${randomUUID().slice(0, 8)}`;
+    const update = { logo_url: url, logo_svg: null as string | null };
+    if (target === "carta-venue-logo") {
+      await admin.from("venues").update(update).eq("id", id);
+    } else {
+      await admin.schema("casa").from("properties").update(update).eq("id", id);
+    }
+    return NextResponse.json({ url, kind: "raster" });
+  }
 
   // Ownership check + figure out storage path
   let storagePath: string;

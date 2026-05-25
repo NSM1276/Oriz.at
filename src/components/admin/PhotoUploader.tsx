@@ -3,7 +3,12 @@
 import { useRef, useState } from "react";
 import { resizeToWebP } from "@/lib/image-resize";
 
-type Target = "carta-item" | "casa-cover" | "casa-block";
+type Target =
+  | "carta-item"
+  | "casa-cover"
+  | "casa-block"
+  | "carta-venue-logo"
+  | "casa-property-logo";
 
 type Props = {
   target: Target;
@@ -35,11 +40,18 @@ export function PhotoUploader({
     setBusy(true);
     setError(null);
     try {
-      const webp = await resizeToWebP(file);
+      const isSvg =
+        file.type === "image/svg+xml" || /\.svg$/i.test(file.name);
       const form = new FormData();
       form.append("target", target);
       form.append("id", id);
-      form.append("file", webp, "photo.webp");
+      if (isSvg) {
+        // SVG passes through untouched — server normalizes (sanitize + currentColor).
+        form.append("file", file, file.name || "logo.svg");
+      } else {
+        const webp = await resizeToWebP(file);
+        form.append("file", webp, "photo.webp");
+      }
       const res = await fetch("/api/admin/upload-photo", { method: "POST", body: form });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
@@ -84,7 +96,7 @@ export function PhotoUploader({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/avif,image/heic,image/heif"
+        accept="image/jpeg,image/png,image/webp,image/avif,image/heic,image/heif,image/svg+xml"
         onChange={handlePick}
         disabled={busy}
         className="hidden"

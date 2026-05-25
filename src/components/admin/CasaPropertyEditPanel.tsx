@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PhotoUploader } from "@/components/admin/PhotoUploader";
+import { VenueLogo } from "@/components/brand/VenueLogo";
 
 export type CasaPropertySummary = {
   id: string;
@@ -11,6 +13,8 @@ export type CasaPropertySummary = {
   about: string | null;
   color_bg: string | null;
   color_primary: string | null;
+  logo_url?: string | null;
+  logo_svg?: string | null;
   website_url?: string | null;
   instagram_url?: string | null;
   facebook_url?: string | null;
@@ -229,6 +233,43 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
             />
           </div>
 
+          {/* Logo */}
+          <div className="border-t border-onyx/10 pt-6">
+            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 mb-3">
+              Logo
+            </p>
+            {property && (property.logo_svg || property.logo_url) && (
+              <div className="mb-4 space-y-3">
+                <p className="font-sans text-[9px] tracking-regal uppercase text-onyx/40">
+                  Vorschau auf 3 Hintergründen:
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <PreviewSwatch bg={colorBg} accent={colorPrimary} svg={property.logo_svg} url={property.logo_url} name={property.name} mode="auto" label="auto" />
+                  <PreviewSwatch bg="#F5F0EC" accent={colorPrimary} svg={property.logo_svg} url={property.logo_url} name={property.name} mode="auto" label="hell" />
+                  <PreviewSwatch bg="#0A0A0A" accent={colorPrimary} svg={property.logo_svg} url={property.logo_url} name={property.name} mode="auto" label="dunkel" />
+                  <PreviewSwatch bg={colorBg} accent={colorPrimary} svg={property.logo_svg} url={property.logo_url} name={property.name} mode="accent" label="accent" />
+                </div>
+              </div>
+            )}
+            <p className="font-sans text-[10px] text-onyx/40 mb-3 leading-snug">
+              SVG empfohlen (passt sich automatisch der Farbe an). PNG/JPG
+              werden als-ist angezeigt.
+            </p>
+            {property && (
+              <PhotoUploader
+                target="casa-property-logo"
+                id={property.id}
+                currentUrl={property.logo_url ?? null}
+                onChange={() => {
+                  // Re-fetch on save would be ideal; for now just reload the panel.
+                  window.location.reload();
+                }}
+                aspect="square"
+                label={property.logo_svg ? "+ Logo ersetzen" : "+ Logo hinzufügen"}
+              />
+            )}
+          </div>
+
           <div className="border-t border-onyx/10 pt-6 space-y-4">
             <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">
               Links &amp; Kontakt
@@ -343,6 +384,46 @@ function Field({
       {hint && (
         <p className="font-sans text-[10px] text-onyx/30 mt-1">{hint}</p>
       )}
+    </div>
+  );
+}
+
+function PreviewSwatch({
+  bg,
+  accent,
+  svg,
+  url,
+  name,
+  mode,
+  label,
+}: {
+  bg: string;
+  accent: string;
+  svg?: string | null;
+  url?: string | null;
+  name: string;
+  mode: "auto" | "accent";
+  label: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div
+        className="w-20 h-20 flex items-center justify-center"
+        style={{ backgroundColor: bg, border: "1px solid rgba(0,0,0,0.1)" }}
+      >
+        <VenueLogo
+          svg={svg}
+          url={url}
+          name={name}
+          bg={bg}
+          accent={accent}
+          color={mode}
+          height={32}
+        />
+      </div>
+      <span className="font-sans text-[9px] tracking-regal uppercase text-onyx/40">
+        {label}
+      </span>
     </div>
   );
 }

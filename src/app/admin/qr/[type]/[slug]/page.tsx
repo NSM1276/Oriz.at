@@ -25,16 +25,18 @@ export default async function QrCardPage({
   if (type === "carta") {
     const { data } = await supabase
       .from("venues")
-      .select("name, color_primary")
+      .select("name, color_primary, logo_svg, logo_url")
       .eq("slug", slug)
-      .maybeSingle();
+      .maybeSingle<{ name: string; color_primary: string | null; logo_svg: string | null; logo_url: string | null }>();
     if (!data) notFound();
     return (
       <QrCard
         name={data.name}
         url={`https://oriz.at/${slug}`}
-        accent={(data as { color_primary?: string | null }).color_primary ?? "#C69B3C"}
+        accent={data.color_primary ?? "#C69B3C"}
         kind="carta"
+        logoSvg={data.logo_svg}
+        logoUrl={data.logo_url}
       />
     );
   }
@@ -43,17 +45,19 @@ export default async function QrCardPage({
   const { data } = await supabase
     .schema("casa")
     .from("properties")
-    .select("name, city, color_primary")
+    .select("name, city, color_primary, logo_svg, logo_url")
     .eq("slug", slug)
-    .maybeSingle();
+    .maybeSingle<{ name: string; city: string | null; color_primary: string | null; logo_svg: string | null; logo_url: string | null }>();
   if (!data) notFound();
   return (
     <QrCard
       name={data.name}
       subtitle={data.city ?? undefined}
       url={`https://oriz.at/c/${slug}`}
-      accent={(data as { color_primary?: string | null }).color_primary ?? "#C69B3C"}
+      accent={data.color_primary ?? "#C69B3C"}
       kind="casa"
+      logoSvg={data.logo_svg}
+      logoUrl={data.logo_url}
     />
   );
 }

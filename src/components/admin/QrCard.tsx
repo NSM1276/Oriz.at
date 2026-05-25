@@ -1,11 +1,15 @@
 "use client";
 
+import { VenueLogo } from "@/components/brand/VenueLogo";
+
 type Props = {
   name: string;
   url: string;
   accent: string;
   kind: "carta" | "casa";
   subtitle?: string;
+  logoSvg?: string | null;
+  logoUrl?: string | null;
 };
 
 // Print-ready A6 QR card. Designed for:
@@ -16,7 +20,7 @@ type Props = {
 // Layout matches ORIZ Quiet Luxury: parchment bg, thin gold hairline,
 // Cormorant Garamond display, single accent line at the bottom.
 
-export function QrCard({ name, url, accent, kind, subtitle }: Props) {
+export function QrCard({ name, url, accent, kind, subtitle, logoSvg, logoUrl }: Props) {
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=2&color=0A0A0A&bgcolor=ffffff&data=${encodeURIComponent(
     url,
   )}`;
@@ -119,8 +123,21 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
             boxSizing: "border-box",
           }}
         >
-          {/* Top: eyebrow */}
+          {/* Top: logo (if any) + eyebrow */}
           <div style={{ textAlign: "center", width: "100%" }}>
+            {(logoSvg || logoUrl) && (
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "8mm" }}>
+                <VenueLogo
+                  svg={logoSvg}
+                  url={logoUrl}
+                  name={name}
+                  bg="#F5F0EC"
+                  accent={accent}
+                  color="auto"
+                  height={48}
+                />
+              </div>
+            )}
             <p
               style={{
                 fontFamily: "var(--font-inter, sans-serif)",

@@ -30,7 +30,7 @@ export default async function AdminCasaListPage() {
     .schema("casa")
     .from("properties")
     .select(
-      "id, slug, name, city, about, color_bg, color_primary, website_url, instagram_url, facebook_url, google_maps_url, phone, email",
+      "id, slug, name, city, about, color_bg, color_primary, logo_url, logo_svg, website_url, instagram_url, facebook_url, google_maps_url, phone, email",
     )
     .order("name", { ascending: true });
 

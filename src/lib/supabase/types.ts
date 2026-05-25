@@ -3,6 +3,7 @@ export type Venue = {
   slug: string;
   name: string;
   logo_url: string | null;
+  logo_svg?: string | null;
   about: string | null;
   currency: string;
   color_primary: string | null;

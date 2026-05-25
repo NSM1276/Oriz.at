@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PhotoUploader } from "@/components/admin/PhotoUploader";
+import { VenueLogo } from "@/components/brand/VenueLogo";
 import type { Venue } from "@/lib/supabase/types";
 
 type EditableVenue = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | "color_primary" | "logo_url" | "instagram_url" | "google_maps_url"> & {
   plan: string;
+  logo_svg?: string | null;
 };
 
 type Props = {
@@ -146,25 +149,30 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
               className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold resize-none" />
           </div>
 
-          {/* Logo URL */}
+          {/* Logo upload */}
           <div className="border-t border-onyx/10 pt-6">
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-1">Logo URL</label>
-            <p className="font-sans text-[10px] text-onyx/30 mb-2">
-              SVG aus Supabase Storage einfügen. Leer lassen = Restaurantname wird angezeigt.
-            </p>
-            <input
-              type="url"
-              value={logoUrl}
-              onChange={e => setLogoUrl(e.target.value)}
-              className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
-              placeholder="https://…/logos/restaurant.svg"
-            />
-            {logoUrl && (
-              <div className="mt-2 flex items-center gap-2 p-2 border border-onyx/10 bg-onyx/5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logoUrl} alt="Logo preview" className="h-8 w-auto max-w-[120px] object-contain" />
-                <span className="font-sans text-[10px] text-onyx/40">Vorschau</span>
+            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Logo</label>
+            {venue && (venue.logo_svg || venue.logo_url) && (
+              <div className="mb-3 flex gap-2 flex-wrap">
+                <LogoSwatch bg={colorBg} accent={colorPrimary} svg={venue.logo_svg} url={venue.logo_url} name={venue.name} mode="auto" label="auto" />
+                <LogoSwatch bg="#F5F0EC" accent={colorPrimary} svg={venue.logo_svg} url={venue.logo_url} name={venue.name} mode="auto" label="hell" />
+                <LogoSwatch bg="#0A0A0A" accent={colorPrimary} svg={venue.logo_svg} url={venue.logo_url} name={venue.name} mode="auto" label="dunkel" />
+                <LogoSwatch bg={colorBg} accent={colorPrimary} svg={venue.logo_svg} url={venue.logo_url} name={venue.name} mode="accent" label="accent" />
               </div>
+            )}
+            <p className="font-sans text-[10px] text-onyx/40 mb-2 leading-snug">
+              SVG empfohlen — passt sich automatisch der Farbe an. PNG mit
+              transparentem Hintergrund auch ok.
+            </p>
+            {venue && (
+              <PhotoUploader
+                target="carta-venue-logo"
+                id={venue.id}
+                currentUrl={venue.logo_url ?? null}
+                onChange={() => window.location.reload()}
+                aspect="square"
+                label={venue.logo_svg ? "+ Logo ersetzen" : "+ Logo hinzufügen"}
+              />
             )}
           </div>
 
@@ -215,5 +223,21 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
         </div>
       </div>
     </>
+  );
+}
+
+function LogoSwatch({
+  bg, accent, svg, url, name, mode, label,
+}: {
+  bg: string; accent: string; svg?: string | null; url?: string | null;
+  name: string; mode: "auto" | "accent"; label: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="w-20 h-20 flex items-center justify-center" style={{ backgroundColor: bg, border: "1px solid rgba(0,0,0,0.1)" }}>
+        <VenueLogo svg={svg} url={url} name={name} bg={bg} accent={accent} color={mode} height={32} />
+      </div>
+      <span className="font-sans text-[9px] tracking-regal uppercase text-onyx/40">{label}</span>
+    </div>
   );
 }
