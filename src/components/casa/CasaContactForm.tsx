@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 // ── options ────────────────────────────────────────────────────────────────
 const PROPERTY_TYPES = [
@@ -101,24 +100,23 @@ export default function CasaContactForm() {
     if (website) fd.append("Website / Booking-Link", website);
     if (message) fd.append("Nachricht", message);
 
-    // Persist to DB first (source of truth — never lose a lead).
-    // Email via formsubmit.co is just a notification channel.
-    const supabase = createClient();
-    const dbInsert = supabase
-      .schema("casa")
-      .from("leads")
-      .insert({
+    // Persist to our own API (DB source of truth) + email notification.
+    const dbInsert = fetch("/api/casa/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         property_name: propertyName,
-        property_type: propertyType || null,
-        units: units || null,
-        languages: languages || null,
-        contact_name: name || null,
+        property_type: propertyType,
+        units,
+        languages,
+        contact_name: name,
         email,
-        phone: phone || null,
-        website: website || null,
-        message: message || null,
+        phone,
+        website,
+        message,
         source: "casa_landing",
-      });
+      }),
+    });
 
     const emailNotify = fetch("https://formsubmit.co/ajax/office@oriz.at", {
       method: "POST",
@@ -128,13 +126,12 @@ export default function CasaContactForm() {
 
     try {
       const [dbRes, emailRes] = await Promise.allSettled([dbInsert, emailNotify]);
-      const dbOk = dbRes.status === "fulfilled" && !dbRes.value.error;
-      const emailOk =
-        emailRes.status === "fulfilled" && emailRes.value.ok;
+      const dbOk = dbRes.status === "fulfilled" && dbRes.value.ok;
+      const emailOk = emailRes.status === "fulfilled" && emailRes.value.ok;
       // Treat as sent if EITHER channel succeeded (we still got the lead).
       setStatus(dbOk || emailOk ? "sent" : "error");
       if (!dbOk && dbRes.status === "fulfilled") {
-        console.error("[CasaContactForm] DB insert failed:", dbRes.value.error);
+        console.error("[CasaContactForm] DB insert failed:", dbRes.value.status);
       }
     } catch {
       setStatus("error");
