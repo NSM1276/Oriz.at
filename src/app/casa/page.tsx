@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import CasaDemo from "@/components/casa/CasaDemo";
 
 export const metadata: Metadata = {
   title: "ORIZ Casa — Digitale Willkommenskarte für Apartments & Pensionen",
@@ -55,6 +56,33 @@ const STEPS = [
     title: "Sie ändern in Sekunden",
     body:
       "Neue Öffnungszeiten? Eine Zeile bearbeiten — sofort live für alle Gäste. Kein Nachdrucken, kein Verteilen.",
+  },
+];
+
+const FAQ = [
+  {
+    q: "Muss der Gast eine App herunterladen?",
+    a: "Nein. Der Gast scannt den QR-Code mit der Kamera des Smartphones — die Seite öffnet sich direkt im Browser. Keine App, kein Login, keine Wartezeit.",
+  },
+  {
+    q: "In welchen Sprachen funktioniert das?",
+    a: "Standard: Deutsch und Englisch — Sie pflegen beide Versionen selbst. Auf Wunsch erkennt die Seite die Sprache des Gastgeräts und zeigt Inhalte in über 20 Sprachen automatisch.",
+  },
+  {
+    q: "Wie schnell bin ich live?",
+    a: "In der Regel 30 Minuten. Sie tragen Ihre Informationen ein, wir generieren den QR-Code, Sie drucken ihn aus — fertig.",
+  },
+  {
+    q: "Was passiert mit den Daten meiner Gäste?",
+    a: "Die Gast-Seite sammelt keine personenbezogenen Daten. Keine Cookies, kein Tracking, keine Registrierung. Inhalte liegen auf EU-Servern in Frankfurt.",
+  },
+  {
+    q: "Kann ich mehrere Apartments oder Pensionen verwalten?",
+    a: "Ja. Für Netzwerke mit mehreren Objekten erstellen wir ein individuelles Angebot — sprechen Sie uns einfach an.",
+  },
+  {
+    q: "Was kostet das?",
+    a: "Wir richten den Preis nach Größe und Anspruch Ihres Hauses. Schreiben Sie uns kurz — Sie bekommen innerhalb von 24 Stunden einen Vorschlag.",
   },
 ];
 
@@ -369,6 +397,18 @@ export default function CasaPage() {
         </div>
       </section>
 
+      {/* ── Demo (dark, interactive) ── */}
+      <section
+        id="demo"
+        className="py-28 px-6"
+        style={{
+          backgroundColor: "#0A0A0A",
+          borderTop: "1px solid rgba(245,240,236,0.05)",
+        }}
+      >
+        <CasaDemo />
+      </section>
+
       {/* ── Trust (dark) ── */}
       <section
         id="vertrauen"
@@ -409,6 +449,71 @@ export default function CasaPage() {
                   }}
                 >
                   {body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ (light) ── */}
+      <section
+        id="faq"
+        className="py-28 px-6"
+        style={{ backgroundColor: "#F5F0EC", color: "#0A0A0A" }}
+      >
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-16">
+            <span
+              className="font-sans uppercase"
+              style={{
+                fontSize: "10px",
+                color: "#C69B3C",
+                letterSpacing: "0.32em",
+              }}
+            >
+              Häufige Fragen
+            </span>
+            <h2
+              className="font-display font-light mt-6"
+              style={{
+                fontSize: "clamp(2rem, 4.5vw, 3rem)",
+                color: "#0A0A0A",
+              }}
+            >
+              Bevor Sie schreiben.
+            </h2>
+          </div>
+
+          <div className="flex flex-col">
+            {FAQ.map(({ q, a }, i) => (
+              <div
+                key={q}
+                className="py-7"
+                style={{
+                  borderTop: i === 0 ? "1px solid rgba(10,10,10,0.10)" : undefined,
+                  borderBottom: "1px solid rgba(10,10,10,0.10)",
+                }}
+              >
+                <h3
+                  className="font-display mb-3"
+                  style={{
+                    fontSize: "clamp(1.05rem, 1.8vw, 1.25rem)",
+                    color: "#0A0A0A",
+                    fontWeight: 500,
+                  }}
+                >
+                  {q}
+                </h3>
+                <p
+                  className="font-display italic"
+                  style={{
+                    fontSize: "0.95rem",
+                    color: "rgba(10,10,10,0.60)",
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {a}
                 </p>
               </div>
             ))}
@@ -488,7 +593,7 @@ export default function CasaPage() {
             letterSpacing: "0.28em",
           }}
         >
-          Pilot · DemoSection &amp; Form folgen
+          Pilot · Inline-Kontaktformular folgt
         </p>
       </div>
     </main>
