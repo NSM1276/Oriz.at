@@ -35,6 +35,16 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
             Venues
           </a>
           <a
+            href="/admin/casa"
+            className="flex items-center gap-3 px-3 py-2 rounded-none text-parchment/80 hover:text-parchment hover:bg-white/5 transition font-sans text-[13px] tracking-wide"
+          >
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="shrink-0 opacity-60">
+              <path d="M2 6.5L7.5 2l5.5 4.5V13H2V6.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+              <path d="M6 13V9h3v4" stroke="currentColor" strokeWidth="1.2"/>
+            </svg>
+            Casa
+          </a>
+          <a
             href="/admin/leads"
             className="flex items-center gap-3 px-3 py-2 rounded-none text-parchment/80 hover:text-parchment hover:bg-white/5 transition font-sans text-[13px] tracking-wide"
           >
