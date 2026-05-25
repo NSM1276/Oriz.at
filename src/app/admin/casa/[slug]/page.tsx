@@ -25,7 +25,7 @@ export default async function CasaAdminPage({
     .schema("casa")
     .from("properties")
     .select(
-      "id, slug, name, city, about, color_bg, color_primary, logo_url, website_url, instagram_url, facebook_url, google_maps_url, phone, email",
+      "id, slug, name, city, about, color_bg, color_primary, logo_url, cover_url, website_url, instagram_url, facebook_url, google_maps_url, phone, email",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -37,7 +37,7 @@ export default async function CasaAdminPage({
     .schema("casa")
     .from("content_blocks")
     .select(
-      "id, property_id, block_type, title_de, title_en, body_de, body_en, position",
+      "id, property_id, block_type, title_de, title_en, body_de, body_en, image_url, position",
     )
     .eq("property_id", property.id)
     .order("position", { ascending: true });
