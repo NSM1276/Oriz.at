@@ -103,7 +103,7 @@ export function AddVenueModal({ open, onClose, onCreated }: Props) {
             <div>
               <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">URL slug</label>
               <div className="flex items-center">
-                <span className="font-sans text-xs text-onyx/40 bg-onyx/5 border border-r-0 border-onyx/15 px-3 py-2">oriz-at.vercel.app/</span>
+                <span className="font-sans text-xs text-onyx/40 bg-onyx/5 border border-r-0 border-onyx/15 px-3 py-2">oriz.at/</span>
                 <input type="text" value={slug} onChange={e => setSlug(e.target.value)}
                   className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                   placeholder="zum-goldenen-hirschen" />
