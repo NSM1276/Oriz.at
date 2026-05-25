@@ -46,7 +46,8 @@ export function SectionNav({ sections, topOffset = 0 }: Props) {
               fontSize: 12,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "var(--accent)",
+              color: "var(--color-text)",
+              opacity: 0.75,
               padding: "6px 14px",
               whiteSpace: "nowrap",
               borderRight: i < sections.length - 1

@@ -128,7 +128,7 @@ export default async function AdminPage() {
                 AI-Texte diesen Monat
               </div>
               <div className="font-display text-lg tabular-nums">
-                <span style={{ color: remaining === 0 ? '#ef4444' : text }}>{used}</span>
+                <span style={{ color: remaining === 0 ? (isDark ? '#FCA5A5' : '#DC2626') : text }}>{used}</span>
                 <span style={{ color: muted }}> / {limit}</span>
               </div>
             </div>
@@ -138,13 +138,16 @@ export default async function AdminPage() {
         {venue && (
           <>
             <QRCodeBlock slug={venue.slug} />
-            <div className="mb-10 flex gap-3">
+            <div className="mb-10 flex gap-3 flex-wrap">
               <a
                 href={`/${venue.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-70"
-                style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
+                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-80"
+                style={{
+                  border: `1px solid ${isDark ? 'rgba(245,240,236,0.35)' : 'rgba(10,10,10,0.35)'}`,
+                  color: text,
+                }}
               >
                 Menü ansehen →
               </a>
@@ -152,8 +155,11 @@ export default async function AdminPage() {
                 href={`/${venue.slug}/print`}
                 target="_blank"
                 rel="noreferrer"
-                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-70"
-                style={{ border: '1px solid var(--accent)', color: 'var(--accent)' }}
+                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-80"
+                style={{
+                  backgroundColor: accent,
+                  color: isDark ? '#0A0A0A' : '#FFFFFF',
+                }}
               >
                 Menü drucken / PDF ↓
               </a>

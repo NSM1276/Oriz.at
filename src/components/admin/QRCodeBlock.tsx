@@ -32,8 +32,11 @@ export function QRCodeBlock({ slug }: { slug: string }) {
         <a
           href={qrDownload}
           download={`qr-${slug}.png`}
-          className="font-sans text-[10px] tracking-regal uppercase px-4 py-2 inline-block transition-opacity hover:opacity-70"
-          style={{ border: '1px solid var(--accent)', color: 'var(--accent)' }}
+          className="font-sans text-[10px] tracking-regal uppercase px-4 py-2 inline-block transition-opacity hover:opacity-80"
+          style={{
+            border: '1px solid var(--color-text)',
+            color: 'var(--color-text)',
+          }}
         >
           Herunterladen (PNG)
         </a>
