@@ -91,9 +91,24 @@ export function VenueCard({ name, slug, colorBg, colorPrimary, plan, itemCount, 
               <path d="M9 9h2v2H9zM11 11h2v2h-2zM9 13h2M13 9v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
             </svg>
           </button>
-          <button onClick={onEdit} className="font-sans text-[11px] tracking-regal uppercase transition-colors" style={{ color: accent }}>
-            Edit →
+          <button
+            onClick={onEdit}
+            title="Settings (colors, plan, social)"
+            className="text-onyx/30 hover:text-onyx/70 transition-colors"
+            aria-label="Edit settings"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z" />
+            </svg>
           </button>
+          <a
+            href={`/admin/carta/${slug}`}
+            className="font-sans text-[11px] tracking-regal uppercase transition-colors"
+            style={{ color: accent }}
+          >
+            Inhalt →
+          </a>
         </div>
       </div>
     </div>
