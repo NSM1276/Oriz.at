@@ -17,6 +17,7 @@ type Property = {
   color_bg: string | null;
   color_primary: string | null;
   logo_url: string | null;
+  cover_url: string | null;
   website_url: string | null;
   instagram_url: string | null;
   facebook_url: string | null;
@@ -32,6 +33,7 @@ type ContentBlock = {
   title_en: string | null;
   body_de: string | null;
   body_en: string | null;
+  image_url: string | null;
   position: number;
 };
 
@@ -41,7 +43,7 @@ async function fetchProperty(slug: string): Promise<Property | null> {
     .schema("casa")
     .from("properties")
     .select(
-      "id, slug, name, city, about, color_bg, color_primary, logo_url, website_url, instagram_url, facebook_url, google_maps_url, phone, email",
+      "id, slug, name, city, about, color_bg, color_primary, logo_url, cover_url, website_url, instagram_url, facebook_url, google_maps_url, phone, email",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -53,7 +55,7 @@ async function fetchBlocks(propertyId: string): Promise<ContentBlock[]> {
   const { data } = await supabase
     .schema("casa")
     .from("content_blocks")
-    .select("id, block_type, title_de, title_en, body_de, body_en, position")
+    .select("id, block_type, title_de, title_en, body_de, body_en, image_url, position")
     .eq("property_id", propertyId)
     .order("position", { ascending: true });
   return (data as ContentBlock[]) ?? [];

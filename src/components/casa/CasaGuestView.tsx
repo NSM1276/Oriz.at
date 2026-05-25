@@ -279,6 +279,7 @@ type Property = {
   color_bg: string | null;
   color_primary: string | null;
   logo_url: string | null;
+  cover_url: string | null;
   website_url: string | null;
   instagram_url: string | null;
   facebook_url: string | null;
@@ -294,6 +295,7 @@ type ContentBlock = {
   title_en: string | null;
   body_de: string | null;
   body_en: string | null;
+  image_url: string | null;
   position: number;
 };
 
@@ -370,10 +372,33 @@ export function CasaGuestView({
         ))}
       </div>
 
+      {/* ── Cover image (optional) ── */}
+      {property.cover_url && (
+        <div
+          style={{
+            width: "100%",
+            aspectRatio: "16 / 9",
+            maxHeight: "55vh",
+            overflow: "hidden",
+            backgroundColor: "rgba(245,240,236,0.05)",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={property.cover_url}
+            alt={property.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          />
+        </div>
+      )}
+
       {/* ── Header ── */}
       <section
         className="px-6"
-        style={{ paddingTop: "clamp(80px, 14vh, 140px)", paddingBottom: "48px" }}
+        style={{
+          paddingTop: property.cover_url ? "48px" : "clamp(80px, 14vh, 140px)",
+          paddingBottom: "48px",
+        }}
       >
         <div className="max-w-xl mx-auto text-center">
           <p
@@ -478,6 +503,28 @@ export function CasaGuestView({
                     }}
                   >
                     {body}
+                  </div>
+                )}
+                {b.image_url && (
+                  <div
+                    className="mt-5"
+                    style={{
+                      width: "100%",
+                      aspectRatio: "16 / 9",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={b.image_url}
+                      alt={title ?? ""}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
                   </div>
                 )}
               </div>

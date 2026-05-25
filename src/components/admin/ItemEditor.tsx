@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { uploadItemImage, extractStoragePath, ImageUploadError } from "@/lib/imageUpload";
+import { PhotoUploader } from "@/components/admin/PhotoUploader";
 import type { Item } from "@/lib/supabase/types";
 
 type Props = {
@@ -23,14 +23,12 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
 
   const [error, setError] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
-  const [photoBusy, setPhotoBusy] = useState(false);
   const [priceFocused, setPriceFocused] = useState(false);
   const [allergensFocused, setAllergensFocused] = useState(false);
   const [captionModalOpen, setCaptionModalOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDraft, setModalDraft] = useState("");
   const [, startTransition] = useTransition();
-  const fileRef = useRef<HTMLInputElement>(null);
   const modalTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Close modal on Escape + lock body scroll
@@ -133,48 +131,6 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
         setError(error.message);
       } else setError(null);
     });
-  }
-
-  // ── photo upload / remove ──────────────────────────────────────────────
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = "";
-    setError(null);
-    setPhotoBusy(true);
-    try {
-      const url = await uploadItemImage({
-        supabase,
-        file,
-        venueId: item.venue_id,
-        itemId: item.id,
-        previousUrl: item.image_url,
-      });
-      const { error: dbErr } = await supabase.from("items").update({ image_url: url }).eq("id", item.id);
-      if (dbErr) throw new ImageUploadError(dbErr.message);
-      setItem({ ...item, image_url: url });
-    } catch (err) {
-      setError(err instanceof ImageUploadError ? err.message : "Upload fehlgeschlagen.");
-    } finally {
-      setPhotoBusy(false);
-    }
-  }
-
-  async function removePhoto() {
-    if (!item.image_url) return;
-    setPhotoBusy(true);
-    setError(null);
-    try {
-      const path = extractStoragePath(item.image_url);
-      if (path) await supabase.storage.from("item-images").remove([path]);
-      const { error: dbErr } = await supabase.from("items").update({ image_url: null }).eq("id", item.id);
-      if (dbErr) throw new Error(dbErr.message);
-      setItem({ ...item, image_url: null });
-    } catch {
-      setError("Foto konnte nicht gelöscht werden.");
-    } finally {
-      setPhotoBusy(false);
-    }
   }
 
   // ── AI caption generation ──────────────────────────────────────────────
@@ -399,7 +355,7 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
           </button>
         </div>
 
-        {/* Photo */}
+        {/* Photo — new pipeline (client resize → /api/admin/upload-photo) */}
         <div className="mt-3 ml-0 flex items-start gap-3">
           <span
             className="font-sans text-[10px] tracking-regal uppercase w-20 shrink-0 pt-1"
@@ -408,54 +364,12 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
             Foto
           </span>
           <div className="flex-1 min-w-0">
-            {item.image_url ? (
-              <div className="flex flex-col gap-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.image_url}
-                  alt={item.name}
-                  className="w-full object-cover"
-                  style={{ maxHeight: 160, maxWidth: 280 }}
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fileRef.current?.click()}
-                    disabled={photoBusy}
-                    className="font-sans text-xs tracking-regal uppercase px-4 py-3 transition disabled:opacity-30"
-                    style={{ border: '1px solid var(--color-dim)', color: 'var(--color-dim)' }}
-                  >
-                    {photoBusy ? "Lädt hoch…" : "Ändern"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={removePhoto}
-                    disabled={photoBusy}
-                    className="font-sans text-xs tracking-regal uppercase px-4 py-3 transition disabled:opacity-30"
-                    style={{ border: '1px solid var(--color-border)', color: 'var(--color-muted)' }}
-                  >
-                    {photoBusy ? "Löscht…" : "Entfernen"}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                disabled={photoBusy}
-                className="font-sans text-xs tracking-regal uppercase px-4 py-3 transition disabled:opacity-30"
-                style={{ border: '1px solid var(--color-border)', color: 'var(--color-dim)' }}
-              >
-                {photoBusy ? "Lädt hoch…" : "Foto hinzufügen"}
-              </button>
-            )}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={handleFile}
+            <PhotoUploader
+              target="carta-item"
+              id={item.id}
+              currentUrl={item.image_url}
+              onChange={(url) => setItem({ ...item, image_url: url })}
+              aspect="wide"
             />
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PhotoUploader } from "@/components/admin/PhotoUploader";
 
 // ── types ──────────────────────────────────────────────────────────────────
 type Property = {
@@ -13,6 +14,7 @@ type Property = {
   color_bg: string | null;
   color_primary: string | null;
   logo_url: string | null;
+  cover_url: string | null;
   website_url: string | null;
   instagram_url: string | null;
   facebook_url: string | null;
@@ -29,6 +31,7 @@ type Block = {
   title_en: string | null;
   body_de: string | null;
   body_en: string | null;
+  image_url: string | null;
   position: number;
 };
 
@@ -387,6 +390,34 @@ export function CasaAdminEditor({
             placeholder="Kurzbeschreibung Ihrer Unterkunft"
             onSave={(v) => saveProperty("about", v || null)}
           />
+
+          {/* Cover photo */}
+          <div className="mt-6">
+            <div
+              className="font-sans uppercase mb-2"
+              style={{
+                fontSize: "10px",
+                color: "rgba(10,10,10,0.50)",
+                letterSpacing: "0.18em",
+              }}
+            >
+              Titelbild · Cover (optional)
+            </div>
+            <p
+              className="font-display italic mb-3"
+              style={{ fontSize: "12px", color: "rgba(10,10,10,0.45)" }}
+            >
+              Erscheint oben auf der Gästekarte — Fassade, gemütliche Ecke, Eingang.
+            </p>
+            <PhotoUploader
+              target="casa-cover"
+              id={property.id}
+              currentUrl={property.cover_url}
+              onChange={(url) => saveProperty("cover_url", url)}
+              aspect="wide"
+              label="+ Titelbild hinzufügen"
+            />
+          </div>
         </section>
 
         {/* Links & Kontakt */}
@@ -565,6 +596,27 @@ export function CasaAdminEditor({
                 value={b.block_type}
                 onSave={(v) => saveBlock(b.id, "block_type", v || "other")}
               />
+
+              <div className="mt-5">
+                <div
+                  className="font-sans uppercase mb-2"
+                  style={{
+                    fontSize: "10px",
+                    color: "rgba(10,10,10,0.50)",
+                    letterSpacing: "0.18em",
+                  }}
+                >
+                  Bild (optional)
+                </div>
+                <PhotoUploader
+                  target="casa-block"
+                  id={b.id}
+                  currentUrl={b.image_url}
+                  onChange={(url) => saveBlock(b.id, "image_url", url)}
+                  aspect="wide"
+                  label="+ Bild zum Block"
+                />
+              </div>
             </div>
           ))}
 
