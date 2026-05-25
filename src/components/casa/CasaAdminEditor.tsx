@@ -124,7 +124,9 @@ function EditableField({
 
 // ── QR block ──────────────────────────────────────────────────────────────
 function QRBlock({ slug }: { slug: string }) {
-  const url = `https://www.oriz.at/casa/${slug}`;
+  // Short URL — denser QR, easier to scan from distance.
+  // /casa/[slug] still works as the long URL.
+  const url = `https://oriz.at/c/${slug}`;
   const qrDisplay = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}&bgcolor=ffffff&color=0a0a0a&margin=2`;
   const qrDownload = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&data=${encodeURIComponent(url)}&bgcolor=ffffff&color=0a0a0a&margin=4&format=png`;
 
