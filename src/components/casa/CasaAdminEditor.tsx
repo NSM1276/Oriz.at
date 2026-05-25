@@ -13,6 +13,12 @@ type Property = {
   color_bg: string | null;
   color_primary: string | null;
   logo_url: string | null;
+  website_url: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  google_maps_url: string | null;
+  phone: string | null;
+  email: string | null;
 };
 
 type Block = {
@@ -361,6 +367,69 @@ export function CasaAdminEditor({
             multiline
             placeholder="Kurzbeschreibung Ihrer Unterkunft"
             onSave={(v) => saveProperty("about", v || null)}
+          />
+        </section>
+
+        {/* Links & Kontakt */}
+        <section
+          className="mb-12 py-8"
+          style={{
+            borderTop: "1px solid rgba(10,10,10,0.10)",
+            borderBottom: "1px solid rgba(10,10,10,0.10)",
+          }}
+        >
+          <h2
+            className="font-sans uppercase mb-2"
+            style={{
+              fontSize: "11px",
+              color: "#C69B3C",
+              letterSpacing: "0.28em",
+            }}
+          >
+            Links &amp; Kontakt
+          </h2>
+          <p
+            className="font-display italic mb-6"
+            style={{ fontSize: "13px", color: "rgba(10,10,10,0.50)" }}
+          >
+            Erscheinen als kleine Icon-Buttons oben auf der Gästekarte.
+            Leere Felder werden ausgeblendet.
+          </p>
+          <EditableField
+            label="Website"
+            value={property.website_url}
+            placeholder="https://ihre-unterkunft.at"
+            onSave={(v) => saveProperty("website_url", v || null)}
+          />
+          <EditableField
+            label="Google Maps"
+            value={property.google_maps_url}
+            placeholder="https://maps.google.com/?q=..."
+            onSave={(v) => saveProperty("google_maps_url", v || null)}
+          />
+          <EditableField
+            label="Instagram"
+            value={property.instagram_url}
+            placeholder="https://instagram.com/ihre-unterkunft"
+            onSave={(v) => saveProperty("instagram_url", v || null)}
+          />
+          <EditableField
+            label="Facebook"
+            value={property.facebook_url}
+            placeholder="https://facebook.com/ihre-unterkunft"
+            onSave={(v) => saveProperty("facebook_url", v || null)}
+          />
+          <EditableField
+            label="Telefon"
+            value={property.phone}
+            placeholder="+43 1 234 5678"
+            onSave={(v) => saveProperty("phone", v || null)}
+          />
+          <EditableField
+            label="E-Mail"
+            value={property.email}
+            placeholder="kontakt@ihre-unterkunft.at"
+            onSave={(v) => saveProperty("email", v || null)}
           />
         </section>
 

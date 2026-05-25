@@ -24,7 +24,9 @@ export default async function CasaAdminPage({
   const { data: property } = await supabase
     .schema("casa")
     .from("properties")
-    .select("id, slug, name, city, about, color_bg, color_primary, logo_url")
+    .select(
+      "id, slug, name, city, about, color_bg, color_primary, logo_url, website_url, instagram_url, facebook_url, google_maps_url, phone, email",
+    )
     .eq("slug", slug)
     .maybeSingle();
 

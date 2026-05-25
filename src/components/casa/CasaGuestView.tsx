@@ -2,6 +2,120 @@
 
 import { useEffect, useState } from "react";
 
+// Small icon row of owner-managed external links: website, IG, FB,
+// Google Maps, phone, email. Each renders only if the URL is set,
+// keeping the row visually quiet on properties that have few links.
+function PropertyLinks({
+  property,
+  accent,
+}: {
+  property: Property;
+  accent: string;
+}) {
+  const items: { href: string; label: string; icon: React.ReactNode }[] = [];
+  if (property.website_url) {
+    items.push({
+      href: property.website_url,
+      label: "Website",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20" />
+        </svg>
+      ),
+    });
+  }
+  if (property.instagram_url) {
+    items.push({
+      href: property.instagram_url,
+      label: "Instagram",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="5" />
+          <circle cx="12" cy="12" r="4" />
+          <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" />
+        </svg>
+      ),
+    });
+  }
+  if (property.facebook_url) {
+    items.push({
+      href: property.facebook_url,
+      label: "Facebook",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
+        </svg>
+      ),
+    });
+  }
+  if (property.google_maps_url) {
+    items.push({
+      href: property.google_maps_url,
+      label: "Karte",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+      ),
+    });
+  }
+  if (property.phone) {
+    items.push({
+      href: `tel:${property.phone.replace(/\s+/g, "")}`,
+      label: property.phone,
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0122 16.92z" />
+        </svg>
+      ),
+    });
+  }
+  if (property.email) {
+    items.push({
+      href: `mailto:${property.email}`,
+      label: "E-Mail",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="M3 7l9 6 9-6" />
+        </svg>
+      ),
+    });
+  }
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap justify-center gap-2 mt-8">
+      {items.map((it, i) => {
+        const isExternal = it.href.startsWith("http");
+        return (
+          <a
+            key={i}
+            href={it.href}
+            target={isExternal ? "_blank" : undefined}
+            rel={isExternal ? "noreferrer noopener" : undefined}
+            className="inline-flex items-center gap-2 font-sans uppercase transition-opacity hover:opacity-80"
+            style={{
+              fontSize: "10px",
+              letterSpacing: "0.18em",
+              color: "rgba(245,240,236,0.65)",
+              border: `1px solid ${accent}55`,
+              padding: "8px 12px",
+            }}
+            aria-label={it.label}
+          >
+            <span style={{ color: accent }}>{it.icon}</span>
+            <span>{it.label}</span>
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
 // City-aware curated recommendations. ORIZ manages these centrally;
 // owner of the property doesn't add or edit them. Affiliate links will
 // be wired in later — these are visual placeholders so the section's
@@ -165,6 +279,12 @@ type Property = {
   color_bg: string | null;
   color_primary: string | null;
   logo_url: string | null;
+  website_url: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  google_maps_url: string | null;
+  phone: string | null;
+  email: string | null;
 };
 
 type ContentBlock = {
@@ -297,6 +417,9 @@ export function CasaGuestView({
             }}
             aria-hidden
           />
+          {/* External links row */}
+          <PropertyLinks property={property} accent={accent} />
+
           {property.about && (
             <p
               className="font-display italic mt-8 mx-auto"
