@@ -7,6 +7,7 @@ import { SignOutButton } from "@/components/admin/SignOutButton";
 import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
 import { SuperAdminView } from "@/components/admin/SuperAdminView";
 import { QRCodeBlock } from "@/components/admin/QRCodeBlock";
+import { RoleHub } from "@/components/admin/RoleHub";
 import { limitForPlan } from "@/lib/plans";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
@@ -36,6 +37,26 @@ export default async function AdminPage() {
   if (!user) redirect("/admin/login");
 
   const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
+
+  // Role hub: route the user to the right product based on what they own.
+  // Super admin sees everything; everyone else gets routed by ownership.
+  if (!isSuperAdmin) {
+    const [{ data: carta }, { data: casa }] = await Promise.all([
+      supabase.from("venues").select("slug").eq("owner_id", user.id).limit(2),
+      supabase.schema("casa").from("properties").select("slug").eq("owner_id", user.id).limit(2),
+    ]);
+    const cartaCount = carta?.length ?? 0;
+    const casaCount = casa?.length ?? 0;
+    // Exactly one Casa property and no Carta → go straight to Casa admin.
+    if (casaCount >= 1 && cartaCount === 0) {
+      redirect(`/admin/casa/${casa![0].slug}`);
+    }
+    // Owns both products → show a chooser hub.
+    if (casaCount >= 1 && cartaCount >= 1) {
+      return <RoleHub user={user.email ?? ""} carta={carta!} casa={casa!} />;
+    }
+    // Only Carta or nothing → fall through to existing Carta-owner view below.
+  }
 
   if (isSuperAdmin) {
     const { data: venues } = await supabase
