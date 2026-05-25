@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import CasaDemo from "@/components/casa/CasaDemo";
+import CasaContactForm from "@/components/casa/CasaContactForm";
 
 export const metadata: Metadata = {
   title: "ORIZ Casa — Digitale Willkommenskarte für Apartments & Pensionen",
@@ -199,8 +199,8 @@ export default function CasaPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-10 md:mt-14">
-            <Link
-              href="/#kontakt"
+            <a
+              href="#kontakt"
               className="font-sans uppercase tracking-regal bg-parchment text-onyx hover:bg-gold transition-colors duration-300"
               style={{
                 fontSize: "clamp(9px, 1vw, 11px)",
@@ -209,7 +209,7 @@ export default function CasaPage() {
               }}
             >
               Beratung anfragen
-            </Link>
+            </a>
             <a
               href="#wie-es-funktioniert"
               className="font-sans uppercase tracking-regal text-parchment/55 hover:text-gold transition-colors duration-300"
@@ -521,81 +521,85 @@ export default function CasaPage() {
         </div>
       </section>
 
-      {/* ── Bottom CTA ── */}
+      {/* ── Contact section with inline form ── */}
       <section
-        className="py-24 px-6 text-center"
+        id="kontakt"
+        className="py-28 px-6"
         style={{
           backgroundColor: "#0A0A0A",
           borderTop: "1px solid rgba(245,240,236,0.05)",
         }}
       >
         <div className="max-w-xl mx-auto">
-          <span
-            className="font-sans uppercase"
-            style={{
-              fontSize: "10px",
-              color: "#C69B3C",
-              letterSpacing: "0.32em",
-            }}
-          >
-            Beratung
-          </span>
-          <h2
-            className="font-display font-light mt-6 mb-6"
-            style={{
-              fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
-              color: "#F5F0EC",
-            }}
-          >
-            Bereit für Ihre digitale<br />
-            <span style={{ fontStyle: "italic" }}>Willkommenskarte?</span>
-          </h2>
-          <div
-            className="mx-auto mb-10"
-            style={{ width: "48px", height: "1px", backgroundColor: "#C69B3C", opacity: 0.4 }}
-            aria-hidden
-          />
-          <p
-            className="font-display italic mb-12"
-            style={{
-              fontSize: "1.1rem",
-              color: "rgba(245,240,236,0.55)",
-              lineHeight: 1.65,
-            }}
-          >
-            Schreiben Sie uns kurz — wir melden uns innerhalb von 24 Stunden
-            mit einem individuellen Vorschlag.
-          </p>
-          <Link
-            href="/#kontakt"
-            className="font-sans uppercase tracking-regal bg-parchment text-onyx hover:bg-gold transition-colors duration-300 inline-block"
-            style={{
-              fontSize: "11px",
-              padding: "15px 40px",
-              letterSpacing: "0.2em",
-            }}
-          >
-            Beratung anfragen
-          </Link>
+          <div className="text-center mb-12">
+            <span
+              className="font-sans uppercase"
+              style={{
+                fontSize: "10px",
+                color: "#C69B3C",
+                letterSpacing: "0.32em",
+              }}
+            >
+              Beratung
+            </span>
+            <h2
+              className="font-display font-light mt-6 mb-6"
+              style={{
+                fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+                color: "#F5F0EC",
+              }}
+            >
+              Bereit für Ihre digitale<br />
+              <span style={{ fontStyle: "italic" }}>Willkommenskarte?</span>
+            </h2>
+            <div
+              className="mx-auto mb-8"
+              style={{ width: "48px", height: "1px", backgroundColor: "#C69B3C", opacity: 0.4 }}
+              aria-hidden
+            />
+            <p
+              className="font-display italic mx-auto"
+              style={{
+                fontSize: "1.05rem",
+                color: "rgba(245,240,236,0.55)",
+                lineHeight: 1.65,
+                maxWidth: "440px",
+              }}
+            >
+              Erzählen Sie uns kurz, wie Ihre Unterkunft aussieht — wir
+              melden uns innerhalb von 24 Stunden mit einem individuellen
+              Vorschlag.
+            </p>
+          </div>
+
+          <CasaContactForm />
+
+          {/* WhatsApp alternative */}
+          <div className="mt-10 flex items-center justify-center gap-3">
+            <div
+              style={{ width: "32px", height: "1px", backgroundColor: "rgba(245,240,236,0.10)" }}
+              aria-hidden
+            />
+            <a
+              href="https://wa.me/4367764292055"
+              target="_blank"
+              rel="noreferrer"
+              className="font-sans uppercase hover:text-gold transition-colors"
+              style={{
+                fontSize: "10px",
+                color: "rgba(245,240,236,0.30)",
+                letterSpacing: "0.18em",
+              }}
+            >
+              oder direkt auf WhatsApp →
+            </a>
+            <div
+              style={{ width: "32px", height: "1px", backgroundColor: "rgba(245,240,236,0.10)" }}
+              aria-hidden
+            />
+          </div>
         </div>
       </section>
-
-      {/* ── Pilot notice ── */}
-      <div
-        className="py-6 px-6 text-center"
-        style={{ backgroundColor: "#0A0A0A", borderTop: "1px solid rgba(245,240,236,0.05)" }}
-      >
-        <p
-          className="font-sans uppercase"
-          style={{
-            fontSize: "9px",
-            color: "rgba(245,240,236,0.25)",
-            letterSpacing: "0.28em",
-          }}
-        >
-          Pilot · Inline-Kontaktformular folgt
-        </p>
-      </div>
     </main>
   );
 }
