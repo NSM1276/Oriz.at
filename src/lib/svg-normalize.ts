@@ -85,7 +85,7 @@ export function normalizeLogoSvg(raw: string): string {
     return ` ${attr}='currentColor'`;
   });
 
-  // Inline style attributes: replace fill/stroke colors there too
+  // Inline style attributes: replace fill/stroke colors there too (double-quoted)
   s = s.replace(/style\s*=\s*"([^"]*)"/gi, (_m, css) => {
     const cleaned = String(css).replace(
       /(fill|stroke)\s*:\s*([^;]+)/gi,
@@ -98,6 +98,20 @@ export function normalizeLogoSvg(raw: string): string {
       },
     );
     return `style="${cleaned}"`;
+  });
+  // Same pass for single-quoted style attributes
+  s = s.replace(/style\s*=\s*'([^']*)'/gi, (_m, css) => {
+    const cleaned = String(css).replace(
+      /(fill|stroke)\s*:\s*([^;]+)/gi,
+      (_mm, prop, val) => {
+        const v = String(val).trim().toLowerCase();
+        if (v === "none" || v === "transparent" || v.startsWith("url(") || v.startsWith("current")) {
+          return `${prop}:${val}`;
+        }
+        return `${prop}:currentColor`;
+      },
+    );
+    return `style='${cleaned}'`;
   });
 
   // Ensure the root <svg> has explicit width:100% / height:100% via CSS-friendly attrs,

@@ -118,9 +118,11 @@ export function VenueLogo({
 }
 
 function enforceHeight(svg: string, height: number): string {
-  return svg.replace(
-    /<svg\b([^>]*)>/i,
-    (_m, attrs) =>
-      `<svg${attrs} style="height:${height}px;width:auto;display:block">`,
-  );
+  const hStyle = `height:${height}px;width:auto;display:block`;
+  return svg.replace(/<svg\b([^>]*)>/i, (_m, attrs) => {
+    const stripped = attrs
+      .replace(/\s*style\s*=\s*"[^"]*"/gi, "")
+      .replace(/\s*style\s*=\s*'[^']*'/gi, "");
+    return `<svg${stripped} style="${hStyle}">`;
+  });
 }

@@ -2,11 +2,12 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/format";
 import { PrintButton } from "@/components/menu/PrintButton";
+import { VenueLogo } from "@/components/brand/VenueLogo";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
 export const revalidate = 0;
 
-type Row = Venue & { sections: (Section & { items: Item[] })[] };
+type Row = Venue & { logo_svg?: string | null; sections: (Section & { items: Item[] })[] };
 
 export default async function PrintPage({
   params,
@@ -19,7 +20,7 @@ export default async function PrintPage({
   const { data } = await supabase
     .from("venues")
     .select(
-      "id, slug, name, logo_url, about, currency, color_primary, color_bg, owner_id, created_at, sections(id, name, position, items(id, name, description, price_cents, allergens, is_active, position))",
+      "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, owner_id, created_at, sections(id, name, position, items(id, name, description, price_cents, allergens, is_active, position))",
     )
     .eq("slug", venueSlug)
     .maybeSingle<Row>();
@@ -53,18 +54,18 @@ export default async function PrintPage({
 
           {/* Header */}
           <header className="text-center mb-10">
-            {data.logo_url ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={data.logo_url}
-                alt={data.name}
-                className="h-28 w-auto mx-auto"
+            <div className="flex justify-center">
+              <VenueLogo
+                svg={data.logo_svg}
+                url={data.logo_url}
+                name={data.name}
+                color="auto"
+                bg="#FFFFFF"
+                accent={data.color_primary}
+                height={112}
+                isDarkBg={false}
               />
-            ) : (
-              <h1 className="font-display text-5xl" style={{ color: "#0A0A0A" }}>
-                {data.name}
-              </h1>
-            )}
+            </div>
             {data.about && (
               <p
                 className="font-display italic text-base mt-5 max-w-sm mx-auto leading-relaxed"
@@ -109,7 +110,7 @@ export default async function PrintPage({
                         {item.description}
                       </p>
                     )}
-                    {item.allergens && (
+                    {item.allergens?.trim() && (
                       <p
                         className="font-sans text-[10px] mt-0.5"
                         style={{ color: "rgba(10,10,10,0.35)" }}

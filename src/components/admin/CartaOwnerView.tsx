@@ -15,6 +15,7 @@ type VenueWithSections = Venue & {
 };
 
 function getLuminance(hex: string): number {
+  if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return 0.5;
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
   const b = parseInt(hex.slice(5, 7), 16) / 255;

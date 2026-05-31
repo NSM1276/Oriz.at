@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { PhotoUploader } from "@/components/admin/PhotoUploader";
 import type { Item } from "@/lib/supabase/types";
 
@@ -12,9 +11,19 @@ type Props = {
   canUseAi?: boolean;
 };
 
+async function patchItem(itemId: string, updates: Record<string, unknown>): Promise<string | null> {
+  const res = await fetch("/api/admin/item-update", {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ itemId, updates }),
+  });
+  if (res.ok) return null;
+  const json = await res.json().catch(() => ({}));
+  return (json as { error?: string }).error ?? "Fehler beim Speichern.";
+}
+
 export function ItemEditor({ initial, canUseAi = true }: Props) {
   const router = useRouter();
-  const supabase = createClient();
 
   const [item, setItem] = useState<Item>(initial);
   const [priceInput, setPriceInput] = useState((initial.price_cents / 100).toFixed(2));
@@ -65,11 +74,11 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
     setItem(next);
     setPriceInput((cents / 100).toFixed(2));
     startTransition(async () => {
-      const { error } = await supabase.from("items").update({ price_cents: cents }).eq("id", item.id);
-      if (error) {
+      const err = await patchItem(item.id, { price_cents: cents });
+      if (err) {
         setItem(prev);
         setPriceInput((prev.price_cents / 100).toFixed(2));
-        setError(error.message);
+        setError(err);
       } else setError(null);
     });
   }
@@ -81,11 +90,11 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
     const prev = item;
     setItem({ ...item, allergens: val });
     startTransition(async () => {
-      const { error } = await supabase.from("items").update({ allergens: val }).eq("id", item.id);
-      if (error) {
+      const err = await patchItem(item.id, { allergens: val });
+      if (err) {
         setItem(prev);
         setAllergensInput(prev.allergens ?? "");
-        setError(error.message);
+        setError(err);
       } else setError(null);
     });
   }
@@ -110,11 +119,11 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
     const prev = item;
     setItem({ ...item, ai_caption: val });
     startTransition(async () => {
-      const { error } = await supabase.from("items").update({ ai_caption: val }).eq("id", item.id);
-      if (error) {
+      const err = await patchItem(item.id, { ai_caption: val });
+      if (err) {
         setItem(prev);
         setCaptionInput(prev.ai_caption ?? "");
-        setError(error.message);
+        setError(err);
       } else setError(null);
     });
   }
@@ -125,10 +134,10 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
     const next = { ...item, is_active: !item.is_active };
     setItem(next);
     startTransition(async () => {
-      const { error } = await supabase.from("items").update({ is_active: next.is_active }).eq("id", item.id);
-      if (error) {
+      const err = await patchItem(item.id, { is_active: next.is_active });
+      if (err) {
         setItem(prev);
-        setError(error.message);
+        setError(err);
       } else setError(null);
     });
   }

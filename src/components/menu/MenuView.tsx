@@ -33,17 +33,16 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
           filter: `venue_id=eq.${venue.id}`,
         },
         (payload) => {
-          setItems((prev) => {
-            const next = new Map(prev);
-            if (payload.eventType === "DELETE") {
-              const old = payload.old as Item;
-              if (old?.id) next.delete(old.id);
-            } else {
-              const row = payload.new as Item;
-              if (row?.id) next.set(row.id, row);
+          if (payload.eventType === "DELETE") {
+            const old = payload.old as Item;
+            if (old?.id) {
+              setItems((prev) => { const next = new Map(prev); next.delete(old.id); return next; });
+              setSelectedItem((cur) => (cur?.id === old.id ? null : cur));
             }
-            return next;
-          });
+          } else {
+            const row = payload.new as Item;
+            if (row?.id) setItems((prev) => { const next = new Map(prev); next.set(row.id, row); return next; });
+          }
         },
       )
       .subscribe();
@@ -71,6 +70,7 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
   // isDark = true  → use light text (parchment)
   // isDark = false → use dark text (onyx)
   function getLuminance(hex: string): number {
+    if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return 0.5;
     const r = parseInt(hex.slice(1, 3), 16) / 255;
     const g = parseInt(hex.slice(3, 5), 16) / 255;
     const b = parseInt(hex.slice(5, 7), 16) / 255;

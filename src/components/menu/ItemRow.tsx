@@ -67,7 +67,7 @@ export function ItemRow({
           </p>
         )}
 
-        {item.allergens && (
+        {item.allergens?.trim() && (
           <p
             className="font-sans text-[11px] mt-1.5 tracking-wide"
             style={{ color: 'var(--color-muted)' }}

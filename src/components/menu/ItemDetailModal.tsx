@@ -132,7 +132,7 @@ export function ItemDetailModal({ item, currency, onClose }: Props) {
                 ) : null}
 
                 {/* Allergens */}
-                {item.allergens && (
+                {item.allergens?.trim() && (
                   <p
                     className="font-sans text-[11px] tracking-wide mt-4 pt-4"
                     style={{
