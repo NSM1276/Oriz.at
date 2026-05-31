@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PhotoUploader } from "@/components/admin/PhotoUploader";
 import { VenueLogo } from "@/components/brand/VenueLogo";
@@ -31,6 +31,24 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
   const [googleMaps, setGoogleMaps] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ownerEmail, setOwnerEmail] = useState("");
+  const [ownerCurrent, setOwnerCurrent] = useState<string | null>(null);
+  const [ownerSaving, setOwnerSaving] = useState(false);
+  const [ownerError, setOwnerError] = useState<string | null>(null);
+  const [ownerSuccess, setOwnerSuccess] = useState(false);
+
+  const loadOwner = useCallback(async (venueId: string) => {
+    setOwnerCurrent(null);
+    setOwnerEmail("");
+    setOwnerError(null);
+    setOwnerSuccess(false);
+    const res = await fetch(`/api/admin/assign-owner?venueId=${venueId}`);
+    if (res.ok) {
+      const data = await res.json() as { ownerEmail: string | null };
+      setOwnerCurrent(data.ownerEmail);
+      setOwnerEmail(data.ownerEmail ?? "");
+    }
+  }, []);
 
   useEffect(() => {
     if (venue) {
@@ -43,8 +61,30 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
       setInstagram(venue.instagram_url ?? "");
       setGoogleMaps(venue.google_maps_url ?? "");
       setError(null);
+      void loadOwner(venue.id);
     }
-  }, [venue]);
+  }, [venue, loadOwner]);
+
+  async function handleAssignOwner() {
+    if (!venue) return;
+    setOwnerSaving(true);
+    setOwnerError(null);
+    setOwnerSuccess(false);
+    const res = await fetch("/api/admin/assign-owner", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ venueId: venue.id, ownerEmail: ownerEmail.trim() || null }),
+    });
+    const json = await res.json() as { ok?: boolean; ownerEmail?: string | null; error?: string };
+    setOwnerSaving(false);
+    if (!res.ok) {
+      setOwnerError(json.error ?? "Fehler");
+    } else {
+      setOwnerCurrent(json.ownerEmail ?? null);
+      setOwnerSuccess(true);
+      setTimeout(() => setOwnerSuccess(false), 3000);
+    }
+  }
 
   async function handleSave() {
     if (!venue) return;
@@ -203,6 +243,38 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                 placeholder="https://maps.google.com/..." />
             </div>
+          </div>
+
+          {/* Owner assignment */}
+          <div className="border-t border-onyx/10 pt-6 space-y-3">
+            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">Venue Owner</p>
+            {ownerCurrent && (
+              <p className="font-sans text-xs text-onyx/60">
+                Current: <span className="text-onyx font-medium">{ownerCurrent}</span>
+              </p>
+            )}
+            {!ownerCurrent && (
+              <p className="font-sans text-xs text-onyx/40 italic">No owner assigned yet</p>
+            )}
+            <div className="flex gap-2">
+              <input
+                type="email"
+                value={ownerEmail}
+                onChange={e => setOwnerEmail(e.target.value)}
+                placeholder="client@email.com"
+                className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
+              />
+              <button
+                type="button"
+                onClick={handleAssignOwner}
+                disabled={ownerSaving}
+                className="bg-onyx text-parchment font-sans text-[11px] tracking-regal uppercase px-4 py-2 hover:bg-onyx/85 transition-colors disabled:opacity-40 whitespace-nowrap"
+              >
+                {ownerSaving ? "…" : ownerEmail.trim() ? "Assign" : "Clear"}
+              </button>
+            </div>
+            {ownerError && <p className="font-sans text-xs text-red-600">{ownerError}</p>}
+            {ownerSuccess && <p className="font-sans text-xs text-green-700">Owner updated ✓</p>}
           </div>
 
           {error && <p className="font-sans text-xs text-red-600">{error}</p>}
