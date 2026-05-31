@@ -56,14 +56,16 @@ export function ItemDetailModal({ item, currency, onClose }: Props) {
             <>
               {/* Photo — only if set; hidden silently if URL is broken */}
               {item.image_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.image_url}
-                  alt={item.name}
-                  className="w-full object-cover"
-                  style={{ maxHeight: 220 }}
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
+                <div className="w-full overflow-hidden" style={{ maxHeight: 220 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.image_url}
+                    alt={item.name}
+                    className="kenburns w-full object-cover"
+                    style={{ maxHeight: 220 }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                </div>
               )}
 
               {/* Content — scrollable if text is long */}
