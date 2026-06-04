@@ -45,10 +45,12 @@ function ModalClassic({ item, currency, onClose, accent }: Omit<Props, "theme"> 
           }}
         >
           {item.image_url && (
-            <div className="w-full overflow-hidden">
+            <div className="w-full overflow-hidden shrink-0"
+              style={{ backgroundColor: "var(--color-bg, #F5F0EC)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image_url} alt={item.name}
-                className="kenburns w-full h-auto block"
+                className="kenburns w-full block object-contain"
+                style={{ maxHeight: "45dvh" }}
                 onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = "none"; }}
               />
             </div>
@@ -142,12 +144,14 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
             <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "rgba(245,240,236,0.2)" }} />
           </div>
 
-          {/* Photo — natural size, no crop */}
+          {/* Photo — full, no crop, max 45dvh */}
           {item.image_url ? (
-            <div className="relative overflow-hidden shrink-0">
+            <div className="relative overflow-hidden shrink-0"
+              style={{ backgroundColor: "#1C1208" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image_url} alt={item.name}
-                className="kenburns w-full h-auto block"
+                className="kenburns w-full block object-contain"
+                style={{ maxHeight: "45dvh" }}
                 onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = "none"; }}
               />
               {/* Gradient overlay bottom */}
@@ -279,12 +283,14 @@ function ModalModern({ item, currency, onClose, accent }: Omit<Props, "theme"> &
             </button>
           </div>
 
-          {/* Photo — natural size, no crop */}
+          {/* Photo — full, no crop, max 45dvh */}
           {item.image_url && (
-            <div className="overflow-hidden shrink-0">
+            <div className="overflow-hidden shrink-0"
+              style={{ backgroundColor: "var(--color-bg, #F5F0EC)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image_url} alt={item.name}
-                className="kenburns w-full h-auto block"
+                className="kenburns w-full block object-contain"
+                style={{ maxHeight: "45dvh" }}
                 onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = "none"; }}
               />
             </div>

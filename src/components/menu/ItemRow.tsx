@@ -30,7 +30,7 @@ export function ItemRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 flex-wrap">
           <h3
-            className="font-display text-xl md:text-2xl transition-opacity group-hover:opacity-70"
+            className="font-display font-semibold text-xl md:text-2xl transition-opacity group-hover:opacity-70"
             style={{ color: 'var(--color-text)' }}
           >
             {item.name}

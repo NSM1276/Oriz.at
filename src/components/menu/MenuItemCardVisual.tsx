@@ -68,14 +68,15 @@ export function MenuItemCardVisual({ item, currency, onClick }: Props) {
         <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
           <div className="flex items-end gap-2">
             <h3
-              className="font-display text-white flex-1 min-w-0"
+              className="font-sans font-semibold text-white flex-1 min-w-0"
               style={{
-                fontSize: "0.9rem",
+                fontSize: "0.85rem",
                 lineHeight: 1.2,
-                textShadow: "0 1px 6px rgba(0,0,0,0.9)",
+                textShadow: "0 1px 8px rgba(0,0,0,0.95)",
                 overflow: "hidden",
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
+                letterSpacing: "0.01em",
               }}
             >
               {item.name}
@@ -121,7 +122,7 @@ export function MenuItemCardVisual({ item, currency, onClick }: Props) {
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 flex-wrap">
           <h3
-            className="font-display text-xl transition-opacity group-hover:opacity-60 group-active:opacity-60"
+            className="font-sans font-medium text-lg transition-opacity group-hover:opacity-60 group-active:opacity-60"
             style={{ color: "var(--color-text)" }}
           >
             {item.name}

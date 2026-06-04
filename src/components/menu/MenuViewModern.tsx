@@ -61,10 +61,11 @@ function ModernItemRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
             <h3
-              className="font-display font-light leading-tight transition-opacity group-hover:opacity-60"
+              className="font-sans font-medium leading-tight transition-opacity group-hover:opacity-60"
               style={{
-                fontSize: "clamp(1.15rem, 3vw, 1.45rem)",
+                fontSize: "clamp(1.05rem, 3vw, 1.25rem)",
                 color: "var(--color-text)",
+                letterSpacing: "-0.01em",
               }}
             >
               {item.name}
@@ -89,7 +90,7 @@ function ModernItemRow({
           </div>
           {item.description && (
             <p
-              className="font-sans text-[13px] mt-0.5 leading-snug"
+              className="font-sans text-sm mt-0.5 leading-snug"
               style={{ color: "var(--color-muted)" }}
             >
               {item.description}
@@ -97,7 +98,7 @@ function ModernItemRow({
           )}
           {item.allergens?.trim() && (
             <p
-              className="font-sans text-[10px] mt-1 uppercase tracking-wider"
+              className="font-sans text-[11px] mt-1 tracking-wide"
               style={{ color: "var(--color-muted)", opacity: 0.6 }}
             >
               {item.allergens}
