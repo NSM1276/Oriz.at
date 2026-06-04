@@ -15,6 +15,7 @@ export type Venue = {
   google_maps_url?: string | null;
   ai_credits_used?: number;
   ai_credits_reset?: string;
+  menu_theme?: 'classic' | 'modern' | 'visual';
 };
 
 export type Section = {

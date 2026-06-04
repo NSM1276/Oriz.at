@@ -1,24 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { SectionBlock } from "./SectionBlock";
 import { ItemDetailModal } from "./ItemDetailModal";
-import { MenuViewVisual } from "./MenuViewVisual";
-import { MenuViewModern } from "./MenuViewModern";
+import { MenuItemCardVisual } from "./MenuItemCardVisual";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import type { Item, MenuPayload } from "@/lib/supabase/types";
 
-export function MenuView({ initial }: { initial: MenuPayload }) {
-  const theme = initial.venue.menu_theme ?? "classic";
-  if (theme === "visual") return <MenuViewVisual initial={initial} />;
-  if (theme === "modern") return <MenuViewModern initial={initial} />;
-  // falls through to Classic below
+export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
   const { venue, sections } = initial;
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
   const closeItem = useCallback(() => setSelectedItem(null), []);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const [items, setItems] = useState<Map<string, Item>>(() => {
     const map = new Map<string, Item>();
@@ -29,15 +25,10 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
-      .channel(`venue:${venue.id}:items`)
+      .channel(`venue:${venue.id}:items:visual`)
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "items",
-          filter: `venue_id=eq.${venue.id}`,
-        },
+        { event: "*", schema: "public", table: "items", filter: `venue_id=eq.${venue.id}` },
         (payload) => {
           if (payload.eventType === "DELETE") {
             const old = payload.old as Item;
@@ -52,7 +43,6 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
         },
       )
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [venue.id]);
 
@@ -68,13 +58,10 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
   useEffect(() => {
     if (venue.color_bg) {
       document.body.style.backgroundColor = venue.color_bg;
-      return () => { document.body.style.backgroundColor = ''; };
+      return () => { document.body.style.backgroundColor = ""; };
     }
   }, [venue.color_bg]);
 
-  // Compute relative luminance (WCAG formula) to decide text colour.
-  // isDark = true  → use light text (parchment)
-  // isDark = false → use dark text (onyx)
   function getLuminance(hex: string): number {
     if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return 0.5;
     const r = parseInt(hex.slice(1, 3), 16) / 255;
@@ -85,25 +72,44 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
     return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
   }
 
-  const isDark = venue.color_bg
-    ? getLuminance(venue.color_bg) < 0.4
-    : false;
-  const bg      = venue.color_bg      ?? '#F5F0EC';
-  const text    = isDark ? '#F5F0EC'  : '#0A0A0A';
-  const dim     = isDark ? 'rgba(245,240,236,0.60)' : 'rgba(10,10,10,0.60)';
-  const muted   = isDark ? 'rgba(245,240,236,0.30)' : 'rgba(10,10,10,0.30)';
-  const border  = isDark ? 'rgba(245,240,236,0.10)' : 'rgba(10,10,10,0.10)';
-  const accent  = venue.color_primary ?? '#C69B3C';
+  const isDark = venue.color_bg ? getLuminance(venue.color_bg) < 0.4 : false;
+  const bg = venue.color_bg ?? "#F5F0EC";
+  const text = isDark ? "#F5F0EC" : "#0A0A0A";
+  const dim = isDark ? "rgba(245,240,236,0.60)" : "rgba(10,10,10,0.60)";
+  const muted = isDark ? "rgba(245,240,236,0.30)" : "rgba(10,10,10,0.30)";
+  const border = isDark ? "rgba(245,240,236,0.10)" : "rgba(10,10,10,0.10)";
+  const accent = venue.color_primary ?? "#C69B3C";
 
   const cssVars = {
-    '--color-bg': bg, '--color-text': text, '--color-dim': dim,
-    '--color-muted': muted, '--color-border': border, '--accent': accent,
+    "--color-bg": bg, "--color-text": text, "--color-dim": dim,
+    "--color-muted": muted, "--color-border": border, "--accent": accent,
   } as React.CSSProperties;
 
+  // IntersectionObserver: track which section is in view to highlight nav tab
+  useEffect(() => {
+    if (sectionsWithItems.length === 0) return;
+    setActiveSection(sectionsWithItems[0].id);
+
+    const observers: IntersectionObserver[] = [];
+    sectionsWithItems.forEach((s) => {
+      const el = document.getElementById(`section-${s.id}`);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveSection(s.id); },
+        { rootMargin: "-40% 0px -55% 0px" },
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach((o) => o.disconnect());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sections]);
+
   return (
-    <div style={{ backgroundColor: bg, minHeight: '100vh', ...cssVars }}>
-      <main className="max-w-3xl mx-auto px-6 pt-8 md:pt-16 pb-8">
-        <header className="text-center mb-0">
+    <div style={{ backgroundColor: bg, minHeight: "100vh", ...cssVars }}>
+      <main className="max-w-2xl mx-auto px-4 pt-8 md:pt-14 pb-8">
+        {/* Header — compact on mobile */}
+        <header className="text-center mb-5">
           <VenueLogo
             name={venue.name}
             svg={venue.logo_svg}
@@ -111,13 +117,13 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
             bg={venue.color_bg}
             accent={venue.color_primary}
             color="auto"
-            height={70}
+            height={60}
             textColor={text}
             isDarkBg={isDark}
           />
           {venue.about && (
             <p
-              className="font-display italic text-base md:text-lg mt-3 max-w-xs md:max-w-xl mx-auto"
+              className="font-sans text-sm mt-2 max-w-xs mx-auto leading-snug"
               style={{
                 color: dim,
                 overflow: "hidden",
@@ -129,51 +135,103 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
               {venue.about}
             </p>
           )}
-          <div className="w-16 h-px mx-auto mt-4" style={{ backgroundColor: accent, opacity: 0.6 }} />
+          <div className="w-10 h-px mx-auto mt-3" style={{ backgroundColor: accent, opacity: 0.4 }} />
         </header>
 
-        {/* Section jump nav */}
+        {/* Sticky pill section nav */}
         {sectionsWithItems.length > 1 && (
           <div
-            className="sticky top-0 z-20 mt-8 -mx-6 px-6 overflow-x-auto"
-            style={{
-              backgroundColor: bg,
-              borderBottom: `1px solid ${border}`,
-              scrollbarWidth: 'none',
-            }}
+            className="sticky top-0 z-20 -mx-4 px-4 py-3 overflow-x-auto"
+            style={{ backgroundColor: bg, borderBottom: `1px solid ${border}`, scrollbarWidth: "none" }}
           >
-            <div className="flex gap-0 py-3 whitespace-nowrap">
-              {sectionsWithItems.map((s, i) => (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    const el = document.getElementById(`section-${s.id}`);
-                    if (!el) return;
-                    const top = el.getBoundingClientRect().top + window.scrollY - 56;
-                    window.scrollTo({ top, behavior: 'smooth' });
-                  }}
-                  className="font-sans text-[11px] tracking-regal uppercase px-4 py-1.5 transition-opacity hover:opacity-70"
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: accent,
-                    borderRight: i < sectionsWithItems.length - 1 ? `1px solid ${border}` : 'none',
-                  }}
-                >
-                  {s.name}
-                </button>
-              ))}
+            <div className="flex gap-2 whitespace-nowrap">
+              {sectionsWithItems.map((s) => {
+                const isActive = activeSection === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => {
+                      const el = document.getElementById(`section-${s.id}`);
+                      if (!el) return;
+                      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 60, behavior: "smooth" });
+                    }}
+                    className="relative font-sans text-[11px] tracking-regal uppercase px-4 py-1.5 rounded-full transition-colors duration-200"
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: isActive ? bg : accent,
+                      backgroundColor: isActive ? accent : "transparent",
+                      outline: isActive ? "none" : `1px solid ${border}`,
+                    }}
+                  >
+                    {s.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {sectionsWithItems.map((s) => (
-          <SectionBlock key={s.id} section={s} items={s.items} currency={venue.currency} onItemClick={openItem} />
-        ))}
+        {/* Sections */}
+        {sectionsWithItems.map((s, sIdx) => {
+          if (s.items.length === 0) return null;
 
-        <footer className="mt-24 mb-10 flex flex-col items-center gap-6">
+          // Split items: photo items in a 2-col grid, text-only items in a list
+          const photoItems = s.items.filter((it) => it.image_url);
+          const textItems = s.items.filter((it) => !it.image_url);
+
+          return (
+            <section
+              key={s.id}
+              id={`section-${s.id}`}
+              className="mt-10 md:mt-14"
+            >
+              {/* Section header */}
+              <header className="mb-4 flex items-center gap-3">
+                <span className="font-sans text-[11px] tracking-regal uppercase shimmer-title">
+                  {s.name}
+                </span>
+                <div className="flex-1 h-px" style={{ backgroundColor: border }} />
+              </header>
+
+              {/* Photo grid — 2 columns; odd last item spans full width */}
+              {photoItems.length > 0 && (
+                <div
+                  className="grid gap-3 mb-3"
+                  style={{ gridTemplateColumns: "1fr 1fr" }}
+                >
+                  {photoItems.map((item, idx) => {
+                    const isLastOdd = photoItems.length % 2 === 1 && idx === photoItems.length - 1;
+                    return (
+                      <div
+                        key={item.id}
+                        style={isLastOdd ? { gridColumn: "1 / -1" } : undefined}
+                      >
+                        <MenuItemCardVisual item={item} currency={venue.currency} onClick={openItem} />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Text-only list */}
+              {textItems.length > 0 && (
+                <ul>
+                  {textItems.map((item) => (
+                    <li key={item.id}>
+                      <MenuItemCardVisual item={item} currency={venue.currency} onClick={openItem} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          );
+        })}
+
+        {/* Footer */}
+        <footer className="mt-14 mb-8 flex flex-col items-center gap-5">
           <div className="flex items-center gap-6">
-
-            {/* Instagram */}
             {venue.instagram_url ? (
               <a href={venue.instagram_url} target="_blank" rel="noreferrer"
                 className="flex flex-col items-center gap-1.5 transition-opacity hover:opacity-70"
@@ -191,8 +249,6 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
                 <span className="font-sans text-[9px] tracking-regal uppercase">Instagram</span>
               </div>
             )}
-
-            {/* Google Maps */}
             {venue.google_maps_url ? (
               <a href={venue.google_maps_url} target="_blank" rel="noreferrer"
                 className="flex flex-col items-center gap-1.5 transition-opacity hover:opacity-70"
@@ -210,33 +266,14 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
                 <span className="font-sans text-[9px] tracking-regal uppercase">Maps</span>
               </div>
             )}
-
-            {/* Facebook — placeholder */}
-            <div className="flex flex-col items-center gap-1.5" style={{ color: muted }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-              <span className="font-sans text-[9px] tracking-regal uppercase">Facebook</span>
-            </div>
-
-            {/* Website — placeholder */}
-            <div className="flex flex-col items-center gap-1.5" style={{ color: muted }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-              </svg>
-              <span className="font-sans text-[9px] tracking-regal uppercase">Website</span>
-            </div>
-
           </div>
-
           <span className="font-sans text-[11px] tracking-regal uppercase" style={{ color: muted }}>
             Powered by ORIZ
           </span>
         </footer>
       </main>
 
-      <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} />
+      <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} theme="visual" accent={accent} />
     </div>
   );
 }

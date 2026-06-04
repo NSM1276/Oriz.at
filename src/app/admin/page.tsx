@@ -46,7 +46,7 @@ export default async function AdminPage() {
   if (isSuperAdmin) {
     const { data: venues } = await supabase
       .from("venues")
-      .select("id, slug, name, about, color_bg, color_primary, logo_url, logo_svg, plan, instagram_url, google_maps_url, sections(id, items(id))")
+      .select("id, slug, name, about, color_bg, color_primary, logo_url, logo_svg, plan, menu_theme, instagram_url, google_maps_url, sections(id, items(id))")
       .order("created_at", { ascending: true })
       .returns<VenueRow[]>();
 
@@ -60,6 +60,7 @@ export default async function AdminPage() {
       logo_url: (v as { logo_url?: string | null }).logo_url ?? null,
       logo_svg: (v as { logo_svg?: string | null }).logo_svg ?? null,
       plan: v.plan ?? "trial",
+      menu_theme: ((v as { menu_theme?: string | null }).menu_theme ?? "classic") as "classic" | "visual" | "modern",
       instagram_url: (v as { instagram_url?: string | null }).instagram_url ?? null,
       google_maps_url: (v as { google_maps_url?: string | null }).google_maps_url ?? null,
       itemCount: v.sections?.reduce((acc, s) => acc + (s.items?.length ?? 0), 0) ?? 0,

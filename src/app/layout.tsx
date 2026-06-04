@@ -16,22 +16,41 @@ const garamond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "ORIZ — Stille Speisekarten für die Spitzengastronomie",
+  title: "ORIZ — Digitale Speisekarte & Hospitality Software aus Wien",
   description:
-    "ORIZ ersetzt die Papierkarte und die Restaurant-Website durch eine ruhige, lebendige Oberfläche. Aus Wien. DSGVO-konform.",
+    "ORIZ ersetzt die Papierkarte durch eine ruhige, lebendige Speisekarte per QR-Code. Carta · Casa · Screen — für Restaurants, Hotels & Pensionen. Aus Wien.",
+  metadataBase: new URL("https://oriz.at"),
+  alternates: {
+    canonical: "https://oriz.at",
+  },
   openGraph: {
-    title: "ORIZ — Digitale Exzellenz",
+    title: "ORIZ — Digitale Speisekarte für Restaurants & Hotels",
     description:
-      "Der stille Ersatz für die Papierkarte — und die Restaurant-Website.",
+      "Drei Produkte. Eine Sprache. Carta (Speisekarte), Casa (Begrüßungskarte), Screen (Lobby-Display) — quiet luxury für Gastronomie & Hospitality.",
     siteName: "ORIZ",
     locale: "de_AT",
     type: "website",
+    url: "https://oriz.at",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ORIZ — Digitale Exzellenz",
-    description: "Der stille Ersatz für die Papierkarte — und die Restaurant-Website.",
+    title: "ORIZ — Digitale Speisekarte aus Wien",
+    description: "Carta · Casa · Screen — quiet luxury für Gastronomie & Hospitality.",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  keywords: [
+    "digitale Speisekarte",
+    "QR Code Speisekarte",
+    "Restaurant Software Wien",
+    "Menükarte digital",
+    "Hotel Gästekarte",
+    "Hospitality Software",
+    "ORIZ",
+  ],
 };
 
 export default function RootLayout({

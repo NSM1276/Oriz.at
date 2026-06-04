@@ -20,7 +20,7 @@ export function ItemRow({
   return (
     <li
       onClick={clickable ? () => onClick(item) : undefined}
-      className="flex items-baseline gap-4 py-4 transition-opacity group"
+      className="flex items-center gap-4 py-4 transition-opacity group"
       style={{
         borderBottom: '1px solid var(--color-border)',
         opacity: dim ? 0.4 : 1,
@@ -76,6 +76,22 @@ export function ItemRow({
           </p>
         )}
       </div>
+
+      {/* Photo thumbnail */}
+      {item.image_url && (
+        <div
+          className="shrink-0 overflow-hidden"
+          style={{ width: 72, height: 72, borderRadius: 4, opacity: dim ? 0.4 : 1 }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={item.image_url}
+            alt={item.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }}
+          />
+        </div>
+      )}
 
       <div
         className="font-sans text-base md:text-lg tabular-nums shrink-0"

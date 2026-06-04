@@ -28,3 +28,120 @@ html, body {
   animation: kenburns 9s ease-in-out infinite alternate;
   will-change: transform;
 }
+
+/* ── Card shimmer — sweeping light wave on photo cards ── */
+@keyframes cardShimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.card-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(200,150,62,0.18) 50%,
+    transparent 70%
+  );
+  animation: cardShimmer 2.8s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Text shimmer — gold wave sweeping through any text ── */
+@keyframes textShimmer {
+  0%   { background-position: -400px center; }
+  55%  { background-position: 400px center; }
+  100% { background-position: 400px center; }
+}
+
+/* Small labels (section headers) — tight sweep */
+.shimmer-title {
+  background: linear-gradient(
+    90deg,
+    var(--accent, #C8963E) 0%,
+    var(--accent, #C8963E) 30%,
+    rgba(255, 235, 160, 1) 50%,
+    var(--accent, #C8963E) 70%,
+    var(--accent, #C8963E) 100%
+  );
+  background-size: 600px 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 3.5s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+/* Large heading shimmer — uses CSS vars so works on both light and dark bg */
+.shimmer-heading {
+  background: linear-gradient(
+    90deg,
+    var(--color-text, #0A0A0A) 0%,
+    var(--color-text, #0A0A0A) 22%,
+    var(--accent, #C8963E)     42%,
+    rgba(255, 235, 160, 1)     50%,
+    var(--accent, #C8963E)     58%,
+    var(--color-text, #0A0A0A) 78%,
+    var(--color-text, #0A0A0A) 100%
+  );
+  background-size: 700px 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 5s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* ── Landing page animations ── */
+
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes wordCycle {
+  0%   { opacity: 0; transform: translateY(10px); }
+  8%   { opacity: 1; transform: translateY(0); }
+  30%  { opacity: 1; transform: translateY(0); }
+  38%  { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes navFadeDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hairlineGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.animate-hero-fade-up {
+  animation: heroFadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-nav-fade {
+  animation: navFadeDown 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stat-visible {
+  animation: countUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* stagger delays */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-600 { animation-delay: 0.6s; }
+.delay-700 { animation-delay: 0.7s; }

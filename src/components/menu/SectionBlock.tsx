@@ -16,10 +16,7 @@ export function SectionBlock({
   return (
     <section id={`section-${section.id}`} className="mt-16">
       <header className="mb-6 flex items-center gap-4">
-        <span
-          className="font-sans text-[11px] tracking-regal uppercase"
-          style={{ color: 'var(--accent)' }}
-        >
+        <span className="font-sans text-[11px] tracking-regal uppercase shimmer-title">
           {section.name}
         </span>
         <div className="flex-1 h-px" style={{ backgroundColor: 'var(--color-border)' }} />

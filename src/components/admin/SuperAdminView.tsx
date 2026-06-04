@@ -12,6 +12,7 @@ type VenueSummary = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | 
   plan: string;
   itemCount: number;
   logo_svg?: string | null;
+  menu_theme?: "classic" | "visual" | "modern";
 };
 
 type Props = {

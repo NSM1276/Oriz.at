@@ -6,9 +6,12 @@ import { PhotoUploader } from "@/components/admin/PhotoUploader";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import type { Venue } from "@/lib/supabase/types";
 
+type MenuTheme = "classic" | "visual" | "modern";
+
 type EditableVenue = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | "color_primary" | "logo_url" | "instagram_url" | "google_maps_url"> & {
   plan: string;
   logo_svg?: string | null;
+  menu_theme?: MenuTheme;
 };
 
 type Props = {
@@ -29,6 +32,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
   const [logoUrl, setLogoUrl] = useState("");
   const [instagram, setInstagram] = useState("");
   const [googleMaps, setGoogleMaps] = useState("");
+  const [menuTheme, setMenuTheme] = useState<MenuTheme>("classic");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ownerEmail, setOwnerEmail] = useState("");
@@ -57,6 +61,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
       setColorBg(venue.color_bg ?? "#1a1a1a");
       setColorPrimary(venue.color_primary ?? "#C69B3C");
       setPlan((venue.plan as Plan) ?? "trial");
+      setMenuTheme((venue.menu_theme as MenuTheme) ?? "classic");
       setLogoUrl(venue.logo_url ?? "");
       setInstagram(venue.instagram_url ?? "");
       setGoogleMaps(venue.google_maps_url ?? "");
@@ -100,6 +105,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
         color_primary: colorPrimary,
         logo_url: logoUrl || null,
         plan,
+        menu_theme: menuTheme,
         instagram_url: instagram || null,
         google_maps_url: googleMaps || null,
       })
@@ -108,7 +114,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
     if (err) {
       setError(err.message);
     } else {
-      onSaved({ ...venue, name, about, color_bg: colorBg, color_primary: colorPrimary, logo_url: logoUrl || null, plan, instagram_url: instagram || null, google_maps_url: googleMaps || null });
+      onSaved({ ...venue, name, about, color_bg: colorBg, color_primary: colorPrimary, logo_url: logoUrl || null, plan, menu_theme: menuTheme, instagram_url: instagram || null, google_maps_url: googleMaps || null });
     }
   }
 
@@ -170,6 +176,24 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
                 <button key={p} onClick={() => setPlan(p)}
                   className={`flex-1 font-sans text-[11px] tracking-regal uppercase py-2 border transition-colors ${plan === p ? "border-gold bg-gold text-onyx" : "border-onyx/15 text-onyx/60 hover:border-onyx/30"}`}>
                   {p.charAt(0).toUpperCase() + p.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Menu Theme */}
+          <div>
+            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Menu Theme</label>
+            <div className="flex gap-2">
+              {([
+                { value: "classic", label: "Classic", hint: "Elegant list" },
+                { value: "visual",  label: "Visual",  hint: "Photo grid" },
+                { value: "modern",  label: "Modern",  hint: "Editorial" },
+              ] as { value: MenuTheme; label: string; hint: string }[]).map(t => (
+                <button key={t.value} type="button" onClick={() => setMenuTheme(t.value)}
+                  className={`flex-1 font-sans text-[11px] tracking-regal uppercase py-2 border transition-colors flex flex-col items-center gap-0.5 ${menuTheme === t.value ? "border-gold bg-gold text-onyx" : "border-onyx/15 text-onyx/60 hover:border-onyx/30"}`}>
+                  {t.label}
+                  <span className={`text-[9px] normal-case tracking-normal ${menuTheme === t.value ? "text-onyx/60" : "text-onyx/30"}`}>{t.hint}</span>
                 </button>
               ))}
             </div>
