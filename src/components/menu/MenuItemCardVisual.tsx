@@ -28,7 +28,8 @@ export function MenuItemCardVisual({ item, currency, onClick }: Props) {
           cursor: clickable ? "pointer" : "default",
           borderRadius: 10,
           opacity: dim ? 0.4 : 1,
-          aspectRatio: "3/4",
+          aspectRatio: "4/3",
+          backgroundColor: "#111",
         }}
       >
         {/* Photo — always visible, no opacity tricks */}
@@ -37,7 +38,7 @@ export function MenuItemCardVisual({ item, currency, onClick }: Props) {
           src={item.image_url!}
           alt={item.name}
           onError={() => setImgError(true)}
-          className="absolute inset-0 w-full h-full object-cover kenburns transition-transform duration-700 group-active:scale-105"
+          className="absolute inset-0 w-full h-full object-contain kenburns transition-transform duration-700 group-active:scale-105"
           style={{ display: "block" }}
         />
 
