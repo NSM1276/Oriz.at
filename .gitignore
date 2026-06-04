@@ -21,3 +21,26 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/
+
+# test screenshots & temp images
+test-*.png
+test-*.jpg
+mobile-*.png
+mobile-*.jpg
+*.jfif
+golden-harp-live.png
+ORIZ\ Animations.html
+_*.jfif
+Gemini_Generated_Image_*.png
+
+# playwright
+.playwright-mcp/
+
+# source photo folders (uploaded to Supabase Storage)
+public/toska\ menu\ image/
+public/BRASSERIE\ LUMIÈRE/
+public/SUSHI*/
+
+# build cache
+tsconfig.tsbuildinfo
+next-env.d.ts
