@@ -45,11 +45,11 @@ function ModalClassic({ item, currency, onClose, accent }: Omit<Props, "theme"> 
           }}
         >
           {item.image_url && (
-            <div className="w-full overflow-hidden" style={{ maxHeight: 220 }}>
+            <div className="w-full overflow-hidden" style={{ aspectRatio: "3/4" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image_url} alt={item.name}
-                className="kenburns w-full object-cover" style={{ maxHeight: 220 }}
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                className="kenburns w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = "none"; }}
               />
             </div>
           )}
@@ -142,9 +142,9 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
             <div className="w-10 h-1 rounded-full" style={{ backgroundColor: "rgba(245,240,236,0.2)" }} />
           </div>
 
-          {/* Photo — tall, full width */}
+          {/* Photo — portrait 3:4, full width, no crop */}
           {item.image_url ? (
-            <div className="relative overflow-hidden shrink-0" style={{ height: 280 }}>
+            <div className="relative overflow-hidden shrink-0" style={{ aspectRatio: "3/4" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image_url} alt={item.name}
                 className="kenburns w-full h-full object-cover"
@@ -279,9 +279,9 @@ function ModalModern({ item, currency, onClose, accent }: Omit<Props, "theme"> &
             </button>
           </div>
 
-          {/* Photo — horizontal strip if exists */}
+          {/* Photo — portrait 3:4, no crop */}
           {item.image_url && (
-            <div className="overflow-hidden shrink-0" style={{ height: 180 }}>
+            <div className="overflow-hidden shrink-0" style={{ aspectRatio: "3/4" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image_url} alt={item.name}
                 className="kenburns w-full h-full object-cover"

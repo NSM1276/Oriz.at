@@ -28,7 +28,7 @@ export function MenuItemCardVisual({ item, currency, onClick }: Props) {
           cursor: clickable ? "pointer" : "default",
           borderRadius: 10,
           opacity: dim ? 0.4 : 1,
-          height: "clamp(155px, 44vw, 210px)",
+          aspectRatio: "3/4",
         }}
       >
         {/* Photo — always visible, no opacity tricks */}
