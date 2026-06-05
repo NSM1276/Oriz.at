@@ -20,13 +20,22 @@ export default function ResetPasswordPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setState(user ? "ready" : "no-session");
-    })();
+    const supabase = createClient();
+
+    // Handle recovery token from email link hash (#access_token=...&type=recovery)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setState("ready");
+      }
+    });
+
+    // Also check if already in a valid session (e.g. page refresh)
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setState((prev) => prev === "checking" ? "ready" : prev);
+      else setState((prev) => prev === "checking" ? "no-session" : prev);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
