@@ -43,7 +43,10 @@ export function CartaOwnerView({
 }) {
   // Item currently open in edit sheet
   const [editingItem, setEditingItem] = useState<Item | null>(null);
-  // Live items map — updates when owner edits via sheet
+  // sectionId for which we're creating a new item
+  const [creatingInSection, setCreatingInSection] = useState<string | null>(null);
+
+  // Live items map — updates when owner edits/creates/deletes/reorders
   const [itemsMap, setItemsMap] = useState<Map<string, Item>>(() => {
     const m = new Map<string, Item>();
     for (const s of (initialVenue?.sections ?? [])) {
@@ -54,8 +57,45 @@ export function CartaOwnerView({
 
   function handleItemChange(updated: Item) {
     setItemsMap((prev) => new Map(prev).set(updated.id, updated));
-    // Keep editing item in sync
     setEditingItem((cur) => (cur?.id === updated.id ? updated : cur));
+  }
+
+  function handleItemDelete(itemId: string) {
+    setItemsMap((prev) => {
+      const next = new Map(prev);
+      next.delete(itemId);
+      return next;
+    });
+  }
+
+  function handleItemCreate(item: Item) {
+    setItemsMap((prev) => new Map(prev).set(item.id, item));
+  }
+
+  async function handleMoveItem(itemId: string, direction: "up" | "down", sectionItems: Item[]) {
+    const idx = sectionItems.findIndex((it) => it.id === itemId);
+    if (idx < 0) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sectionItems.length) return;
+
+    const a = sectionItems[idx];
+    const b = sectionItems[swapIdx];
+    const posA = a.position;
+    const posB = b.position;
+
+    // Optimistic update
+    setItemsMap((prev) => {
+      const next = new Map(prev);
+      next.set(a.id, { ...a, position: posB });
+      next.set(b.id, { ...b, position: posA });
+      return next;
+    });
+
+    // Persist both
+    await Promise.all([
+      fetch("/api/admin/item-update", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ itemId: a.id, updates: { position: posB } }) }),
+      fetch("/api/admin/item-update", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ itemId: b.id, updates: { position: posA } }) }),
+    ]);
   }
 
   // Live venue state — updates instantly when owner changes style
@@ -262,8 +302,16 @@ export function CartaOwnerView({
                 />
                 {sorted.map((section) => {
                   const items = (section.items ?? [])
-                    .slice()
+                    .map((it) => itemsMap.get(it.id) ?? it)
+                    .filter((it) => itemsMap.has(it.id))
+                    .concat(
+                      // pick up newly created items that belong to this section
+                      Array.from(itemsMap.values()).filter(
+                        (it) => it.section_id === section.id && !section.items.find((s) => s.id === it.id)
+                      )
+                    )
                     .sort((a, b) => a.position - b.position);
+
                   return (
                     <section
                       key={section.id}
@@ -283,18 +331,32 @@ export function CartaOwnerView({
                         />
                       </header>
                       <ul>
-                        {items.map((it) => {
-                          const liveItem = itemsMap.get(it.id) ?? it;
-                          return (
-                            <AdminItemRow
-                              key={liveItem.id}
-                              item={liveItem}
-                              currency={venue.currency}
-                              onEdit={() => setEditingItem(liveItem)}
-                            />
-                          );
-                        })}
+                        {items.map((it, idx) => (
+                          <AdminItemRow
+                            key={it.id}
+                            item={it}
+                            currency={venue.currency}
+                            isFirst={idx === 0}
+                            isLast={idx === items.length - 1}
+                            onEdit={() => setEditingItem(it)}
+                            onMoveUp={() => handleMoveItem(it.id, "up", items)}
+                            onMoveDown={() => handleMoveItem(it.id, "down", items)}
+                          />
+                        ))}
                       </ul>
+                      {/* Add item button */}
+                      <button
+                        onClick={() => setCreatingInSection(section.id)}
+                        className="mt-4 w-full font-sans text-[11px] tracking-regal uppercase py-3 transition-opacity hover:opacity-70"
+                        style={{
+                          border: `1px dashed ${border}`,
+                          color: dim,
+                          background: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        + Gericht hinzufügen
+                      </button>
                     </section>
                   );
                 })}
@@ -326,13 +388,26 @@ export function CartaOwnerView({
       </main>
 
       {/* Edit sheet — slides up when owner taps an item */}
-      {venue && (
+      {venue && editingItem && (
         <ItemEditSheet
           item={editingItem}
           currency={venue.currency}
           canUseAi={canUseAi}
           onClose={() => setEditingItem(null)}
           onItemChange={handleItemChange}
+          onItemDelete={handleItemDelete}
+        />
+      )}
+
+      {/* Create sheet — slides up when owner taps "+ Gericht hinzufügen" */}
+      {venue && creatingInSection && (
+        <ItemEditSheet
+          item={null}
+          currency={venue.currency}
+          createContext={{ sectionId: creatingInSection, venueId: venue.id }}
+          onClose={() => setCreatingInSection(null)}
+          onItemChange={() => {}}
+          onItemCreate={handleItemCreate}
         />
       )}
     </div>
