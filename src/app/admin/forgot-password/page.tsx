@@ -16,10 +16,8 @@ export default function ForgotPasswordPage() {
     setState("loading");
     setErrorMsg(null);
     const supabase = createClient();
-    const origin =
-      typeof window !== "undefined" ? window.location.origin : "https://oriz.at";
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${origin}/admin/reset-password`,
+      redirectTo: "https://oriz.at/admin/reset-password",
     });
     if (error) {
       setState("error");
