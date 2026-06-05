@@ -50,21 +50,32 @@ export function AdminItemRow({ item, currency, onEdit }: Props) {
         )}
       </div>
 
-      {/* Thumbnail */}
+      {/* Thumbnail — supports both images and videos */}
       {item.image_url && (
         <div
           className="shrink-0 overflow-hidden"
           style={{ width: 56, height: 56, borderRadius: 4 }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={item.image_url}
-            alt=""
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).parentElement!.style.display = "none";
-            }}
-          />
+          {/\.(mp4|webm|mov)(\?|$)/i.test(item.image_url) ? (
+            <video
+              src={item.image_url}
+              muted
+              autoPlay
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={item.image_url}
+              alt=""
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).parentElement!.style.display = "none";
+              }}
+            />
+          )}
         </div>
       )}
 
