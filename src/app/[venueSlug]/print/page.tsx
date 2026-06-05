@@ -83,7 +83,7 @@ export default async function PrintPage({
           {/* Menu sections */}
           {sections.map((section) => (
             <section key={section.id} className="mt-9">
-              <div className="flex items-center gap-4 mb-4">
+              <div className="section-header flex items-center gap-4 mb-4">
                 <span
                   className="font-sans text-[10px] tracking-regal uppercase shrink-0"
                   style={{ color: accent }}
@@ -95,7 +95,7 @@ export default async function PrintPage({
               {section.items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-baseline gap-4 py-2.5"
+                  className="item-row flex items-baseline gap-4 py-2.5"
                   style={{ borderBottom: "1px solid rgba(10,10,10,0.06)" }}
                 >
                   <div className="flex-1 min-w-0">
@@ -167,8 +167,24 @@ export default async function PrintPage({
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          @page { margin: 15mm; size: A4; }
+
+          @page { margin: 18mm 20mm; size: A4 portrait; }
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+          /* Header stays on first page, no break after it */
+          header { break-after: avoid; page-break-after: avoid; }
+
+          /* Each section: keep header+first items together, no orphan section name */
+          section { break-inside: avoid; page-break-inside: avoid; margin-top: 6mm !important; }
+
+          /* Section label + rule stays with the items below it */
+          .section-header { break-after: avoid; page-break-after: avoid; }
+
+          /* Each item row: never break in the middle of a row */
+          .item-row { break-inside: avoid; page-break-inside: avoid; }
+
+          /* Footer always starts on its own page if not enough space */
+          footer { break-before: auto; page-break-before: auto; }
         }
       `}</style>
     </>

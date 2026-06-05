@@ -353,25 +353,8 @@ function Sheet({
                 <label style={{ fontFamily: "var(--font-inter, sans-serif)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: mutedColor }}>
                   Story
                 </label>
-                <button
-                  onClick={generateCaption}
-                  disabled={aiBusy || !canUseAi}
-                  title={!canUseAi ? "Monatliches AI-Limit erreicht" : "Text generieren"}
-                  style={{
-                    fontFamily: "var(--font-inter, sans-serif)",
-                    fontSize: 10,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: "6px 14px",
-                    cursor: (aiBusy || !canUseAi) ? "not-allowed" : "pointer",
-                    border: `1px solid ${accent}`,
-                    color: accent,
-                    background: "none",
-                    opacity: (aiBusy || !canUseAi) ? 0.35 : 1,
-                  }}
-                >
-                  {aiBusy ? "…" : "✦ KI"}
-                </button>
+                {/* AI button — temporarily disabled, re-enable when billing is set up */}
+                {/* <button onClick={generateCaption} disabled={aiBusy || !canUseAi} ... /> */}
               </div>
               <textarea
                 ref={captionRef}
