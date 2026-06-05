@@ -64,7 +64,7 @@ function ModalClassic({ item, currency, onClose, accent }: Omit<Props, "theme"> 
               </svg>
             </button>
             <div className="flex items-baseline justify-between gap-4 pr-8 mb-3">
-              <h2 className="font-display text-3xl font-light leading-tight shimmer-heading">
+              <h2 className="font-display text-3xl font-light leading-tight" style={{ color: "var(--color-text, #0A0A0A)" }}>
                 {item.name}
               </h2>
               <span className="font-sans text-lg tabular-nums whitespace-nowrap shrink-0" style={{ color: accent }}>
@@ -131,7 +131,7 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
           transition={{ type: "spring", stiffness: 340, damping: 38, mass: 0.9 }}
           className="w-full max-w-lg pointer-events-auto overflow-hidden"
           style={{
-            backgroundColor: "#1C1208",
+            backgroundColor: "var(--color-bg, #1C1208)",
             borderRadius: "16px 16px 0 0",
             maxHeight: "92dvh",
             display: "flex",
@@ -147,7 +147,7 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
           {/* Photo — full, no crop, max 45dvh */}
           {item.image_url ? (
             <div className="relative overflow-hidden shrink-0"
-              style={{ backgroundColor: "#1C1208" }}>
+              style={{ backgroundColor: "var(--color-bg, #1C1208)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image_url} alt={item.name}
                 className="kenburns w-full block object-contain"
@@ -156,7 +156,7 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
               />
               {/* Gradient overlay bottom */}
               <div className="absolute inset-0 pointer-events-none"
-                style={{ background: "linear-gradient(to top, #1C1208 0%, rgba(28,18,8,0.5) 40%, transparent 70%)" }} />
+                style={{ background: "linear-gradient(to top, var(--color-bg, #1C1208) 0%, rgba(0,0,0,0.4) 40%, transparent 70%)" }} />
               {/* Price badge over photo */}
               <div className="absolute bottom-4 right-4 font-sans text-base tabular-nums px-3 py-1.5"
                 style={{ backgroundColor: "rgba(28,18,8,0.8)", color: accent, backdropFilter: "blur(8px)", border: `1px solid ${accent}33` }}>
@@ -184,8 +184,8 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
               </svg>
             </button>
 
-            <h2 className="font-display font-light leading-tight mb-3 pr-8 shimmer-heading"
-              style={{ fontSize: "clamp(1.7rem, 5vw, 2.2rem)" }}>
+            <h2 className="font-display font-light leading-tight mb-3 pr-8"
+              style={{ fontSize: "clamp(1.7rem, 5vw, 2.2rem)", color: "rgba(245,240,236,0.95)" }}>
               {item.name}
             </h2>
 
@@ -269,8 +269,8 @@ function ModalModern({ item, currency, onClose, accent }: Omit<Props, "theme"> &
                 style={{ color: accent }}>
                 {formatPrice(item.price_cents, currency)}
               </span>
-              <h2 className="font-display font-light leading-tight shimmer-heading"
-                style={{ fontSize: "clamp(1.6rem, 4vw, 2rem)" }}>
+              <h2 className="font-display font-light leading-tight"
+                style={{ fontSize: "clamp(1.6rem, 4vw, 2rem)", color: "var(--color-text, #0A0A0A)" }}>
                 {item.name}
               </h2>
             </div>
