@@ -22,14 +22,21 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    // Handle recovery token from email link hash (#access_token=...&type=recovery)
+    // PKCE flow: Supabase redirects with ?code= in URL — must exchange for session
+    const code = new URLSearchParams(window.location.search).get("code");
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) setState("no-session");
+        else setState("ready");
+      });
+      return;
+    }
+
+    // Implicit flow fallback: hash-based token (#access_token=...&type=recovery)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setState("ready");
-      }
+      if (event === "PASSWORD_RECOVERY") setState("ready");
     });
 
-    // Also check if already in a valid session (e.g. page refresh)
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setState((prev) => prev === "checking" ? "ready" : prev);
       else setState((prev) => prev === "checking" ? "no-session" : prev);
