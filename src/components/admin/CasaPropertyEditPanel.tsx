@@ -43,6 +43,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [saving, setSaving] = useState(false);
+  const [removingLogo, setRemovingLogo] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -93,6 +94,18 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
       return;
     }
     onSaved({ ...property, ...updates });
+  }
+
+  async function handleRemoveLogo() {
+    if (!property) return;
+    setRemovingLogo(true);
+    await fetch("/api/admin/casa/property-update", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ propertyId: property.id, updates: { logo_url: null, logo_svg: null } }),
+    });
+    setRemovingLogo(false);
+    onSaved({ ...property, logo_url: null, logo_svg: null });
   }
 
   const isOpen = property !== null;
@@ -280,6 +293,15 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
                 aspect="square"
                 label={property.logo_svg ? "+ Logo ersetzen" : "+ Logo hinzufügen"}
               />
+            )}
+            {property && (property.logo_svg || property.logo_url) && (
+              <button
+                onClick={handleRemoveLogo}
+                disabled={removingLogo}
+                className="mt-3 font-sans text-[10px] tracking-regal uppercase text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+              >
+                {removingLogo ? "Entfernen…" : "Logo entfernen"}
+              </button>
             )}
           </div>
 

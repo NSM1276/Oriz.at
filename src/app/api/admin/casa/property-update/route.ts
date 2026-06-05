@@ -4,13 +4,12 @@ import { createClient as createServerSupabase } from "@/lib/supabase/server";
 
 const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 
-// Fields a caller may change via this route.
-// logo_url / logo_svg are managed by upload-photo, not here.
 const ALLOWED_FIELDS = new Set([
   "name", "slug", "city", "about",
   "color_bg", "color_primary",
   "website_url", "instagram_url", "facebook_url", "google_maps_url",
   "phone", "email", "cover_url",
+  "logo_url", "logo_svg",
 ]);
 
 function svc() {
