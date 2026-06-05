@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { VenueLogo } from "@/components/brand/VenueLogo";
 
 type Props = {
   name: string;
@@ -9,31 +8,32 @@ type Props = {
   accent: string;
   kind: "carta" | "casa";
   subtitle?: string;
+  // logoSvg / logoUrl kept in props for API compatibility but not rendered —
+  // a small QR sticker has no room for logos and they cause dark-on-dark problems.
   logoSvg?: string | null;
   logoUrl?: string | null;
 };
 
-// Print-ready A6 QR card with light/dark toggle.
-// Browser "Print → Save as PDF" yields a clean A6 card (no UI chrome).
+// Print-ready 90×90 mm QR sticker with light/dark toggle.
+// Owner downloads as PDF → prints at any copy shop.
+// Also works as NFC-card companion (same URL, same visual identity).
 
-export function QrCard({ name, url, accent, kind, subtitle, logoSvg, logoUrl }: Props) {
+export function QrCard({ name, url, accent, kind, subtitle }: Props) {
   const [dark, setDark] = useState(false);
 
   const title = kind === "carta" ? "Speisekarte" : "Willkommen";
-  const cta = "Bitte scannen · Please scan";
 
-  // Colors based on mode
-  const cardBg   = dark ? "#0A0A0A" : "#F5F0EC";
-  const textMain = dark ? "#F5F0EC" : "#0A0A0A";
-  const textDim  = dark ? "rgba(245,240,236,0.45)" : "rgba(10,10,10,0.45)";
-  const textMuted= dark ? "rgba(245,240,236,0.28)" : "rgba(10,10,10,0.28)";
-  const qrBg     = dark ? "0A0A0A" : "ffffff";
-  const qrColor  = dark ? "F5F0EC" : "0A0A0A";
-  const qrContainerBg = dark ? "#1A1A1A" : "#ffffff";
-  const qrBorder = dark ? `1px solid ${accent}44` : `1px solid ${accent}33`;
-  const screenBg = dark ? "#111111" : "#E5E0DA";
+  // ── Color palette ─────────────────────────────────────────────────
+  const cardBg      = dark ? "#0A0A0A"                      : "#F5F0EC";
+  const textMain    = dark ? "#F5F0EC"                      : "#0A0A0A";
+  const textMuted   = dark ? "rgba(245,240,236,0.30)"       : "rgba(10,10,10,0.30)";
+  const qrBg        = dark ? "0A0A0A"                       : "ffffff";
+  const qrColor     = dark ? "F5F0EC"                       : "0A0A0A";
+  const qrBoxBg     = dark ? "#141414"                      : "#ffffff";
+  const qrBoxBorder = dark ? `1px solid rgba(245,240,236,0.10)` : `1px solid rgba(10,10,10,0.08)`;
+  const screenBg    = dark ? "#111111"                      : "#E5E0DA";
 
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=2&color=${qrColor}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}`;
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=900x900&margin=0&color=${qrColor}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}`;
 
   return (
     <>
@@ -41,19 +41,21 @@ export function QrCard({ name, url, accent, kind, subtitle, logoSvg, logoUrl }: 
         @page { size: 90mm 90mm; margin: 0; }
         @media print {
           html, body { background: ${cardBg} !important; margin: 0; padding: 0; }
-          .no-print { display: none !important; }
-          .qr-card  { box-shadow: none !important; margin: 0 !important; width: 90mm !important; height: 90mm !important; }
+          .no-print  { display: none !important; }
+          .qr-card   { box-shadow: none !important; margin: 0 !important;
+                       width: 90mm !important; height: 90mm !important; }
         }
-        html, body { background: ${screenBg}; margin: 0; padding: 0; transition: background 0.3s; }
+        html, body { background: ${screenBg}; margin: 0; padding: 0; transition: background 0.25s; }
       `}</style>
 
-      {/* Toolbar */}
+      {/* ── Toolbar ──────────────────────────────────────────────── */}
       <div
         className="no-print"
         style={{
           position: "fixed", top: 0, left: 0, right: 0,
           padding: "12px 20px",
-          background: "rgba(10,10,10,0.88)",
+          background: "rgba(10,10,10,0.90)",
+          backdropFilter: "blur(8px)",
           display: "flex", alignItems: "center", justifyContent: "space-between",
           fontFamily: "var(--font-inter, sans-serif)", zIndex: 100, gap: 12,
         }}
@@ -63,9 +65,9 @@ export function QrCard({ name, url, accent, kind, subtitle, logoSvg, logoUrl }: 
         </span>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {/* Light / Dark toggle */}
+          {/* Hell / Dunkel */}
           <div style={{ display: "flex", border: "1px solid rgba(245,240,236,0.2)", overflow: "hidden" }}>
-            {[{ label: "Hell", val: false }, { label: "Dunkel", val: true }].map(({ label, val }) => (
+            {([{ label: "Hell", val: false }, { label: "Dunkel", val: true }] as const).map(({ label, val }) => (
               <button
                 key={label}
                 onClick={() => setDark(val)}
@@ -73,7 +75,7 @@ export function QrCard({ name, url, accent, kind, subtitle, logoSvg, logoUrl }: 
                   fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase",
                   padding: "7px 14px", cursor: "pointer", fontFamily: "inherit",
                   background: dark === val ? "#C69B3C" : "transparent",
-                  color: dark === val ? "#0A0A0A" : "rgba(245,240,236,0.55)",
+                  color:      dark === val ? "#0A0A0A" : "rgba(245,240,236,0.55)",
                   border: "none",
                 }}
               >
@@ -105,13 +107,24 @@ export function QrCard({ name, url, accent, kind, subtitle, logoSvg, logoUrl }: 
         </div>
       </div>
 
-      {/* Preview area */}
+      {/* ── Preview area ─────────────────────────────────────────── */}
       <div
         style={{
           minHeight: "100vh", display: "flex", alignItems: "center",
           justifyContent: "center", padding: "80px 20px 40px",
         }}
       >
+        {/*
+         * 90 × 90 mm square card.
+         * Layout (top → bottom):
+         *   4 mm  top padding
+         *   ≈6 mm  label row  (title + accent rule)
+         *   flex   gap
+         *   64 mm  QR box  (60 mm QR + 2 mm padding each side)
+         *   flex   gap
+         *   ≈8 mm  name row  (name + ORIZ watermark)
+         *   4 mm  bottom padding
+         */}
         <div
           className="qr-card"
           style={{
@@ -119,60 +132,66 @@ export function QrCard({ name, url, accent, kind, subtitle, logoSvg, logoUrl }: 
             background: cardBg,
             display: "flex", flexDirection: "column",
             alignItems: "center", justifyContent: "space-between",
-            padding: "5mm 6mm",
-            boxShadow: "0 12px 50px rgba(0,0,0,0.25)",
+            padding: "4mm 4mm",
+            boxShadow: "0 16px 60px rgba(0,0,0,0.30)",
             boxSizing: "border-box",
-            transition: "background 0.3s",
+            transition: "background 0.25s",
           }}
         >
-          {/* Top: logo (if any) + eyebrow label */}
-          <div style={{ textAlign: "center", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: "2.5mm" }}>
-            {(logoSvg || logoUrl) && (
-              <VenueLogo
-                svg={logoSvg} url={logoUrl} name={name}
-                bg={cardBg} accent={accent}
-                color="auto" height={28}
-                isDarkBg={dark}
-              />
-            )}
+          {/* Top label */}
+          <div style={{ textAlign: "center", width: "100%" }}>
             <p style={{
               fontFamily: "var(--font-inter, sans-serif)",
-              fontSize: "7px", letterSpacing: "0.32em",
-              textTransform: "uppercase", color: accent, margin: 0,
+              fontSize: "7.5px", letterSpacing: "0.35em",
+              textTransform: "uppercase", color: accent,
+              margin: "0 0 2mm",
             }}>
               {title}
             </p>
+            <div style={{ width: "18mm", height: "0.4mm", background: accent, opacity: 0.55, margin: "0 auto" }} />
           </div>
 
-          {/* Middle: QR — dominant element */}
-          <div style={{ background: qrContainerBg, padding: "3mm", border: qrBorder, flexShrink: 0 }}>
+          {/* QR code — dominant */}
+          <div
+            style={{
+              background: qrBoxBg,
+              border: qrBoxBorder,
+              padding: "2mm",
+              flexShrink: 0,
+              lineHeight: 0,
+            }}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrSrc} alt={`QR Code · ${name}`}
-              style={{ display: "block", width: "52mm", height: "52mm" }} />
+            <img
+              src={qrSrc}
+              alt={`QR · ${name}`}
+              style={{ display: "block", width: "60mm", height: "60mm" }}
+            />
           </div>
 
-          {/* Bottom: name + ORIZ mark */}
-          <div style={{ width: "100%", textAlign: "center" }}>
+          {/* Bottom: name + ORIZ */}
+          <div style={{ textAlign: "center", width: "100%" }}>
+            <div style={{ width: "18mm", height: "0.4mm", background: accent, opacity: 0.55, margin: "0 auto 2mm" }} />
             <h1 style={{
               fontFamily: "var(--font-garamond, serif)",
-              fontWeight: 300, fontSize: "14pt",
-              color: textMain, margin: 0, lineHeight: 1.1,
+              fontWeight: 300, fontSize: "13pt",
+              color: textMain, margin: "0 0 1.5mm", lineHeight: 1.1,
+              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
             }}>
               {name}
             </h1>
             {subtitle && (
               <p style={{
                 fontFamily: "var(--font-garamond, serif)",
-                fontStyle: "italic", fontSize: "8pt",
-                color: textDim, margin: "1.5mm 0 0",
+                fontStyle: "italic", fontSize: "7.5pt",
+                color: textMuted, margin: "0 0 1.5mm",
               }}>
                 {subtitle}
               </p>
             )}
-            <div style={{ width: 24, height: 1, background: accent, opacity: 0.5, margin: "2mm auto 2mm" }} />
             <p style={{
               fontFamily: "var(--font-inter, sans-serif)",
-              fontSize: "6.5px", letterSpacing: "0.25em",
+              fontSize: "6px", letterSpacing: "0.28em",
               textTransform: "uppercase", color: textMuted, margin: 0,
             }}>
               ORIZ · {url.replace(/^https?:\/\//, "")}
