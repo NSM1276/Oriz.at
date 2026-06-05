@@ -23,17 +23,28 @@ type Props = {
 const PLANS = ["trial", "starter", "pro"] as const;
 type Plan = typeof PLANS[number];
 
+function getLuminance(hex: string): number {
+  if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return 0.5;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const lin = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
 export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
   const [name, setName] = useState("");
   const [about, setAbout] = useState("");
   const [colorBg, setColorBg] = useState("#1a1a1a");
   const [colorPrimary, setColorPrimary] = useState("#C69B3C");
   const [plan, setPlan] = useState<Plan>("trial");
-  const [logoUrl, setLogoUrl] = useState("");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoSvg, setLogoSvg] = useState<string | null>(null);   // ← NEW: track SVG state
   const [instagram, setInstagram] = useState("");
   const [googleMaps, setGoogleMaps] = useState("");
   const [menuTheme, setMenuTheme] = useState<MenuTheme>("classic");
   const [saving, setSaving] = useState(false);
+  const [deletingLogo, setDeletingLogo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ownerEmail, setOwnerEmail] = useState("");
   const [ownerCurrent, setOwnerCurrent] = useState<string | null>(null);
@@ -54,6 +65,20 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
     }
   }, []);
 
+  // FIX Bug 2: refresh logo from DB after upload instead of reloading the page
+  const refreshLogo = useCallback(async (venueId: string) => {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("venues")
+      .select("logo_svg, logo_url")
+      .eq("id", venueId)
+      .maybeSingle<{ logo_svg: string | null; logo_url: string | null }>();
+    if (data) {
+      setLogoSvg(data.logo_svg ?? null);
+      setLogoUrl(data.logo_url ?? null);
+    }
+  }, []);
+
   useEffect(() => {
     if (venue) {
       setName(venue.name ?? "");
@@ -62,7 +87,8 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
       setColorPrimary(venue.color_primary ?? "#C69B3C");
       setPlan((venue.plan as Plan) ?? "trial");
       setMenuTheme((venue.menu_theme as MenuTheme) ?? "classic");
-      setLogoUrl(venue.logo_url ?? "");
+      setLogoUrl(venue.logo_url ?? null);
+      setLogoSvg(venue.logo_svg ?? null);          // ← init SVG state from prop
       setInstagram(venue.instagram_url ?? "");
       setGoogleMaps(venue.google_maps_url ?? "");
       setError(null);
@@ -91,6 +117,22 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
     }
   }
 
+  // FIX Bug 3: delete logo (works for both SVG and PNG)
+  async function handleDeleteLogo() {
+    if (!venue) return;
+    if (!confirm("Logo entfernen?")) return;
+    setDeletingLogo(true);
+    const res = await fetch(
+      `/api/admin/upload-photo?target=carta-venue-logo&id=${venue.id}`,
+      { method: "DELETE" },
+    );
+    setDeletingLogo(false);
+    if (res.ok) {
+      setLogoSvg(null);
+      setLogoUrl(null);
+    }
+  }
+
   async function handleSave() {
     if (!venue) return;
     setSaving(true);
@@ -114,11 +156,21 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
     if (err) {
       setError(err.message);
     } else {
-      onSaved({ ...venue, name, about, color_bg: colorBg, color_primary: colorPrimary, logo_url: logoUrl || null, plan, menu_theme: menuTheme, instagram_url: instagram || null, google_maps_url: googleMaps || null });
+      onSaved({
+        ...venue,
+        name, about,
+        color_bg: colorBg, color_primary: colorPrimary,
+        logo_url: logoUrl || null,
+        plan,
+        menu_theme: menuTheme,
+        instagram_url: instagram || null,
+        google_maps_url: googleMaps || null,
+      });
     }
   }
 
   const isOpen = venue !== null;
+  const hasLogo = !!(logoSvg || logoUrl);   // ← used for delete button + swatches
 
   return (
     <>
@@ -147,7 +199,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
           {/* Live preview */}
           <div className="h-16 w-full relative overflow-hidden border border-onyx/10" style={{ backgroundColor: colorBg }}>
             <div className="absolute bottom-0 left-0 right-0 h-1" style={{ backgroundColor: colorPrimary }} />
-            <span className="absolute bottom-3 left-3 font-display text-sm drop-shadow" style={{ color: colorBg && parseInt(colorBg.replace('#','').substring(0,2),16)*299+parseInt(colorBg.replace('#','').substring(2,4),16)*587+parseInt(colorBg.replace('#','').substring(4,6),16)*114 > 128000 ? '#0A0A0A' : '#F5F0EC' }}>{name || "Venue name"}</span>
+            <span className="absolute bottom-3 left-3 font-display text-sm drop-shadow" style={{ color: getLuminance(colorBg) > 0.4 ? '#0A0A0A' : '#F5F0EC' }}>{name || "Venue name"}</span>
           </div>
 
           {/* Background color */}
@@ -213,30 +265,48 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
               className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold resize-none" />
           </div>
 
-          {/* Logo upload */}
+          {/* ── Logo section ────────────────────────────────────── */}
           <div className="border-t border-onyx/10 pt-6">
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Logo</label>
-            {venue && (venue.logo_svg || venue.logo_url) && (
+            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-3">Logo</label>
+
+            {/* FIX Bug 1: pass isDarkBg so SVG adapts color on each swatch background */}
+            {hasLogo && (
               <div className="mb-3 flex gap-2 flex-wrap">
-                <LogoSwatch bg={colorBg} accent={colorPrimary} svg={venue.logo_svg} url={venue.logo_url} name={venue.name} mode="auto" label="auto" />
-                <LogoSwatch bg="#F5F0EC" accent={colorPrimary} svg={venue.logo_svg} url={venue.logo_url} name={venue.name} mode="auto" label="hell" />
-                <LogoSwatch bg="#0A0A0A" accent={colorPrimary} svg={venue.logo_svg} url={venue.logo_url} name={venue.name} mode="auto" label="dunkel" />
-                <LogoSwatch bg={colorBg} accent={colorPrimary} svg={venue.logo_svg} url={venue.logo_url} name={venue.name} mode="accent" label="accent" />
+                <LogoSwatch bg={colorBg}    accent={colorPrimary} svg={logoSvg} url={logoUrl} name={name} mode="auto"   label="auto"   />
+                <LogoSwatch bg="#F5F0EC"    accent={colorPrimary} svg={logoSvg} url={logoUrl} name={name} mode="auto"   label="hell"   />
+                <LogoSwatch bg="#0A0A0A"    accent={colorPrimary} svg={logoSvg} url={logoUrl} name={name} mode="auto"   label="dunkel" />
+                <LogoSwatch bg={colorBg}    accent={colorPrimary} svg={logoSvg} url={logoUrl} name={name} mode="accent" label="accent" />
               </div>
             )}
-            <p className="font-sans text-[10px] text-onyx/40 mb-2 leading-snug">
+
+            <p className="font-sans text-[10px] text-onyx/40 mb-3 leading-snug">
               SVG empfohlen — passt sich automatisch der Farbe an. PNG mit
               transparentem Hintergrund auch ok.
             </p>
+
+            {/* FIX Bug 2: onChange refreshes logo from DB instead of reloading page */}
+            {/* FIX Bug 3: delete button shown whenever hasLogo (SVG or PNG) */}
             {venue && (
-              <PhotoUploader
-                target="carta-venue-logo"
-                id={venue.id}
-                currentUrl={venue.logo_url ?? null}
-                onChange={() => window.location.reload()}
-                aspect="square"
-                label={venue.logo_svg ? "+ Logo ersetzen" : "+ Logo hinzufügen"}
-              />
+              <div className="flex items-center gap-2 flex-wrap">
+                <PhotoUploader
+                  target="carta-venue-logo"
+                  id={venue.id}
+                  currentUrl={null}          /* always show "+" button — deletion handled separately */
+                  onChange={async () => { await refreshLogo(venue.id); }}
+                  aspect="square"
+                  label={hasLogo ? "+ Logo ersetzen" : "+ Logo hinzufügen"}
+                />
+                {hasLogo && (
+                  <button
+                    type="button"
+                    onClick={handleDeleteLogo}
+                    disabled={deletingLogo}
+                    className="font-sans text-[10px] tracking-regal uppercase text-red-700/70 border border-red-700/30 px-3 py-2 hover:bg-red-700 hover:text-white transition disabled:opacity-50"
+                  >
+                    {deletingLogo ? "…" : "Entfernen"}
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
@@ -322,16 +392,28 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
   );
 }
 
+// ── Logo swatch ────────────────────────────────────────────────────
+// FIX Bug 1: isDarkBg is now calculated from the swatch's bg color
+// so VenueLogo inverts SVG color correctly on each background.
 function LogoSwatch({
   bg, accent, svg, url, name, mode, label,
 }: {
   bg: string; accent: string; svg?: string | null; url?: string | null;
   name: string; mode: "auto" | "accent"; label: string;
 }) {
+  const isDarkBg = getLuminance(bg) < 0.4;
   return (
     <div className="flex flex-col items-center gap-1">
-      <div className="w-20 h-20 flex items-center justify-center" style={{ backgroundColor: bg, border: "1px solid rgba(0,0,0,0.1)" }}>
-        <VenueLogo svg={svg} url={url} name={name} bg={bg} accent={accent} color={mode} height={32} />
+      <div
+        className="w-20 h-20 flex items-center justify-center"
+        style={{ backgroundColor: bg, border: "1px solid rgba(0,0,0,0.1)" }}
+      >
+        <VenueLogo
+          svg={svg} url={url} name={name}
+          bg={bg} accent={accent}
+          color={mode} height={32}
+          isDarkBg={isDarkBg}
+        />
       </div>
       <span className="font-sans text-[9px] tracking-regal uppercase text-onyx/40">{label}</span>
     </div>
