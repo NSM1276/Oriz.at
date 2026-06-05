@@ -271,6 +271,16 @@ function CityRecommendations({
   );
 }
 
+function getLuminance(hex: string): number {
+  const h = hex.replace("#", "");
+  if (h.length !== 6) return 0;
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  const toLinear = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+
 type Property = {
   id: string;
   slug: string;
@@ -279,6 +289,7 @@ type Property = {
   about: string | null;
   color_bg: string | null;
   color_primary: string | null;
+  casa_theme: string | null;
   logo_url: string | null;
   logo_svg: string | null;
   cover_url: string | null;
@@ -324,6 +335,17 @@ export function CasaGuestView({
 
   const bg = property.color_bg || "#0A0A0A";
   const accent = property.color_primary || "#C69B3C";
+  const theme = property.casa_theme ?? "classic";
+
+  const isDark = getLuminance(bg) < 0.4;
+  const textColor = isDark ? "#F5F0EC" : "#0A0A0A";
+  const dimColor = isDark ? "rgba(245,240,236,0.60)" : "rgba(10,10,10,0.60)";
+  const mutedColor = isDark ? "rgba(245,240,236,0.40)" : "rgba(10,10,10,0.40)";
+  const borderColor = isDark ? "rgba(245,240,236,0.10)" : "rgba(10,10,10,0.10)";
+  const overlayBg = isDark ? "rgba(10,10,10,0.70)" : "rgba(245,240,236,0.85)";
+
+  // Modern theme: cleaner, more structured layout signal
+  const isModern = theme === "modern";
 
   const labels =
     lang === "de"
@@ -334,15 +356,16 @@ export function CasaGuestView({
     <main
       style={{
         backgroundColor: bg,
-        color: "#F5F0EC",
+        color: textColor,
         minHeight: "100dvh",
+        fontFamily: isModern ? "var(--font-inter, sans-serif)" : undefined,
       }}
     >
       {/* ── DE/EN toggle (top-right floating) ── */}
       <div
         className="fixed top-5 right-5 z-50 flex items-center"
         style={{
-          backgroundColor: "rgba(10,10,10,0.70)",
+          backgroundColor: overlayBg,
           backdropFilter: "blur(8px)",
           border: `1px solid ${accent}33`,
           padding: "4px 8px",
@@ -353,7 +376,7 @@ export function CasaGuestView({
             {i > 0 && (
               <span
                 className="font-sans mx-1"
-                style={{ fontSize: "9px", color: "rgba(245,240,236,0.20)" }}
+                style={{ fontSize: "9px", color: borderColor }}
               >
                 |
               </span>
@@ -365,7 +388,7 @@ export function CasaGuestView({
                 fontSize: "10px",
                 letterSpacing: "0.18em",
                 padding: "4px 4px",
-                color: lang === l ? accent : "rgba(245,240,236,0.40)",
+                color: lang === l ? accent : mutedColor,
               }}
             >
               {l.toUpperCase()}
@@ -427,10 +450,11 @@ export function CasaGuestView({
             </div>
           ) : null}
           <h1
-            className="font-display font-light"
+            className="font-light"
             style={{
+              fontFamily: isModern ? "var(--font-inter, sans-serif)" : "var(--font-garamond, serif)",
               fontSize: "clamp(2.25rem, 6vw, 3.5rem)",
-              color: "#F5F0EC",
+              color: textColor,
               lineHeight: 1.1,
             }}
           >
@@ -441,7 +465,7 @@ export function CasaGuestView({
               className="font-display italic mt-3"
               style={{
                 fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)",
-                color: "rgba(245,240,236,0.50)",
+                color: dimColor,
               }}
             >
               {property.city}
@@ -465,7 +489,7 @@ export function CasaGuestView({
               className="font-display italic mt-8 mx-auto"
               style={{
                 fontSize: "0.95rem",
-                color: "rgba(245,240,236,0.60)",
+                color: dimColor,
                 maxWidth: "440px",
                 lineHeight: 1.65,
               }}
@@ -488,11 +512,8 @@ export function CasaGuestView({
                 key={b.id}
                 className="py-6"
                 style={{
-                  borderTop:
-                    i === 0
-                      ? "1px solid rgba(245,240,236,0.10)"
-                      : undefined,
-                  borderBottom: "1px solid rgba(245,240,236,0.10)",
+                  borderTop: i === 0 ? `1px solid ${borderColor}` : undefined,
+                  borderBottom: `1px solid ${borderColor}`,
                 }}
               >
                 {title && (
@@ -509,10 +530,10 @@ export function CasaGuestView({
                 )}
                 {body && (
                   <div
-                    className="font-display"
                     style={{
+                      fontFamily: isModern ? "var(--font-inter, sans-serif)" : "var(--font-garamond, serif)",
                       fontSize: "1rem",
-                      color: "rgba(245,240,236,0.85)",
+                      color: dimColor,
                       lineHeight: 1.65,
                       whiteSpace: "pre-line",
                     }}

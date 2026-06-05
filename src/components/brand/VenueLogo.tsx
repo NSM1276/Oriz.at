@@ -104,9 +104,8 @@ export function VenueLogo({
   // Text fallback in display font
   return (
     <span
-      className={`font-display ${className ?? ""}`}
+      className={`font-display shimmer-heading ${className ?? ""}`}
       style={{
-        color: resolved,
         fontSize: Math.round(effectiveHeight * 0.7),
         lineHeight: 1,
         fontWeight: 300,

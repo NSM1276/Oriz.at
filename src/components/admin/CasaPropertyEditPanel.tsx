@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { PhotoUploader } from "@/components/admin/PhotoUploader";
 import { VenueLogo } from "@/components/brand/VenueLogo";
+import { COLOR_PRESETS, findPreset } from "@/lib/colorPresets";
 
 export type CasaPropertySummary = {
   id: string;
@@ -67,32 +67,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
     if (!property) return;
     setSaving(true);
     setError(null);
-    const supabase = createClient();
-    const { error: err } = await supabase
-      .schema("casa")
-      .from("properties")
-      .update({
-        name,
-        slug: slug || property.slug,
-        city: city || null,
-        about: about || null,
-        color_bg: colorBg,
-        color_primary: colorPrimary,
-        website_url: website || null,
-        instagram_url: instagram || null,
-        facebook_url: facebook || null,
-        google_maps_url: maps || null,
-        phone: phone || null,
-        email: email || null,
-      })
-      .eq("id", property.id);
-    setSaving(false);
-    if (err) {
-      setError(err.message);
-      return;
-    }
-    onSaved({
-      ...property,
+    const updates = {
       name,
       slug: slug || property.slug,
       city: city || null,
@@ -105,7 +80,19 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
       google_maps_url: maps || null,
       phone: phone || null,
       email: email || null,
+    };
+    const res = await fetch("/api/admin/casa/property-update", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ propertyId: property.id, updates }),
     });
+    setSaving(false);
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      setError((json as { error?: string }).error ?? "Fehler beim Speichern.");
+      return;
+    }
+    onSaved({ ...property, ...updates });
   }
 
   const isOpen = property !== null;
@@ -221,16 +208,38 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
             />
           </Field>
 
-          <div className="border-t border-onyx/10 pt-6 space-y-4">
-            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">
-              Theme
+          <div className="border-t border-onyx/10 pt-6">
+            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 mb-4">
+              Farbe &amp; Stil
             </p>
-            <ColorField label="Background" value={colorBg} onChange={setColorBg} />
-            <ColorField
-              label="Accent"
-              value={colorPrimary}
-              onChange={setColorPrimary}
-            />
+            <div className="flex flex-wrap gap-2 mb-3">
+              {COLOR_PRESETS.map((preset) => {
+                const isSelected = preset.color_bg.toLowerCase() === colorBg.toLowerCase();
+                return (
+                  <button
+                    key={preset.id}
+                    onClick={() => { setColorBg(preset.color_bg); setColorPrimary(preset.color_primary); }}
+                    title={preset.label}
+                    style={{
+                      width: 36, height: 36, borderRadius: "50%",
+                      backgroundColor: preset.color_bg,
+                      border: `2px solid ${preset.color_primary}`,
+                      boxShadow: isSelected ? `0 0 0 2px #F5F0EC, 0 0 0 4px ${preset.color_primary}` : "none",
+                      transform: isSelected ? "scale(1.15)" : "scale(1)",
+                      transition: "transform 150ms, box-shadow 150ms",
+                      cursor: "pointer",
+                    }}
+                  />
+                );
+              })}
+            </div>
+            {findPreset(colorBg) && (
+              <p className="font-sans text-[10px] tracking-regal uppercase mb-4" style={{ color: colorPrimary }}>
+                {findPreset(colorBg)?.label}
+              </p>
+            )}
+            <ColorField label="Background (custom)" value={colorBg} onChange={setColorBg} />
+            <ColorField label="Accent (custom)" value={colorPrimary} onChange={setColorPrimary} />
           </div>
 
           {/* Logo */}
@@ -260,9 +269,13 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
                 target="casa-property-logo"
                 id={property.id}
                 currentUrl={property.logo_url ?? null}
-                onChange={() => {
-                  // Re-fetch on save would be ideal; for now just reload the panel.
-                  window.location.reload();
+                onChange={(url) => {
+                  if (url) {
+                    onSaved({ ...property, logo_url: url, logo_svg: null });
+                  } else {
+                    // SVG upload — reload to pick up logo_svg from DB
+                    window.location.reload();
+                  }
                 }}
                 aspect="square"
                 label={property.logo_svg ? "+ Logo ersetzen" : "+ Logo hinzufügen"}

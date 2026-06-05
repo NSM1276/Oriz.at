@@ -22,12 +22,11 @@ function toStorageSlug(name) {
     .toLowerCase();
 }
 
-// Only re-run brasserie (tosca already done ✅)
 const VENUES = [
   {
-    slug: 'brasserie-lumiere',
-    folder: 'C:/Users/User/Documents/mein website/NEW/ORIZ/public/BRASSERIE LUMIÈRE',
-    storagePrefix: 'brasserie-lumiere',
+    slug: 'sushi-schonbrunn',
+    folder: 'C:/Users/User/Documents/mein website/NEW/ORIZ/public/SUSHI SCHÖNBRUNN',
+    storagePrefix: 'sushi-schonbrunn',
   },
 ];
 
@@ -59,8 +58,8 @@ async function processVenue({ slug, folder, storagePrefix }) {
       const srcPath = path.join(folder, file);
       const raw = await readFile(srcPath);
       const compressed = await sharp(raw)
-        .resize(600, 440, { fit: 'cover', position: 'centre' })
-        .webp({ quality: 82 })
+        .resize(900, null, { fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 85 })
         .toBuffer();
 
       const sizeBefore = raw.length;

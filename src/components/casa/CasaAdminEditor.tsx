@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { PhotoUploader } from "@/components/admin/PhotoUploader";
+import { CasaStylePicker } from "@/components/admin/CasaStylePicker";
+import { VenueLogo } from "@/components/brand/VenueLogo";
 
 // ── types ──────────────────────────────────────────────────────────────────
 type Property = {
@@ -13,7 +14,9 @@ type Property = {
   about: string | null;
   color_bg: string | null;
   color_primary: string | null;
+  casa_theme: string | null;
   logo_url: string | null;
+  logo_svg: string | null;
   cover_url: string | null;
   website_url: string | null;
   instagram_url: string | null;
@@ -206,17 +209,19 @@ export function CasaAdminEditor({
   const [property, setProperty] = useState(initialProperty);
   const [blocks, setBlocks] = useState<Block[]>(initialBlocks);
   const [addingBlock, setAddingBlock] = useState(false);
-  const supabase = createClient();
 
   // ── property field updates ───────────────────────────────────────────────
   async function saveProperty<K extends keyof Property>(field: K, value: Property[K]) {
     setProperty((p) => ({ ...p, [field]: value }));
-    const { error } = await supabase
-      .schema("casa")
-      .from("properties")
-      .update({ [field]: value })
-      .eq("id", property.id);
-    if (error) throw error;
+    const res = await fetch("/api/admin/casa/property-update", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ propertyId: property.id, updates: { [field]: value } }),
+    });
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      throw new Error((json as { error?: string }).error ?? "Fehler beim Speichern.");
+    }
   }
 
   // ── block field updates ──────────────────────────────────────────────────
@@ -224,53 +229,58 @@ export function CasaAdminEditor({
     setBlocks((bs) =>
       bs.map((b) => (b.id === blockId ? { ...b, [field]: value } : b)),
     );
-    const { error } = await supabase
-      .schema("casa")
-      .from("content_blocks")
-      .update({ [field]: value })
-      .eq("id", blockId);
-    if (error) throw error;
+    const res = await fetch("/api/admin/casa/block", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ blockId, updates: { [field]: value } }),
+    });
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      throw new Error((json as { error?: string }).error ?? "Fehler beim Speichern.");
+    }
   }
 
   async function addBlock() {
     setAddingBlock(true);
     const nextPosition = blocks.length;
-    const { data, error } = await supabase
-      .schema("casa")
-      .from("content_blocks")
-      .insert({
-        property_id: property.id,
+    const res = await fetch("/api/admin/casa/block", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        propertyId: property.id,
         block_type: "other",
         title_de: "Neuer Block",
         title_en: "New block",
         body_de: "",
         body_en: "",
         position: nextPosition,
-      })
-      .select()
-      .single();
+      }),
+    });
     setAddingBlock(false);
-    if (data) setBlocks((bs) => [...bs, data as Block]);
-    if (error) alert("Fehler beim Hinzufügen: " + error.message);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.block) setBlocks((bs) => [...bs, json.block as Block]);
+    } else {
+      const json = await res.json().catch(() => ({}));
+      alert("Fehler beim Hinzufügen: " + ((json as { error?: string }).error ?? "Unbekannter Fehler"));
+    }
   }
 
   async function deleteBlock(id: string) {
     if (!confirm("Diesen Block wirklich löschen?")) return;
     const prev = blocks;
     setBlocks((bs) => bs.filter((b) => b.id !== id));
-    // Storage cleanup first — best-effort, ignore failures (file might
-    // not exist if block had no photo). Then drop the row.
+    // Storage cleanup first — best-effort, silent on missing file
     await fetch(`/api/admin/upload-photo?target=casa-block&id=${id}`, {
       method: "DELETE",
     }).catch(() => {});
-    const { error } = await supabase
-      .schema("casa")
-      .from("content_blocks")
-      .delete()
-      .eq("id", id);
-    if (error) {
+    const res = await fetch(`/api/admin/casa/block?blockId=${id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
       setBlocks(prev);
-      alert("Fehler beim Löschen: " + error.message);
+      const json = await res.json().catch(() => ({}));
+      alert("Fehler beim Löschen: " + ((json as { error?: string }).error ?? "Unbekannter Fehler"));
     }
   }
 
@@ -285,21 +295,22 @@ export function CasaAdminEditor({
     setBlocks(repositioned);
     // persist both swapped blocks
     await Promise.all([
-      supabase
-        .schema("casa")
-        .from("content_blocks")
-        .update({ position: idx })
-        .eq("id", reordered[swapIdx].id),
-      supabase
-        .schema("casa")
-        .from("content_blocks")
-        .update({ position: swapIdx })
-        .eq("id", reordered[idx].id),
+      fetch("/api/admin/casa/block", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ blockId: reordered[swapIdx].id, updates: { position: idx } }),
+      }),
+      fetch("/api/admin/casa/block", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ blockId: reordered[idx].id, updates: { position: swapIdx } }),
+      }),
     ]);
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    const { createClient } = await import("@/lib/supabase/client");
+    await createClient().auth.signOut();
     window.location.href = "/admin/login";
   }
 
@@ -359,6 +370,73 @@ export function CasaAdminEditor({
 
         {/* QR code */}
         <QRBlock slug={property.slug} />
+
+        {/* Style picker */}
+        <CasaStylePicker
+          propertyId={property.id}
+          color_bg={property.color_bg}
+          color_primary={property.color_primary}
+          casa_theme={property.casa_theme}
+          onUpdate={(updates) => setProperty((p) => ({ ...p, ...updates }))}
+        />
+
+        {/* Logo */}
+        <section
+          className="mb-10 py-8"
+          style={{ borderTop: "1px solid rgba(10,10,10,0.10)", borderBottom: "1px solid rgba(10,10,10,0.10)" }}
+        >
+          <h2 className="font-sans uppercase mb-4" style={{ fontSize: "11px", color: property.color_primary ?? "#C69B3C", letterSpacing: "0.28em" }}>
+            Logo
+          </h2>
+          {(property.logo_svg || property.logo_url) && (
+            <div className="mb-5">
+              <div className="flex gap-2 flex-wrap mb-3">
+                {[property.color_bg ?? "#0A0A0A", "#F5F0EC", "#0A0A0A"].map((bg, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <div className="w-16 h-16 flex items-center justify-center" style={{ backgroundColor: bg, border: "1px solid rgba(0,0,0,0.10)" }}>
+                      <VenueLogo svg={property.logo_svg} url={property.logo_url} name={property.name} bg={bg} accent={property.color_primary ?? "#C69B3C"} color="auto" height={28} />
+                    </div>
+                    <span className="font-sans text-[9px] tracking-regal uppercase" style={{ color: "rgba(10,10,10,0.40)" }}>{i === 0 ? "aktuell" : i === 1 ? "hell" : "dunkel"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <PhotoUploader
+            target="casa-property-logo"
+            id={property.id}
+            currentUrl={property.logo_url ?? null}
+            onChange={(url) => {
+              // For JPEG/PNG: url is the new URL. For SVG: url may be undefined.
+              // Re-fetch property to get updated logo_svg / logo_url.
+              fetch("/api/admin/casa/property-update", {
+                method: "PATCH",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ propertyId: property.id, updates: {} }),
+              }).catch(() => {});
+              // Reload only the property data (not the page) by refreshing the router
+              window.location.reload();
+            }}
+            aspect="square"
+            label={property.logo_svg || property.logo_url ? "+ Logo ersetzen" : "+ Logo hinzufügen"}
+          />
+          {(property.logo_svg || property.logo_url) && (
+            <button
+              onClick={async () => {
+                await fetch("/api/admin/casa/property-update", {
+                  method: "PATCH",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({ propertyId: property.id, updates: { logo_url: null } }),
+                });
+                setProperty((p) => ({ ...p, logo_url: null, logo_svg: null }));
+              }}
+              className="mt-3 font-sans text-[10px] tracking-regal uppercase transition-opacity hover:opacity-70"
+              style={{ color: "#DC2626", background: "none", border: "none", cursor: "pointer", padding: 0, letterSpacing: "0.18em" }}
+            >
+              Logo entfernen
+            </button>
+          )}
+        </section>
 
         {/* Property fields */}
         <section
