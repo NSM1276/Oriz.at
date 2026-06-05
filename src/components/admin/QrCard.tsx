@@ -38,11 +38,11 @@ export function QrCard({ name, url, accent, kind, subtitle, logoSvg, logoUrl }: 
   return (
     <>
       <style>{`
-        @page { size: A6 portrait; margin: 0; }
+        @page { size: 90mm 90mm; margin: 0; }
         @media print {
           html, body { background: ${cardBg} !important; margin: 0; padding: 0; }
           .no-print { display: none !important; }
-          .qr-card  { box-shadow: none !important; margin: 0 !important; width: 100% !important; height: 100% !important; }
+          .qr-card  { box-shadow: none !important; margin: 0 !important; width: 90mm !important; height: 90mm !important; }
         }
         html, body { background: ${screenBg}; margin: 0; padding: 0; transition: background 0.3s; }
       `}</style>
@@ -115,77 +115,64 @@ export function QrCard({ name, url, accent, kind, subtitle, logoSvg, logoUrl }: 
         <div
           className="qr-card"
           style={{
-            width: "105mm", height: "148mm",
+            width: "90mm", height: "90mm",
             background: cardBg,
             display: "flex", flexDirection: "column",
             alignItems: "center", justifyContent: "space-between",
-            padding: "12mm 10mm",
+            padding: "5mm 6mm",
             boxShadow: "0 12px 50px rgba(0,0,0,0.25)",
             boxSizing: "border-box",
             transition: "background 0.3s",
           }}
         >
-          {/* Top: logo + eyebrow */}
-          <div style={{ textAlign: "center", width: "100%" }}>
+          {/* Top: logo (if any) + eyebrow label */}
+          <div style={{ textAlign: "center", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: "2.5mm" }}>
             {(logoSvg || logoUrl) && (
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: "8mm" }}>
-                <VenueLogo
-                  svg={logoSvg} url={logoUrl} name={name}
-                  bg={cardBg} accent={accent}
-                  color="auto" height={48}
-                  isDarkBg={dark}
-                />
-              </div>
+              <VenueLogo
+                svg={logoSvg} url={logoUrl} name={name}
+                bg={cardBg} accent={accent}
+                color="auto" height={28}
+                isDarkBg={dark}
+              />
             )}
             <p style={{
               fontFamily: "var(--font-inter, sans-serif)",
-              fontSize: "9px", letterSpacing: "0.32em",
+              fontSize: "7px", letterSpacing: "0.32em",
               textTransform: "uppercase", color: accent, margin: 0,
             }}>
               {title}
             </p>
-            <div style={{ width: 30, height: 1, background: accent, opacity: 0.6, margin: "8px auto 0" }} />
           </div>
 
-          {/* Middle: QR */}
-          <div style={{ background: qrContainerBg, padding: "5mm", border: qrBorder }}>
+          {/* Middle: QR — dominant element */}
+          <div style={{ background: qrContainerBg, padding: "3mm", border: qrBorder, flexShrink: 0 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrSrc} alt={`QR Code · ${name}`}
-              style={{ display: "block", width: "55mm", height: "55mm" }} />
+              style={{ display: "block", width: "52mm", height: "52mm" }} />
           </div>
-
-          {/* CTA */}
-          <p style={{
-            fontFamily: "var(--font-inter, sans-serif)",
-            fontSize: "9px", letterSpacing: "0.24em",
-            textTransform: "uppercase", color: textDim,
-            margin: 0, textAlign: "center",
-          }}>
-            {cta}
-          </p>
 
           {/* Bottom: name + ORIZ mark */}
           <div style={{ width: "100%", textAlign: "center" }}>
             <h1 style={{
               fontFamily: "var(--font-garamond, serif)",
-              fontWeight: 300, fontSize: "20pt",
-              color: textMain, margin: 0, lineHeight: 1.15,
+              fontWeight: 300, fontSize: "14pt",
+              color: textMain, margin: 0, lineHeight: 1.1,
             }}>
               {name}
             </h1>
             {subtitle && (
               <p style={{
                 fontFamily: "var(--font-garamond, serif)",
-                fontStyle: "italic", fontSize: "11pt",
-                color: textDim, margin: "4px 0 0",
+                fontStyle: "italic", fontSize: "8pt",
+                color: textDim, margin: "1.5mm 0 0",
               }}>
                 {subtitle}
               </p>
             )}
-            <div style={{ width: 30, height: 1, background: accent, opacity: 0.6, margin: "10mm auto 4mm" }} />
+            <div style={{ width: 24, height: 1, background: accent, opacity: 0.5, margin: "2mm auto 2mm" }} />
             <p style={{
               fontFamily: "var(--font-inter, sans-serif)",
-              fontSize: "8px", letterSpacing: "0.3em",
+              fontSize: "6.5px", letterSpacing: "0.25em",
               textTransform: "uppercase", color: textMuted, margin: 0,
             }}>
               ORIZ · {url.replace(/^https?:\/\//, "")}
