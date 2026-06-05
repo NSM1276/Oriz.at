@@ -35,13 +35,45 @@ export function normalizeLogoSvg(raw: string): string {
   s = s.slice(svgOpenIdx);
 
   // Security: remove dangerous tags entirely (with content)
-  const dangerousTags = ["script", "foreignObject", "iframe", "object", "embed", "style"];
+  const dangerousTags = ["script", "foreignObject", "iframe", "object", "embed"];
   for (const tag of dangerousTags) {
     const re = new RegExp(`<${tag}\\b[\\s\\S]*?<\\/${tag}>`, "gi");
     s = s.replace(re, "");
     // Also self-closing variants
     s = s.replace(new RegExp(`<${tag}\\b[^>]*\\/>`, "gi"), "");
   }
+
+  // <style> blocks: sanitize instead of stripping.
+  // Stripping entirely breaks SVGs that define fills via CSS classes
+  // (common in Illustrator/Inkscape exports: .cls-1{fill:#000}).
+  // We keep the block but:
+  //   1. Remove @import / @keyframes / expression() — data-exfiltration / animation risks
+  //   2. Remove external url() references — can leak requests
+  //   3. Replace all fill/stroke color values with currentColor (same as we do for attrs)
+  s = s.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (_m, css) => {
+    let cleaned = String(css);
+    // Strip dangerous @-rules
+    cleaned = cleaned.replace(/@import\b[^;]*;/gi, "");
+    cleaned = cleaned.replace(/@keyframes\b\s+\S+\s*\{[\s\S]*?\}\s*\}/gi, "");
+    // Remove external url() (keep data:image/ which is safe)
+    cleaned = cleaned.replace(/url\s*\(\s*['"]?(?!data:image)([^)'"]*?)['"]?\s*\)/gi, "none");
+    // Strip expression() (IE-era code execution)
+    cleaned = cleaned.replace(/expression\s*\([^)]*\)/gi, "");
+    // Replace fill/stroke color values with currentColor
+    cleaned = cleaned.replace(
+      /(fill|stroke)\s*:\s*([^;}\n,]+)/gi,
+      (_mm, prop, val) => {
+        const v = String(val).trim().toLowerCase();
+        if (v === "none" || v === "transparent" || v.startsWith("url") || v.startsWith("current")) {
+          return `${prop}:${val}`;
+        }
+        return `${prop}:currentColor`;
+      },
+    );
+    // Drop the block if nothing meaningful remains
+    const hasContent = /[a-z0-9-_{}:;.#]/i.test(cleaned.replace(/\s/g, ""));
+    return hasContent ? `<style>${cleaned}</style>` : "";
+  });
 
   // Security: strip event handlers (onclick=, onload=, etc.) — case-insensitive,
   // both quoted and unquoted variants.

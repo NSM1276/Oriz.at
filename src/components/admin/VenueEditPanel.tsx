@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { PhotoUploader } from "@/components/admin/PhotoUploader";
 import { VenueLogo } from "@/components/brand/VenueLogo";
+import { normalizeLogoSvg } from "@/lib/svg-normalize";
+import { resizeToWebP } from "@/lib/image-resize";
 import type { Venue } from "@/lib/supabase/types";
 
 type MenuTheme = "classic" | "visual" | "modern";
@@ -43,6 +44,16 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
   const [instagram, setInstagram] = useState("");
   const [googleMaps, setGoogleMaps] = useState("");
   const [menuTheme, setMenuTheme] = useState<MenuTheme>("classic");
+  // Staged logo upload: file is shown in preview BEFORE being sent to the server.
+  // pendingFile = selected but not yet uploaded.
+  // pendingLogoSvg = client-normalized SVG text (for preview swatches).
+  // pendingLogoUrl = objectURL for raster preview.
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingLogoSvg, setPendingLogoSvg] = useState<string | null>(null);
+  const [pendingLogoUrl, setPendingLogoUrl] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
   const [saving, setSaving] = useState(false);
   const [deletingLogo, setDeletingLogo] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,12 +99,15 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
       setPlan((venue.plan as Plan) ?? "trial");
       setMenuTheme((venue.menu_theme as MenuTheme) ?? "classic");
       setLogoUrl(venue.logo_url ?? null);
-      setLogoSvg(venue.logo_svg ?? null);          // ← init SVG state from prop
+      setLogoSvg(venue.logo_svg ?? null);
       setInstagram(venue.instagram_url ?? "");
       setGoogleMaps(venue.google_maps_url ?? "");
       setError(null);
+      // Clear any pending preview when switching venues
+      clearPending();
       void loadOwner(venue.id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [venue, loadOwner]);
 
   async function handleAssignOwner() {
@@ -114,6 +128,70 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
       setOwnerCurrent(json.ownerEmail ?? null);
       setOwnerSuccess(true);
       setTimeout(() => setOwnerSuccess(false), 3000);
+    }
+  }
+
+  // ── Staged logo upload ─────────────────────────────────────────
+  function clearPending() {
+    if (pendingLogoUrl) URL.revokeObjectURL(pendingLogoUrl);
+    setPendingFile(null);
+    setPendingLogoSvg(null);
+    setPendingLogoUrl(null);
+  }
+
+  async function handleLogoFilePicked(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset the input so the same file can be picked again later
+    if (logoInputRef.current) logoInputRef.current.value = "";
+    setError(null);
+
+    const isSvg = file.type === "image/svg+xml" || /\.svg$/i.test(file.name);
+    if (isSvg) {
+      try {
+        const text = await file.text();
+        const normalized = normalizeLogoSvg(text); // client-side normalize for accurate preview
+        clearPending();
+        setPendingLogoSvg(normalized);
+        setPendingLogoUrl(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Ungültige SVG-Datei");
+        return;
+      }
+    } else {
+      clearPending();
+      setPendingLogoUrl(URL.createObjectURL(file));
+      setPendingLogoSvg(null);
+    }
+    setPendingFile(file);
+  }
+
+  async function handleLogoUploadConfirm() {
+    if (!pendingFile || !venue) return;
+    setUploadingLogo(true);
+    setError(null);
+    try {
+      const isSvg = pendingFile.type === "image/svg+xml" || /\.svg$/i.test(pendingFile.name);
+      const form = new FormData();
+      form.append("target", "carta-venue-logo");
+      form.append("id", venue.id);
+      if (isSvg) {
+        form.append("file", pendingFile, pendingFile.name || "logo.svg");
+      } else {
+        const webp = await resizeToWebP(pendingFile);
+        form.append("file", webp, "photo.webp");
+      }
+      const res = await fetch("/api/admin/upload-photo", { method: "POST", body: form });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error((j as { error?: string }).error ?? `HTTP ${res.status}`);
+      }
+      await refreshLogo(venue.id);
+      clearPending();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload fehlgeschlagen");
+    } finally {
+      setUploadingLogo(false);
     }
   }
 
@@ -170,7 +248,12 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
   }
 
   const isOpen = venue !== null;
-  const hasLogo = !!(logoSvg || logoUrl);   // ← used for delete button + swatches
+  const hasLogo = !!(logoSvg || logoUrl);           // saved logo in DB
+  const isPending = !!pendingFile;                  // staged (not yet uploaded)
+  // What to show in swatches: pending preview if present, otherwise saved logo
+  const displaySvg = isPending ? pendingLogoSvg : logoSvg;
+  const displayUrl = isPending ? pendingLogoUrl : logoUrl;
+  const hasDisplayLogo = !!(displaySvg || displayUrl);
 
   return (
     <>
@@ -269,13 +352,20 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
           <div className="border-t border-onyx/10 pt-6">
             <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-3">Logo</label>
 
-            {/* FIX Bug 1: pass isDarkBg so SVG adapts color on each swatch background */}
-            {hasLogo && (
-              <div className="mb-3 flex gap-2 flex-wrap">
-                <LogoSwatch bg={colorBg}    accent={colorPrimary} svg={logoSvg} url={logoUrl} name={name} mode="auto"   label="auto"   />
-                <LogoSwatch bg="#F5F0EC"    accent={colorPrimary} svg={logoSvg} url={logoUrl} name={name} mode="auto"   label="hell"   />
-                <LogoSwatch bg="#0A0A0A"    accent={colorPrimary} svg={logoSvg} url={logoUrl} name={name} mode="auto"   label="dunkel" />
-                <LogoSwatch bg={colorBg}    accent={colorPrimary} svg={logoSvg} url={logoUrl} name={name} mode="accent" label="accent" />
+            {/* Swatches — show pending preview or saved logo */}
+            {hasDisplayLogo && (
+              <div className="mb-3">
+                {isPending && (
+                  <p className="font-sans text-[9px] tracking-regal uppercase text-gold mb-2">
+                    Vorschau — noch nicht gespeichert
+                  </p>
+                )}
+                <div className="flex gap-2 flex-wrap">
+                  <LogoSwatch bg={colorBg}    accent={colorPrimary} svg={displaySvg} url={displayUrl} name={name} mode="auto"   label="auto"   />
+                  <LogoSwatch bg="#F5F0EC"    accent={colorPrimary} svg={displaySvg} url={displayUrl} name={name} mode="auto"   label="hell"   />
+                  <LogoSwatch bg="#0A0A0A"    accent={colorPrimary} svg={displaySvg} url={displayUrl} name={name} mode="auto"   label="dunkel" />
+                  <LogoSwatch bg={colorBg}    accent={colorPrimary} svg={displaySvg} url={displayUrl} name={name} mode="accent" label="accent" />
+                </div>
               </div>
             )}
 
@@ -284,18 +374,45 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
               transparentem Hintergrund auch ok.
             </p>
 
-            {/* FIX Bug 2: onChange refreshes logo from DB instead of reloading page */}
-            {/* FIX Bug 3: delete button shown whenever hasLogo (SVG or PNG) */}
-            {venue && (
+            {/* Hidden file input — shared by both "add" and "replace" triggers */}
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/svg+xml"
+              onChange={handleLogoFilePicked}
+              className="hidden"
+            />
+
+            {isPending ? (
+              /* ── Pending: confirm or cancel ── */
               <div className="flex items-center gap-2 flex-wrap">
-                <PhotoUploader
-                  target="carta-venue-logo"
-                  id={venue.id}
-                  currentUrl={null}          /* always show "+" button — deletion handled separately */
-                  onChange={async () => { await refreshLogo(venue.id); }}
-                  aspect="square"
-                  label={hasLogo ? "+ Logo ersetzen" : "+ Logo hinzufügen"}
-                />
+                <button
+                  type="button"
+                  onClick={handleLogoUploadConfirm}
+                  disabled={uploadingLogo}
+                  className="font-sans text-[10px] tracking-regal uppercase bg-onyx text-parchment px-4 py-2.5 hover:bg-onyx/85 transition disabled:opacity-50"
+                >
+                  {uploadingLogo ? "Wird gespeichert…" : "Logo speichern"}
+                </button>
+                <button
+                  type="button"
+                  onClick={clearPending}
+                  disabled={uploadingLogo}
+                  className="font-sans text-[10px] tracking-regal uppercase text-onyx/60 border border-onyx/20 px-4 py-2.5 hover:border-onyx hover:text-onyx transition disabled:opacity-50"
+                >
+                  Abbrechen
+                </button>
+              </div>
+            ) : (
+              /* ── Normal: upload button + delete ── */
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  className="font-sans text-[10px] tracking-regal uppercase text-onyx/60 border border-dashed border-onyx/30 px-4 py-3 hover:border-onyx hover:text-onyx transition"
+                >
+                  {hasLogo ? "+ Logo ersetzen" : "+ Logo hinzufügen"}
+                </button>
                 {hasLogo && (
                   <button
                     type="button"
