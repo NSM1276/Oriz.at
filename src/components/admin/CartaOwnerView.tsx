@@ -1,9 +1,12 @@
-import React from "react";
+"use client";
+
+import { useState } from "react";
 import { ItemEditor } from "@/components/admin/ItemEditor";
 import { SectionNav } from "@/components/admin/SectionNav";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
 import { QRCodeBlock } from "@/components/admin/QRCodeBlock";
+import { OwnerStylePicker } from "@/components/admin/OwnerStylePicker";
 import { limitForPlan } from "@/lib/plans";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
@@ -31,12 +34,38 @@ function getLuminance(hex: string): number {
 // `superAdminLink` is an optional href back to /admin/casa or /admin
 // to make navigation obvious when super admin lands here.
 export function CartaOwnerView({
-  venue,
+  venue: initialVenue,
   superAdminLink,
 }: {
   venue: VenueWithSections | null;
   superAdminLink?: string;
 }) {
+  // Live venue state — updates instantly when owner changes style
+  const [venueStyle, setVenueStyle] = useState({
+    color_bg:      initialVenue?.color_bg      ?? null,
+    color_primary: initialVenue?.color_primary ?? null,
+    menu_theme:    initialVenue?.menu_theme     ?? "classic",
+  });
+
+  const venue = initialVenue
+    ? { ...initialVenue, ...venueStyle }
+    : initialVenue;
+
+  function handleStyleUpdate(updates: {
+    color_bg?: string;
+    color_primary?: string;
+    menu_theme?: string;
+  }) {
+    setVenueStyle((prev) => ({
+      ...prev,
+      ...(updates.color_bg !== undefined      ? { color_bg: updates.color_bg }           : {}),
+      ...(updates.color_primary !== undefined  ? { color_primary: updates.color_primary } : {}),
+      ...(updates.menu_theme !== undefined
+        ? { menu_theme: updates.menu_theme as "classic" | "modern" | "visual" }
+        : {}),
+    }));
+  }
+
   const plan = venue?.plan ?? "trial";
   const limit = limitForPlan(plan);
   const used = venue?.ai_credits_used ?? 0;
@@ -178,6 +207,17 @@ export function CartaOwnerView({
               </a>
             </div>
           </>
+        )}
+
+        {/* Style picker — color palette + theme switcher */}
+        {venue && (
+          <OwnerStylePicker
+            venueId={venue.id}
+            color_bg={venue.color_bg}
+            color_primary={venue.color_primary}
+            menu_theme={venue.menu_theme}
+            onUpdate={handleStyleUpdate}
+          />
         )}
 
         {!venue ? (
