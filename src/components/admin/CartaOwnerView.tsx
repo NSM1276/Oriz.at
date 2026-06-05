@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ItemEditor } from "@/components/admin/ItemEditor";
+import { AdminItemRow } from "@/components/admin/AdminItemRow";
+import { ItemEditSheet } from "@/components/admin/ItemEditSheet";
 import { SectionNav } from "@/components/admin/SectionNav";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
@@ -40,6 +41,23 @@ export function CartaOwnerView({
   venue: VenueWithSections | null;
   superAdminLink?: string;
 }) {
+  // Item currently open in edit sheet
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
+  // Live items map — updates when owner edits via sheet
+  const [itemsMap, setItemsMap] = useState<Map<string, Item>>(() => {
+    const m = new Map<string, Item>();
+    for (const s of (initialVenue?.sections ?? [])) {
+      for (const it of s.items) m.set(it.id, it);
+    }
+    return m;
+  });
+
+  function handleItemChange(updated: Item) {
+    setItemsMap((prev) => new Map(prev).set(updated.id, updated));
+    // Keep editing item in sync
+    setEditingItem((cur) => (cur?.id === updated.id ? updated : cur));
+  }
+
   // Live venue state — updates instantly when owner changes style
   const [venueStyle, setVenueStyle] = useState({
     color_bg:      initialVenue?.color_bg      ?? null,
@@ -265,13 +283,17 @@ export function CartaOwnerView({
                         />
                       </header>
                       <ul>
-                        {items.map((item) => (
-                          <ItemEditor
-                            key={item.id}
-                            initial={item}
-                            canUseAi={canUseAi}
-                          />
-                        ))}
+                        {items.map((it) => {
+                          const liveItem = itemsMap.get(it.id) ?? it;
+                          return (
+                            <AdminItemRow
+                              key={liveItem.id}
+                              item={liveItem}
+                              currency={venue.currency}
+                              onEdit={() => setEditingItem(liveItem)}
+                            />
+                          );
+                        })}
                       </ul>
                     </section>
                   );
@@ -302,6 +324,17 @@ export function CartaOwnerView({
           .
         </p>
       </main>
+
+      {/* Edit sheet — slides up when owner taps an item */}
+      {venue && (
+        <ItemEditSheet
+          item={editingItem}
+          currency={venue.currency}
+          canUseAi={canUseAi}
+          onClose={() => setEditingItem(null)}
+          onItemChange={handleItemChange}
+        />
+      )}
     </div>
   );
 }
