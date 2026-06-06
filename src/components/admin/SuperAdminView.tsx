@@ -13,6 +13,15 @@ type VenueSummary = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | 
   itemCount: number;
   logo_svg?: string | null;
   menu_theme?: "classic" | "visual" | "modern";
+  phone?: string | null;
+  address?: string | null;
+  website_url?: string | null;
+  google_review_url?: string | null;
+  tripadvisor_url?: string | null;
+  facebook_url?: string | null;
+  price_range?: string | null;
+  opening_hours?: Record<string, [string, string][]> | null;
+  gallery?: string[] | null;
 };
 
 type Props = {

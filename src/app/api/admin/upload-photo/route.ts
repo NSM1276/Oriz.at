@@ -131,6 +131,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     storagePath = `casa/${id}/cover.webp`;
+  } else if (target === "carta-venue-cover") {
+    const { data: venue } = await admin
+      .from("venues")
+      .select("id, owner_id")
+      .eq("id", id)
+      .maybeSingle<{ id: string; owner_id: string | null }>();
+    if (!venue) return NextResponse.json({ error: "venue not found" }, { status: 404 });
+    if (!isSuper && venue.owner_id !== user.id) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
+    storagePath = `carta/${id}/cover.webp`;
   } else if (target === "casa-block") {
     const { data: block } = await admin
       .schema("casa")
@@ -174,6 +185,8 @@ export async function POST(req: NextRequest) {
   // Persist the URL back to the row so the page sees it on next read.
   if (target === "carta-item") {
     await admin.from("items").update({ image_url: url }).eq("id", id);
+  } else if (target === "carta-venue-cover") {
+    await admin.from("venues").update({ cover_url: url }).eq("id", id);
   } else if (target === "casa-cover") {
     await admin.schema("casa").from("properties").update({ cover_url: url }).eq("id", id);
   } else if (target === "casa-block") {
@@ -215,6 +228,12 @@ export async function DELETE(req: NextRequest) {
     if (!isSuper && prop?.owner_id !== user.id) return NextResponse.json({ error: "forbidden" }, { status: 403 });
     storagePath = `casa/${id}/cover.webp`;
     await admin.schema("casa").from("properties").update({ cover_url: null }).eq("id", id);
+  } else if (target === "carta-venue-cover") {
+    const { data: venue } = await admin.from("venues").select("owner_id").eq("id", id).maybeSingle<{ owner_id: string | null }>();
+    if (!venue) return NextResponse.json({ error: "not found" }, { status: 404 });
+    if (!isSuper && venue.owner_id !== user.id) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    storagePath = `carta/${id}/cover.webp`;
+    await admin.from("venues").update({ cover_url: null }).eq("id", id);
   } else if (target === "casa-block") {
     const { data: block } = await admin.schema("casa").from("content_blocks").select("property_id").eq("id", id).maybeSingle<{ property_id: string }>();
     if (!block) return NextResponse.json({ error: "not found" }, { status: 404 });

@@ -13,7 +13,29 @@ type EditableVenue = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" |
   plan: string;
   logo_svg?: string | null;
   menu_theme?: MenuTheme;
+  phone?: string | null;
+  address?: string | null;
+  website_url?: string | null;
+  google_review_url?: string | null;
+  tripadvisor_url?: string | null;
+  facebook_url?: string | null;
+  price_range?: string | null;
+  opening_hours?: Record<string, [string, string][]> | null;
+  gallery?: string[] | null;
 };
+
+const WEEKDAYS = [
+  { key: "mon", label: "Mo" },
+  { key: "tue", label: "Di" },
+  { key: "wed", label: "Mi" },
+  { key: "thu", label: "Do" },
+  { key: "fri", label: "Fr" },
+  { key: "sat", label: "Sa" },
+  { key: "sun", label: "So" },
+] as const;
+
+type WeekdayKey = typeof WEEKDAYS[number]["key"];
+type DaySlot = { open: boolean; from: string; to: string };
 
 type Props = {
   venue: EditableVenue | null;
@@ -44,6 +66,18 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
   const [instagram, setInstagram] = useState("");
   const [googleMaps, setGoogleMaps] = useState("");
   const [menuTheme, setMenuTheme] = useState<MenuTheme>("classic");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [googleReview, setGoogleReview] = useState("");
+  const [tripadvisor, setTripadvisor] = useState("");
+  const [facebookUrl, setFacebookUrl] = useState("");
+  const [priceRange, setPriceRange] = useState("");
+  const [hours, setHours] = useState<Record<WeekdayKey, DaySlot>>(() =>
+    Object.fromEntries(WEEKDAYS.map(d => [d.key, { open: false, from: "09:00", to: "22:00" }])) as Record<WeekdayKey, DaySlot>
+  );
+  const [gallery, setGallery] = useState<string[]>([]);
+  const [galleryInput, setGalleryInput] = useState("");
   // Staged logo upload: file is shown in preview BEFORE being sent to the server.
   // pendingFile = selected but not yet uploaded.
   // pendingLogoSvg = client-normalized SVG text (for preview swatches).
@@ -102,6 +136,23 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
       setLogoSvg(venue.logo_svg ?? null);
       setInstagram(venue.instagram_url ?? "");
       setGoogleMaps(venue.google_maps_url ?? "");
+      setPhone(venue.phone ?? "");
+      setAddress(venue.address ?? "");
+      setWebsiteUrl(venue.website_url ?? "");
+      setGoogleReview(venue.google_review_url ?? "");
+      setTripadvisor(venue.tripadvisor_url ?? "");
+      setFacebookUrl(venue.facebook_url ?? "");
+      setPriceRange(venue.price_range ?? "");
+      setGallery(venue.gallery ?? []);
+      // Init opening hours from DB
+      const dbHours = venue.opening_hours as Record<string, [string, string][]> | null | undefined;
+      setHours(Object.fromEntries(WEEKDAYS.map(d => {
+        const slots = dbHours?.[d.key];
+        if (slots && slots.length > 0) {
+          return [d.key, { open: true, from: slots[0][0], to: slots[0][1] }];
+        }
+        return [d.key, { open: false, from: "09:00", to: "22:00" }];
+      })) as Record<WeekdayKey, DaySlot>);
       setError(null);
       // Clear any pending preview when switching venues
       clearPending();
@@ -228,6 +279,22 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
         menu_theme: menuTheme,
         instagram_url: instagram || null,
         google_maps_url: googleMaps || null,
+        phone: phone || null,
+        address: address || null,
+        website_url: websiteUrl || null,
+        google_review_url: googleReview || null,
+        tripadvisor_url: tripadvisor || null,
+        facebook_url: facebookUrl || null,
+        price_range: priceRange || null,
+        opening_hours: (() => {
+          const obj: Record<string, [string, string][]> = {};
+          for (const d of WEEKDAYS) {
+            const slot = hours[d.key];
+            if (slot.open) obj[d.key] = [[slot.from, slot.to]];
+          }
+          return Object.keys(obj).length > 0 ? obj : null;
+        })(),
+        gallery: gallery.length > 0 ? gallery : null,
       })
       .eq("id", venue.id);
     setSaving(false);
@@ -243,6 +310,14 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
         menu_theme: menuTheme,
         instagram_url: instagram || null,
         google_maps_url: googleMaps || null,
+        phone: phone || null,
+        address: address || null,
+        website_url: websiteUrl || null,
+        google_review_url: googleReview || null,
+        tripadvisor_url: tripadvisor || null,
+        facebook_url: facebookUrl || null,
+        price_range: priceRange || null,
+        gallery: gallery.length > 0 ? gallery : null,
       });
     }
   }
@@ -453,6 +528,122 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
               <input type="url" value={googleMaps} onChange={e => setGoogleMaps(e.target.value)}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                 placeholder="https://maps.google.com/..." />
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div className="border-t border-onyx/10 pt-6 space-y-4">
+            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">Kontakt</p>
+            <div>
+              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Telefon</label>
+              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+                className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
+                placeholder="+43 1 234567" />
+            </div>
+            <div>
+              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Adresse</label>
+              <input type="text" value={address} onChange={e => setAddress(e.target.value)}
+                className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
+                placeholder="Naschmarkt Stand 217, 1060 Wien" />
+            </div>
+            <div>
+              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Website</label>
+              <input type="url" value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)}
+                className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
+                placeholder="https://restaurant.at" />
+            </div>
+          </div>
+
+          {/* Reviews */}
+          <div className="border-t border-onyx/10 pt-6 space-y-4">
+            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">Bewertungen</p>
+            <div>
+              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Google Review URL</label>
+              <input type="url" value={googleReview} onChange={e => setGoogleReview(e.target.value)}
+                className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
+                placeholder="https://g.page/r/..." />
+            </div>
+            <div>
+              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">TripAdvisor URL</label>
+              <input type="url" value={tripadvisor} onChange={e => setTripadvisor(e.target.value)}
+                className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
+                placeholder="https://tripadvisor.com/..." />
+            </div>
+            <div>
+              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Facebook URL</label>
+              <input type="url" value={facebookUrl} onChange={e => setFacebookUrl(e.target.value)}
+                className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
+                placeholder="https://facebook.com/..." />
+            </div>
+          </div>
+
+          {/* Price range */}
+          <div className="border-t border-onyx/10 pt-6">
+            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-3">Preisklasse</label>
+            <div className="flex gap-2">
+              {["€", "€€", "€€€", "€€€€"].map(p => (
+                <button key={p} type="button" onClick={() => setPriceRange(priceRange === p ? "" : p)}
+                  className={`flex-1 font-sans text-sm py-2 border transition-colors ${priceRange === p ? "border-gold bg-gold text-onyx" : "border-onyx/15 text-onyx/60 hover:border-onyx/30"}`}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Opening hours */}
+          <div className="border-t border-onyx/10 pt-6">
+            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-3">Öffnungszeiten</label>
+            <div className="space-y-2">
+              {WEEKDAYS.map(d => {
+                const slot = hours[d.key];
+                return (
+                  <div key={d.key} className="flex items-center gap-2">
+                    <button type="button"
+                      onClick={() => setHours(h => ({ ...h, [d.key]: { ...h[d.key], open: !h[d.key].open } }))}
+                      className={`w-8 h-8 flex-shrink-0 flex items-center justify-center border text-[10px] font-sans tracking-regal transition-colors ${slot.open ? "bg-onyx text-parchment border-onyx" : "border-onyx/20 text-onyx/40"}`}>
+                      {d.label}
+                    </button>
+                    {slot.open ? (
+                      <>
+                        <input type="time" value={slot.from}
+                          onChange={e => setHours(h => ({ ...h, [d.key]: { ...h[d.key], from: e.target.value } }))}
+                          className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-2 py-1.5 text-onyx focus:outline-none focus:border-gold" />
+                        <span className="text-onyx/30 text-xs">–</span>
+                        <input type="time" value={slot.to}
+                          onChange={e => setHours(h => ({ ...h, [d.key]: { ...h[d.key], to: e.target.value } }))}
+                          className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-2 py-1.5 text-onyx focus:outline-none focus:border-gold" />
+                      </>
+                    ) : (
+                      <span className="font-sans text-xs text-onyx/30 italic">Geschlossen</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Gallery */}
+          <div className="border-t border-onyx/10 pt-6">
+            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-3">Galerie (URLs)</label>
+            <div className="space-y-2 mb-3">
+              {gallery.map((url, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="flex-1 font-sans text-xs text-onyx/60 truncate">{url}</span>
+                  <button type="button" onClick={() => setGallery(g => g.filter((_, j) => j !== i))}
+                    className="text-onyx/30 hover:text-red-600 transition-colors flex-shrink-0 text-xs">✕</button>
+                </div>
+              ))}
+              {gallery.length === 0 && <p className="font-sans text-xs text-onyx/30 italic">Keine Bilder</p>}
+            </div>
+            <div className="flex gap-2">
+              <input type="url" value={galleryInput} onChange={e => setGalleryInput(e.target.value)}
+                placeholder="https://..."
+                className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold" />
+              <button type="button"
+                onClick={() => { if (galleryInput.trim()) { setGallery(g => [...g, galleryInput.trim()]); setGalleryInput(""); } }}
+                className="font-sans text-[10px] tracking-regal uppercase text-onyx border border-onyx/20 px-3 py-2 hover:border-onyx transition-colors">
+                + Add
+              </button>
             </div>
           </div>
 

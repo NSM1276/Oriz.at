@@ -5,6 +5,7 @@ import { resizeToWebP } from "@/lib/image-resize";
 
 type Target =
   | "carta-item"
+  | "carta-venue-cover"
   | "casa-cover"
   | "casa-block"
   | "carta-venue-logo"

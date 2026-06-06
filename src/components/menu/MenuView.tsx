@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { SectionBlock } from "./SectionBlock";
 import { ItemDetailModal } from "./ItemDetailModal";
+import { StickyActionBar } from "./StickyActionBar";
 import { MenuViewVisual } from "./MenuViewVisual";
 import { MenuViewModern } from "./MenuViewModern";
 import { VenueLogo } from "@/components/brand/VenueLogo";
@@ -102,7 +103,7 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
 
   return (
     <div style={{ backgroundColor: bg, minHeight: '100vh', ...cssVars }}>
-      <main className="max-w-3xl mx-auto px-6 pt-8 md:pt-16 pb-8">
+      <main className="max-w-3xl mx-auto px-6 pt-8 md:pt-16 pb-28" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}>
         <header className="text-center mb-0">
           <VenueLogo
             name={venue.name}
@@ -237,6 +238,7 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
       </main>
 
       <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} />
+      <StickyActionBar venue={venue} theme="classic" />
     </div>
   );
 }

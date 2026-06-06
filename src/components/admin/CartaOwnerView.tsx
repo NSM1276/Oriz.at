@@ -9,6 +9,8 @@ import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
 import { QRCodeBlock } from "@/components/admin/QRCodeBlock";
 import { OwnerStylePicker } from "@/components/admin/OwnerStylePicker";
 import { limitForPlan } from "@/lib/plans";
+import { OwnerProfileTab } from "@/components/admin/OwnerProfileTab";
+import { MenusManager } from "@/components/admin/MenusManager";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
 type VenueWithSections = Venue & {
@@ -16,6 +18,15 @@ type VenueWithSections = Venue & {
   ai_credits_used: number;
   ai_credits_reset: string;
   sections: (Section & { items: Item[] })[];
+  phone?: string | null;
+  address?: string | null;
+  website_url?: string | null;
+  google_review_url?: string | null;
+  tripadvisor_url?: string | null;
+  facebook_url?: string | null;
+  price_range?: string | null;
+  opening_hours?: Record<string, [string, string][]> | null;
+  gallery?: string[] | null;
 };
 
 function getLuminance(hex: string): number {
@@ -41,6 +52,8 @@ export function CartaOwnerView({
   venue: VenueWithSections | null;
   superAdminLink?: string;
 }) {
+  const [activeTab, setActiveTab] = useState<"menu" | "profil">("menu");
+
   // Item currently open in edit sheet
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   // sectionId for which we're creating a new item
@@ -267,14 +280,62 @@ export function CartaOwnerView({
           </>
         )}
 
-        {/* Style picker — color palette + theme switcher */}
+        {/* Tab switcher */}
         {venue && (
+          <div className="flex mb-8 border-b" style={{ borderColor: border }}>
+            {(["menu", "profil"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className="font-sans text-[11px] tracking-regal uppercase px-5 py-3 -mb-px border-b-2 transition-colors"
+                style={{
+                  borderBottomColor: activeTab === tab ? accent : "transparent",
+                  color: activeTab === tab ? accent : dim,
+                }}
+              >
+                {tab === "menu" ? "Menü" : "Profil"}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Menus manager — multiple menus with schedule */}
+        {venue && activeTab === "menu" && (
+          <MenusManager venueId={venue.id} accent={accent} border={border} text={text} dim={dim} muted={muted} isDark={isDark} />
+        )}
+
+        {/* Style picker — color palette + theme switcher */}
+        {venue && activeTab === "menu" && (
           <OwnerStylePicker
             venueId={venue.id}
             color_bg={venue.color_bg}
             color_primary={venue.color_primary}
             menu_theme={venue.menu_theme}
             onUpdate={handleStyleUpdate}
+          />
+        )}
+
+        {/* Profil tab */}
+        {venue && activeTab === "profil" && (
+          <OwnerProfileTab
+            venueId={venue.id}
+            isDark={isDark}
+            text={text}
+            dim={dim}
+            muted={muted}
+            border={border}
+            accent={accent}
+            initialPhone={venue.phone ?? null}
+            initialAddress={venue.address ?? null}
+            initialWebsite={venue.website_url ?? null}
+            initialGoogleReview={venue.google_review_url ?? null}
+            initialTripadvisor={venue.tripadvisor_url ?? null}
+            initialFacebook={venue.facebook_url ?? null}
+            initialPriceRange={venue.price_range ?? null}
+            initialOpeningHours={venue.opening_hours ?? null}
+            initialGallery={venue.gallery ?? null}
+            initialCoverUrl={venue.cover_url ?? null}
           />
         )}
 
@@ -290,7 +351,7 @@ export function CartaOwnerView({
               You have no venue attached to this account.
             </p>
           </div>
-        ) : (
+        ) : activeTab === "menu" ? (
           (() => {
             const sorted = (venue.sections ?? [])
               .slice()
@@ -363,7 +424,7 @@ export function CartaOwnerView({
               </>
             );
           })()
-        )}
+        ) : null}
 
         <p
           className="mt-16 font-sans text-xs text-center"

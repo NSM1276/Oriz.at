@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MenuView } from "@/components/menu/MenuView";
-import type { Item, MenuPayload, Section, Venue } from "@/lib/supabase/types";
+import type { Item, MenuData, MenuPayload, Section, Venue } from "@/lib/supabase/types";
 
 export const revalidate = 0;
 
 type Row = Venue & {
   sections: (Section & { items: Item[] })[];
+  menus: MenuData[];
 };
 
 export default async function GuestMenuPage({
@@ -20,7 +21,7 @@ export default async function GuestMenuPage({
   const { data, error } = await supabase
     .from("venues")
     .select(
-      "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, menu_theme, owner_id, created_at, instagram_url, google_maps_url, sections(id, venue_id, name, position, items(id, section_id, venue_id, name, description, price_cents, image_url, allergens, ai_caption, is_active, position, updated_at))",
+      "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, menu_theme, owner_id, created_at, instagram_url, google_maps_url, phone, address, tripadvisor_url, facebook_url, website_url, google_review_url, price_range, opening_hours, gallery, menus(id, name, position, active_days, time_from, time_to), sections(id, venue_id, name, position, menu_id, items(id, section_id, venue_id, name, description, price_cents, image_url, allergens, diet_tags, ai_caption, is_active, position, updated_at))",
     )
     .eq("slug", venueSlug)
     .maybeSingle<Row>();
@@ -32,9 +33,12 @@ export default async function GuestMenuPage({
     .sort((a, b) => a.position - b.position)
     .map((s) => ({
       ...s,
-      items: (s.items ?? [])
-        .sort((a, b) => a.position - b.position),
+      items: (s.items ?? []).sort((a, b) => a.position - b.position),
     }));
+
+  const menus: MenuData[] = ((data.menus ?? []) as MenuData[])
+    .slice()
+    .sort((a, b) => a.position - b.position);
 
   const initial: MenuPayload = {
     venue: {
@@ -52,8 +56,18 @@ export default async function GuestMenuPage({
       instagram_url: (data as typeof data & { instagram_url?: string | null }).instagram_url ?? null,
       google_maps_url: (data as typeof data & { google_maps_url?: string | null }).google_maps_url ?? null,
       menu_theme: ((data as typeof data & { menu_theme?: string }).menu_theme ?? 'classic') as 'classic' | 'modern' | 'visual',
+      phone: (data as Partial<Venue>).phone ?? null,
+      address: (data as Partial<Venue>).address ?? null,
+      tripadvisor_url: (data as Partial<Venue>).tripadvisor_url ?? null,
+      facebook_url: (data as Partial<Venue>).facebook_url ?? null,
+      website_url: (data as Partial<Venue>).website_url ?? null,
+      google_review_url: (data as Partial<Venue>).google_review_url ?? null,
+      price_range: (data as Partial<Venue>).price_range ?? null,
+      opening_hours: (data as Partial<Venue>).opening_hours ?? null,
+      gallery: (data as Partial<Venue>).gallery ?? null,
     },
     sections,
+    menus,
   };
 
   return <MenuView initial={initial} />;
@@ -76,16 +90,7 @@ export async function generateMetadata({
   return {
     title: `${data.name} — Menu`,
     description,
-    openGraph: {
-      title: `${data.name} — Menu`,
-      description,
-      siteName: "ORIZ",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${data.name} — Menu`,
-      description,
-    },
+    openGraph: { title: `${data.name} — Menu`, description, siteName: "ORIZ", type: "website" },
+    twitter: { card: "summary_large_image", title: `${data.name} — Menu`, description },
   };
 }

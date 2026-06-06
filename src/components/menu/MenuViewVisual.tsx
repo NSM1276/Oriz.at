@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { ItemDetailModal } from "./ItemDetailModal";
+import { StickyActionBar } from "./StickyActionBar";
 import { MenuItemCardVisual } from "./MenuItemCardVisual";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import type { Item, MenuPayload } from "@/lib/supabase/types";
@@ -107,7 +108,7 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
 
   return (
     <div style={{ backgroundColor: bg, minHeight: "100vh", ...cssVars }}>
-      <main className="max-w-2xl mx-auto px-4 pt-8 md:pt-14 pb-8">
+      <main className="max-w-2xl mx-auto px-4 pt-8 md:pt-14 pb-28" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}>
         {/* Header — compact on mobile */}
         <header className="text-center mb-5">
           <VenueLogo
@@ -274,6 +275,7 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
       </main>
 
       <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} theme="visual" accent={accent} />
+      <StickyActionBar venue={venue} theme="visual" />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/format";
 import { ItemDetailModal } from "./ItemDetailModal";
+import { StickyActionBar } from "./StickyActionBar";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import type { Item, MenuPayload, Section } from "@/lib/supabase/types";
 
@@ -338,7 +339,7 @@ export function MenuViewModern({ initial }: { initial: MenuPayload }) {
         </nav>
       )}
 
-      <main className="max-w-2xl mx-auto px-6 pt-16 pb-12">
+      <main className="max-w-2xl mx-auto px-6 pt-16 pb-28" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}>
         {/* Header */}
         <motion.header
           className="mb-16"
@@ -409,6 +410,7 @@ export function MenuViewModern({ initial }: { initial: MenuPayload }) {
       </main>
 
       <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} theme="modern" accent={accent} />
+      <StickyActionBar venue={venue} theme="modern" />
     </div>
   );
 }

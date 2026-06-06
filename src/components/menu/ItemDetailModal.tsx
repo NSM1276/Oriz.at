@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice } from "@/lib/format";
 import type { Item } from "@/lib/supabase/types";
+import { AllergenIcons } from "./AllergenIcons";
 
 // True for .mp4 / .webm / .mov — renders <video> instead of <img>
 function isVideoUrl(url: string | null | undefined): boolean {
@@ -130,12 +131,7 @@ function ModalClassic({ item, currency, onClose, accent }: Omit<Props, "theme"> 
                 {item.description}
               </p>
             ) : null}
-            {item.allergens?.trim() && (
-              <p className="font-sans text-[11px] tracking-wide mt-4 pt-4"
-                style={{ color: "var(--color-muted, rgba(10,10,10,0.35))", borderTop: "1px solid var(--color-border, rgba(10,10,10,0.10))" }}>
-                Allergene: {item.allergens}
-              </p>
-            )}
+            <AllergenIcons codes={item.allergens} />
             {!item.is_active && (
               <div className="mt-5 font-sans text-[11px] tracking-regal uppercase px-3 py-1.5 inline-block"
                 style={{ color: "var(--color-muted)", border: "1px solid var(--color-border)" }}>
@@ -250,12 +246,7 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
               </p>
             ) : null}
 
-            {item.allergens?.trim() && (
-              <p className="font-sans text-[11px] tracking-wide uppercase mt-5 pt-4"
-                style={{ color: "rgba(245,240,236,0.25)", borderTop: "1px solid rgba(245,240,236,0.08)" }}>
-                {item.allergens}
-              </p>
-            )}
+            <AllergenIcons codes={item.allergens} />
 
             {!item.is_active && (
               <div className="mt-4 font-sans text-[11px] tracking-regal uppercase px-3 py-1.5 inline-block"
@@ -360,17 +351,7 @@ function ModalModern({ item, currency, onClose, accent }: Omit<Props, "theme"> &
               </p>
             )}
 
-            {item.allergens?.trim() && (
-              <div className="mt-6 pt-5" style={{ borderTop: "1px solid var(--color-border, rgba(10,10,10,0.08))" }}>
-                <span className="font-sans text-[10px] tracking-regal uppercase block mb-1"
-                  style={{ color: "var(--color-muted, rgba(10,10,10,0.3))" }}>
-                  Allergene
-                </span>
-                <p className="font-sans text-sm" style={{ color: "var(--color-dim, rgba(10,10,10,0.55))" }}>
-                  {item.allergens}
-                </p>
-              </div>
-            )}
+            <AllergenIcons codes={item.allergens} />
 
             {!item.is_active && (
               <div className="mt-6 font-sans text-[11px] tracking-regal uppercase px-3 py-1.5 inline-block"
