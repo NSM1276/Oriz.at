@@ -46,18 +46,19 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
   return (
     <>
       <style>{`
-        /* ── Print output: exact physical sticker size ── */
-        @page { size: 40mm 50mm; margin: 0; }
+        /* ── Print: A4, grid of 25 stickers (5×5) ── */
+        @page { size: A4 portrait; margin: 5mm; }
         @media print {
-          html, body  { background: ${cardBg} !important; margin: 0; padding: 0; }
-          .no-print   { display: none !important; }
-          .qr-card    { transform: none !important;
-                        box-shadow: none !important;
-                        width: 40mm !important; height: 50mm !important; }
+          html, body      { background: white !important; margin: 0; padding: 0; }
+          .no-print       { display: none !important; }
+          .print-sheet    { display: grid !important; }
+          .qr-card        { transform: none !important; box-shadow: none !important;
+                            width: 40mm !important; height: 50mm !important; }
         }
         /* ── Screen: scaled preview ── */
         html, body { background: ${screenBg}; margin: 0; padding: 0; transition: background 0.25s; }
         .qr-card   { transform: scale(${SCALE}); transform-origin: center center; }
+        .print-sheet { display: none; }
 
         /* ── Mobile toolbar ── */
         .qr-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
@@ -125,7 +126,7 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
               minHeight: 44, whiteSpace: "nowrap",
             }}
           >
-            Drucken / PDF ↓
+            25× auf A4 drucken ↓
           </button>
           {/* Mobile: styled card PNG download instead of print */}
           <a
@@ -157,13 +158,9 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
         </div>
       </div>
 
-      {/* ── Preview area ─────────────────────────────────────────── */}
-      {/*
-       * The card is 40mm × 50mm in real CSS mm units.
-       * transform: scale(3.5) makes it fill the screen nicely.
-       * The wrapper reserves the scaled space so nothing overlaps.
-       */}
+      {/* ── Screen preview ─────────────────────────────────────────── */}
       <div
+        className="no-print"
         style={{
           minHeight: "100vh", display: "flex", alignItems: "center",
           justifyContent: "center", padding: "80px 20px 40px",
@@ -171,7 +168,6 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
       >
         {/* Space-reservation shell — SCALE × physical size */}
         <div
-          className="no-print"
           style={{
             width:  `calc(40mm * ${SCALE})`,
             height: `calc(50mm * ${SCALE})`,
@@ -186,21 +182,38 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
             name={name} subtitle={subtitle} url={url} qrSrc={qrSrc}
           />
         </div>
-
-        {/* Print-only card (no transform wrapper needed) */}
-        <div className="print-only" style={{ display: "none" }}>
-          <QrSticker
-            cardBg={cardBg} textMain={textMain} textMuted={textMuted}
-            qrBoxBg={qrBoxBg} qrBorder={qrBorder}
-            accent={accent} title={title}
-            name={name} subtitle={subtitle} url={url} qrSrc={qrSrc}
-          />
-        </div>
       </div>
 
-      <style>{`
-        @media print { .print-only { display: block !important; } }
-      `}</style>
+      {/* ── Print sheet: A4, 5 cols × 5 rows = 25 stickers ────────── */}
+      {/* Hidden on screen, shown only when printing                    */}
+      <div
+        className="print-sheet"
+        style={{
+          gridTemplateColumns: "repeat(5, 40mm)",
+          gridTemplateRows:    "repeat(5, 50mm)",
+          gap: 0,
+          width: "200mm",
+          margin: "0 auto",
+        }}
+      >
+        {Array.from({ length: 25 }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: "40mm", height: "50mm",
+              boxSizing: "border-box",
+              outline: "0.3mm dashed rgba(0,0,0,0.18)",
+            }}
+          >
+            <QrSticker
+              cardBg={cardBg} textMain={textMain} textMuted={textMuted}
+              qrBoxBg={qrBoxBg} qrBorder={qrBorder}
+              accent={accent} title={title}
+              name={name} subtitle={subtitle} url={url} qrSrc={qrSrc}
+            />
+          </div>
+        ))}
+      </div>
     </>
   );
 }
