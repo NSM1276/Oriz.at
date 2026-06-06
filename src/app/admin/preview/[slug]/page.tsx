@@ -36,6 +36,11 @@ export default async function PreviewPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  // Only these 3 demo venues are publicly accessible without auth.
+  // Real client venues are protected via normal /admin login.
+  const DEMO_SLUGS = ["ristorante-tosca", "brasserie-lumiere", "sushi-schonbrunn"];
+  if (!DEMO_SLUGS.includes(slug)) notFound();
   const admin = svc();
 
   const { data: venue } = await admin
