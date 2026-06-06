@@ -8,18 +8,80 @@ import { StickyActionBar } from "./StickyActionBar";
 import { MenuViewVisual } from "./MenuViewVisual";
 import { MenuViewModern } from "./MenuViewModern";
 import { VenueLogo } from "@/components/brand/VenueLogo";
-import type { Item, MenuPayload } from "@/lib/supabase/types";
+import { getActiveMenuId } from "@/lib/menu-schedule";
+import type { Item, MenuData, MenuPayload } from "@/lib/supabase/types";
+
+// ── Menu tab bar (Classic style) ────────────────────────────────
+function MenuTabBar({
+  menus,
+  selectedMenuId,
+  onSelect,
+  accent,
+  bg,
+  border,
+}: {
+  menus: MenuData[];
+  selectedMenuId: string | null;
+  onSelect: (id: string) => void;
+  accent: string;
+  bg: string;
+  border: string;
+}) {
+  if (menus.length <= 1) return null;
+  return (
+    <div
+      className="overflow-x-auto -mx-6 px-6 mb-6 mt-6"
+      style={{ scrollbarWidth: "none" }}
+    >
+      <div className="flex gap-2 whitespace-nowrap">
+        {menus.map((m) => {
+          const isActive = selectedMenuId === m.id;
+          return (
+            <button
+              key={m.id}
+              onClick={() => onSelect(m.id)}
+              style={{
+                minHeight: 44,
+                background: isActive ? accent : "transparent",
+                color: isActive ? bg : accent,
+                border: `1px solid ${isActive ? accent : border}`,
+                borderRadius: 4,
+                padding: "0 18px",
+                fontFamily: "var(--font-inter, sans-serif)",
+                fontSize: 11,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                transition: "background 0.18s, color 0.18s",
+                fontWeight: isActive ? 600 : 400,
+              }}
+            >
+              {m.name}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function MenuView({ initial }: { initial: MenuPayload }) {
   const theme = initial.venue.menu_theme ?? "classic";
   if (theme === "visual") return <MenuViewVisual initial={initial} />;
   if (theme === "modern") return <MenuViewModern initial={initial} />;
   // falls through to Classic below
-  const { venue, sections } = initial;
+  const { venue, sections, menus = [] } = initial;
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
   const closeItem = useCallback(() => setSelectedItem(null), []);
+
+  const defaultMenuId = useMemo(
+    () => (menus.length > 1 ? getActiveMenuId(menus) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(defaultMenuId);
 
   const [items, setItems] = useState<Map<string, Item>>(() => {
     const map = new Map<string, Item>();
@@ -57,7 +119,7 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
     return () => { supabase.removeChannel(channel); };
   }, [venue.id]);
 
-  const sectionsWithItems = useMemo(() => {
+  const allSectionsWithItems = useMemo(() => {
     return sections.map((s) => {
       const list = Array.from(items.values())
         .filter((it) => it.section_id === s.id)
@@ -65,6 +127,14 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
       return { ...s, items: list };
     });
   }, [sections, items]);
+
+  // Filter sections by selected menu (null menu_id = global, always shown)
+  const sectionsWithItems = useMemo(() => {
+    if (menus.length <= 1 || !selectedMenuId) return allSectionsWithItems;
+    return allSectionsWithItems.filter(
+      (s) => s.menu_id === selectedMenuId || s.menu_id == null,
+    );
+  }, [allSectionsWithItems, menus.length, selectedMenuId]);
 
   useEffect(() => {
     if (venue.color_bg) {
@@ -132,6 +202,16 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
           )}
           <div className="w-16 h-px mx-auto mt-4" style={{ backgroundColor: accent, opacity: 0.6 }} />
         </header>
+
+        {/* Menu switcher tabs — only shown when venue has multiple menus */}
+        <MenuTabBar
+          menus={menus}
+          selectedMenuId={selectedMenuId}
+          onSelect={(id) => { setSelectedMenuId(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          accent={accent}
+          bg={bg}
+          border={border}
+        />
 
         {/* Section jump nav */}
         {sectionsWithItems.length > 1 && (
