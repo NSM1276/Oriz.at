@@ -10,6 +10,13 @@ import { VenueLogo } from "@/components/brand/VenueLogo";
 import { getActiveMenuId } from "@/lib/menu-schedule";
 import type { Item, MenuPayload } from "@/lib/supabase/types";
 
+type DietFilter = "vegan" | "vegetarisch" | "glutenfrei";
+const ALCOHOL_KEYWORDS = ["alkohol", "bier", "wein", "getränke", "drinks", "bar"];
+function isAlcoholSection(name: string): boolean {
+  const lower = name.toLowerCase();
+  return ALCOHOL_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
 export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
   const { venue, sections, menus = [] } = initial;
 
@@ -24,6 +31,16 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
     [],
   );
   const [selectedMenuId, setSelectedMenuId] = useState<string | null>(defaultMenuId);
+
+  const [hideAlcohol, setHideAlcohol] = useState(false);
+  const [dietFilters, setDietFilters] = useState<Set<DietFilter>>(new Set());
+  function toggleDiet(tag: DietFilter) {
+    setDietFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag); else next.add(tag);
+      return next;
+    });
+  }
 
   const [items, setItems] = useState<Map<string, Item>>(() => {
     const map = new Map<string, Item>();
@@ -64,13 +81,25 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
     });
   }, [sections, items]);
 
-  // Filter by selected menu; sections with null menu_id are always shown
   const sectionsWithItems = useMemo(() => {
     if (menus.length <= 1 || !selectedMenuId) return allSectionsWithItems;
     return allSectionsWithItems.filter(
       (s) => s.menu_id === selectedMenuId || s.menu_id == null,
     );
   }, [allSectionsWithItems, menus.length, selectedMenuId]);
+
+  const filteredSections = useMemo(() => {
+    return sectionsWithItems
+      .filter((s) => !(hideAlcohol && isAlcoholSection(s.name)))
+      .map((s) => {
+        if (dietFilters.size === 0) return s;
+        const filtered = s.items.filter((it) =>
+          Array.from(dietFilters).every((tag) => it.diet_tags?.includes(tag))
+        );
+        return { ...s, items: filtered };
+      })
+      .filter((s) => s.items.length > 0);
+  }, [sectionsWithItems, hideAlcohol, dietFilters]);
 
   useEffect(() => {
     if (venue.color_bg) {
@@ -227,8 +256,42 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
           </div>
         )}
 
+        {/* Filter bar */}
+        <div style={{ overflowX: "auto", scrollbarWidth: "none", margin: "12px -16px 0", padding: "0 16px" }}>
+          <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap", paddingBottom: 10, paddingTop: 2 }}>
+            {(
+              [
+                { key: "alcohol" as const, label: "Alkohol" },
+                { key: "vegan" as const, label: "Vegan" },
+                { key: "vegetarisch" as const, label: "Vegetarisch" },
+                { key: "glutenfrei" as const, label: "Glutenfrei" },
+              ] as const
+            ).map(({ key, label }) => {
+              const isActive = key === "alcohol" ? hideAlcohol : dietFilters.has(key);
+              return (
+                <button
+                  key={key}
+                  onClick={() => { if (key === "alcohol") setHideAlcohol((v) => !v); else toggleDiet(key); }}
+                  style={{
+                    height: 36, padding: "0 14px", borderRadius: 18,
+                    border: `1px solid ${isActive ? accent : border}`,
+                    backgroundColor: isActive ? accent : "transparent",
+                    color: isActive ? bg : text,
+                    fontFamily: "var(--font-inter, sans-serif)", fontSize: 11,
+                    letterSpacing: "0.08em", textTransform: "uppercase" as const,
+                    cursor: "pointer", opacity: isActive ? 1 : 0.55,
+                    transition: "all 180ms", flexShrink: 0,
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Sections */}
-        {sectionsWithItems.map((s, sIdx) => {
+        {filteredSections.map((s, sIdx) => {
           if (s.items.length === 0) return null;
 
           // Split items: photo items in a 2-col grid, text-only items in a list

@@ -59,7 +59,7 @@ export type Item = {
   image_url: string | null;
   ai_caption: string | null;
   allergens: string | null;
-  diet_tags?: string | null;
+  diet_tags?: string[] | null;
   is_active: boolean;
   position: number;
   updated_at: string;

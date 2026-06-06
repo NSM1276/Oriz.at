@@ -65,6 +65,15 @@ function MenuTabBar({
   );
 }
 
+// ── Filter types ────────────────────────────────────────────────
+type DietFilter = "vegan" | "vegetarisch" | "glutenfrei";
+const ALCOHOL_KEYWORDS = ["alkohol", "bier", "wein", "getränke", "drinks", "bar"];
+
+function isAlcoholSection(name: string): boolean {
+  const lower = name.toLowerCase();
+  return ALCOHOL_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
 export function MenuView({ initial }: { initial: MenuPayload }) {
   const theme = initial.venue.menu_theme ?? "classic";
   if (theme === "visual") return <MenuViewVisual initial={initial} />;
@@ -76,12 +85,25 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
   const closeItem = useCallback(() => setSelectedItem(null), []);
 
+  // Menu switcher state
   const defaultMenuId = useMemo(
     () => (menus.length > 1 ? getActiveMenuId(menus) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
   const [selectedMenuId, setSelectedMenuId] = useState<string | null>(defaultMenuId);
+
+  // Diet / alcohol filter state
+  const [hideAlcohol, setHideAlcohol] = useState(false);
+  const [dietFilters, setDietFilters] = useState<Set<DietFilter>>(new Set());
+
+  function toggleDiet(tag: DietFilter) {
+    setDietFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag); else next.add(tag);
+      return next;
+    });
+  }
 
   const [items, setItems] = useState<Map<string, Item>>(() => {
     const map = new Map<string, Item>();
@@ -128,13 +150,27 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
     });
   }, [sections, items]);
 
-  // Filter sections by selected menu (null menu_id = global, always shown)
+  // 1. Filter by active menu (null menu_id = global, always shown)
   const sectionsWithItems = useMemo(() => {
     if (menus.length <= 1 || !selectedMenuId) return allSectionsWithItems;
     return allSectionsWithItems.filter(
       (s) => s.menu_id === selectedMenuId || s.menu_id == null,
     );
   }, [allSectionsWithItems, menus.length, selectedMenuId]);
+
+  // 2. Filter by diet tags / alcohol (applied on top of menu filter)
+  const filteredSections = useMemo(() => {
+    return sectionsWithItems
+      .filter((s) => !(hideAlcohol && isAlcoholSection(s.name)))
+      .map((s) => {
+        if (dietFilters.size === 0) return s;
+        const filtered = s.items.filter((it) =>
+          Array.from(dietFilters).every((tag) => it.diet_tags?.includes(tag))
+        );
+        return { ...s, items: filtered };
+      })
+      .filter((s) => s.items.length > 0);
+  }, [sectionsWithItems, hideAlcohol, dietFilters]);
 
   useEffect(() => {
     if (venue.color_bg) {
@@ -247,7 +283,57 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
           </div>
         )}
 
-        {sectionsWithItems.map((s) => (
+        {/* Filter bar */}
+        <div
+          style={{
+            overflowX: "auto",
+            scrollbarWidth: "none",
+            margin: "16px -24px 0",
+            padding: "0 16px 0",
+          }}
+        >
+          <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap", paddingBottom: 12, paddingTop: 4 }}>
+            {(
+              [
+                { key: "alcohol" as const, label: "Alkohol" },
+                { key: "vegan" as const, label: "Vegan" },
+                { key: "vegetarisch" as const, label: "Vegetarisch" },
+                { key: "glutenfrei" as const, label: "Glutenfrei" },
+              ] as const
+            ).map(({ key, label }) => {
+              const isActive = key === "alcohol" ? hideAlcohol : dietFilters.has(key);
+              return (
+                <button
+                  key={key}
+                  onClick={() => {
+                    if (key === "alcohol") setHideAlcohol((v) => !v);
+                    else toggleDiet(key);
+                  }}
+                  style={{
+                    height: 36,
+                    padding: "0 14px",
+                    borderRadius: 18,
+                    border: `1px solid ${isActive ? accent : border}`,
+                    backgroundColor: isActive ? accent : "transparent",
+                    color: isActive ? (accent === "#C69B3C" ? "#0A0A0A" : text) : text,
+                    fontFamily: "var(--font-inter, sans-serif)",
+                    fontSize: 11,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase" as const,
+                    cursor: "pointer",
+                    opacity: isActive ? 1 : 0.55,
+                    transition: "all 180ms",
+                    flexShrink: 0,
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {filteredSections.map((s) => (
           <SectionBlock key={s.id} section={s} items={s.items} currency={venue.currency} onItemClick={openItem} />
         ))}
 
