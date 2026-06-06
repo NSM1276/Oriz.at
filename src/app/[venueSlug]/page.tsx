@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MenuView } from "@/components/menu/MenuView";
+import { DemoBanner } from "@/components/menu/DemoBanner";
 import type { Item, MenuData, MenuPayload, Section, Venue } from "@/lib/supabase/types";
+
+const DEMO_SLUGS = ["ristorante-tosca", "brasserie-lumiere", "sushi-schonbrunn"];
 
 export const revalidate = 0;
 
@@ -70,7 +73,20 @@ export default async function GuestMenuPage({
     menus,
   };
 
-  return <MenuView initial={initial} />;
+  const isDemo = DEMO_SLUGS.includes(venueSlug);
+
+  return (
+    <>
+      {isDemo && (
+        <DemoBanner
+          slug={venueSlug}
+          name={initial.venue.name}
+          accent={initial.venue.color_primary ?? "#C69B3C"}
+        />
+      )}
+      <MenuView initial={initial} />
+    </>
+  );
 }
 
 export async function generateMetadata({
