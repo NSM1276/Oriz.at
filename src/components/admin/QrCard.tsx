@@ -243,15 +243,15 @@ function QrSticker({
         transition: "background 0.25s",
       }}
     >
-      {/* Top: label + accent rule */}
+      {/* Top: CTA + accent rule */}
       <div style={{ textAlign: "center", width: "100%" }}>
         <p style={{
           fontFamily: "var(--font-inter, sans-serif)",
-          fontSize: "6.5px", letterSpacing: "0.3em",
+          fontSize: "6.5px", letterSpacing: "0.32em",
           textTransform: "uppercase", color: accent,
           margin: "0 0 1.5mm",
         }}>
-          {title}
+          Scan mich
         </p>
         <div style={{ width: "14mm", height: "0.35mm", background: accent, opacity: 0.5, margin: "0 auto" }} />
       </div>
@@ -297,10 +297,10 @@ function QrSticker({
         )}
         <p style={{
           fontFamily: "var(--font-inter, sans-serif)",
-          fontSize: "5.5px", letterSpacing: "0.22em",
+          fontSize: "5.5px", letterSpacing: "0.28em",
           textTransform: "uppercase", color: textMuted, margin: 0,
         }}>
-          ORIZ · {url.replace(/^https?:\/\//, "")}
+          · ORIZ ·
         </p>
       </div>
     </div>
