@@ -84,6 +84,7 @@ function Sheet({
   const [priceInput, setPriceInput] = useState((initial.price_cents / 100).toFixed(2));
   const [allergensInput, setAllergensInput] = useState(initial.allergens ?? "");
   const [captionDraft, setCaptionDraft] = useState(initial.ai_caption ?? "");
+  const [dietTags, setDietTags] = useState<string[]>(initial.diet_tags ?? []);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -169,6 +170,26 @@ function Sheet({
     });
   }
 
+  async function toggleDietTag(tag: string) {
+    const next = dietTags.includes(tag)
+      ? dietTags.filter((t) => t !== tag)
+      : [...dietTags, tag];
+    setDietTags(next);
+    const prev = item;
+    update({ diet_tags: next });
+    startTransition(async () => {
+      const err = await patchItem(item.id, { diet_tags: next });
+      if (err) {
+        setDietTags(prev.diet_tags ?? []);
+        setItem(prev);
+        onItemChange(prev);
+        setError(err);
+      } else {
+        setError(null);
+      }
+    });
+  }
+
   async function handleDelete() {
     if (!deleteConfirm) { setDeleteConfirm(true); return; }
     setDeleting(true);
@@ -247,9 +268,51 @@ function Sheet({
             </div>
 
             {/* Allergens */}
-            <div style={{ marginBottom: 32 }}>
+            <div style={{ marginBottom: 24 }}>
               <label style={{ fontFamily: "var(--font-inter, sans-serif)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: mutedColor, display: "block", marginBottom: 8 }}>Allergene</label>
               <input type="text" value={allergensInput} onChange={(e) => setAllergensInput(e.target.value)} onFocus={() => setAllergensFocused(true)} onBlur={() => { setAllergensFocused(false); commitAllergens(); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} placeholder="z.B. Gluten, Milch, Ei" style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${allergensFocused ? accent : borderColor}`, outline: "none", fontFamily: "var(--font-inter, sans-serif)", fontSize: 14, color: dimColor, padding: "6px 0", boxSizing: "border-box" }} />
+            </div>
+
+            {/* Diet tags */}
+            <div style={{ marginBottom: 32 }}>
+              <label style={{ fontFamily: "var(--font-inter, sans-serif)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: mutedColor, display: "block", marginBottom: 10 }}>Diät-Tags</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {(["vegan", "vegetarisch", "glutenfrei"] as const).map((tag) => {
+                  const labels: Record<string, string> = { vegan: "Vegan", vegetarisch: "Vegetarisch", glutenfrei: "Glutenfrei" };
+                  const checked = dietTags.includes(tag);
+                  return (
+                    <label
+                      key={tag}
+                      style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 44, cursor: "pointer", paddingLeft: 2 }}
+                    >
+                      <span
+                        role="checkbox"
+                        aria-checked={checked}
+                        onClick={() => toggleDietTag(tag)}
+                        style={{
+                          width: 20, height: 20, flexShrink: 0, borderRadius: 4,
+                          border: `1.5px solid ${checked ? accent : borderColor}`,
+                          backgroundColor: checked ? accent : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          transition: "all 180ms", cursor: "pointer",
+                        }}
+                      >
+                        {checked && (
+                          <svg width="11" height="8" viewBox="0 0 11 8" fill="none">
+                            <path d="M1 3.5L4.5 7L10 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </span>
+                      <span
+                        onClick={() => toggleDietTag(tag)}
+                        style={{ fontFamily: "var(--font-inter, sans-serif)", fontSize: 14, color: checked ? textColor : dimColor }}
+                      >
+                        {labels[tag]}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
 
             {error && <p style={{ marginBottom: 16, fontFamily: "var(--font-inter, sans-serif)", fontSize: 12, color: "#DC2626" }}>{error}</p>}
