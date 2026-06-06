@@ -314,20 +314,31 @@ function QrSticker({
         <div style={{ width: `${14 * fScale}mm`, height: "0.35mm", background: accent, opacity: 0.5, margin: `0 auto ${1.5 * fScale}mm` }} />
         <h1 style={{
           fontFamily: "var(--font-garamond, serif)", fontWeight: 300,
-          fontSize: `${10 * fScale}pt`, color: textMain,
-          margin: `0 0 ${1 * fScale}mm`, lineHeight: 1.1,
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-          maxWidth: `${w - padMm * 2 - 2}mm`,
+          // Scale font size down for long names so they always fit in 2 lines
+          fontSize: `${(name.length > 22 ? 7.5 : name.length > 15 ? 8.5 : 10) * fScale}pt`,
+          color: textMain,
+          margin: `0 0 ${1 * fScale}mm`, lineHeight: 1.2,
+          // Allow wrapping — max 2 lines, no ellipsis
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          wordBreak: "break-word",
+          maxWidth: `${w - padMm * 2 - 1}mm`,
         }}>
           {name}
         </h1>
         {subtitle && (
           <p style={{
             fontFamily: "var(--font-garamond, serif)", fontStyle: "italic",
-            fontSize: `${6.5 * fScale}pt`, color: textMuted,
+            fontSize: `${(subtitle.length > 20 ? 5.5 : 6.5) * fScale}pt`, color: textMuted,
             margin: `0 0 ${1 * fScale}mm`,
-            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-            maxWidth: `${w - padMm * 2 - 2}mm`,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            wordBreak: "break-word",
+            maxWidth: `${w - padMm * 2 - 1}mm`,
           }}>
             {subtitle}
           </p>
