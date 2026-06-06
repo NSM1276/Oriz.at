@@ -162,7 +162,7 @@ export function CartaOwnerView({
 
   return (
     <div style={{ backgroundColor: bg, minHeight: "100dvh", ...cssVars }}>
-      <main className="max-w-3xl mx-auto px-6 py-12">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 sm:pt-12 pb-16">
         <div className="flex items-start justify-between mb-10 gap-6 flex-wrap">
           <div>
             <span

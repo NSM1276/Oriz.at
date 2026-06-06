@@ -55,30 +55,41 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
         /* ── Screen: scaled preview ── */
         html, body { background: ${screenBg}; margin: 0; padding: 0; transition: background 0.25s; }
         .qr-card   { transform: scale(${SCALE}); transform-origin: center center; }
+
+        /* ── Mobile toolbar ── */
+        .qr-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+        .qr-toolbar-meta { display: flex; align-items: center; gap: 12px; }
+        .qr-toolbar-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .qr-subtitle { display: inline; }
+        @media (max-width: 480px) {
+          .qr-toolbar { padding: 10px 14px !important; }
+          .qr-subtitle { display: none; }
+          .qr-btn-print { padding: 8px 12px !important; }
+          .qr-btn-close { display: none; }
+        }
       `}</style>
 
       {/* ── Toolbar ──────────────────────────────────────────────── */}
       <div
-        className="no-print"
+        className="no-print qr-toolbar"
         style={{
           position: "fixed", top: 0, left: 0, right: 0,
           padding: "12px 20px",
           background: "rgba(10,10,10,0.90)",
           backdropFilter: "blur(8px)",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          fontFamily: "var(--font-inter, sans-serif)", zIndex: 100, gap: 12,
+          fontFamily: "var(--font-inter, sans-serif)", zIndex: 100,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#C69B3C" }}>
+        <div className="qr-toolbar-meta">
+          <span style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#C69B3C", whiteSpace: "nowrap" }}>
             ORIZ · Druckvorschau
           </span>
-          <span style={{ fontSize: 10, color: "rgba(245,240,236,0.35)", letterSpacing: "0.05em" }}>
+          <span className="qr-subtitle" style={{ fontSize: 10, color: "rgba(245,240,236,0.35)", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
             Aufkleber 40 × 50 mm
           </span>
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div className="qr-toolbar-actions">
           {/* Hell / Dunkel */}
           <div style={{ display: "flex", border: "1px solid rgba(245,240,236,0.2)", overflow: "hidden" }}>
             {([{ label: "Hell", val: false }, { label: "Dunkel", val: true }] as const).map(({ label, val }) => (
@@ -87,10 +98,10 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
                 onClick={() => setDark(val)}
                 style={{
                   fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase",
-                  padding: "7px 14px", cursor: "pointer", fontFamily: "inherit",
+                  padding: "8px 14px", cursor: "pointer", fontFamily: "inherit",
                   background: dark === val ? "#C69B3C" : "transparent",
                   color:      dark === val ? "#0A0A0A" : "rgba(245,240,236,0.55)",
-                  border: "none",
+                  border: "none", minHeight: 44,
                 }}
               >
                 {label}
@@ -100,23 +111,27 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
 
           <button
             onClick={() => window.print()}
+            className="qr-btn-print"
             style={{
               fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase",
               padding: "8px 18px", background: "#C69B3C", color: "#0A0A0A",
               border: "none", cursor: "pointer", fontFamily: "inherit",
+              minHeight: 44, whiteSpace: "nowrap",
             }}
           >
-            Drucken / als PDF speichern
+            Drucken / PDF ↓
           </button>
           <button
             onClick={() => window.close()}
+            className="qr-btn-close"
             style={{
               fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase",
               padding: "8px 14px", background: "transparent", color: "#F5F0EC",
               border: "1px solid rgba(245,240,236,0.3)", cursor: "pointer", fontFamily: "inherit",
+              minHeight: 44,
             }}
           >
-            Schließen
+            ✕
           </button>
         </div>
       </div>

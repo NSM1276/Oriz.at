@@ -22,13 +22,13 @@ export function AdminItemRow({ item, currency, isFirst, isLast, onEdit, onMoveUp
         opacity: item.is_active ? 1 : 0.45,
       }}
     >
-      {/* ↑↓ reorder buttons */}
-      <div className="flex flex-col gap-0.5 shrink-0">
+      {/* ↑↓ reorder buttons — 44px touch target on mobile */}
+      <div className="flex flex-col shrink-0">
         <button
           onClick={onMoveUp}
           disabled={isFirst}
           aria-label="Nach oben"
-          className="w-6 h-6 flex items-center justify-center transition-opacity disabled:opacity-0"
+          className="w-11 h-11 flex items-center justify-center transition-opacity disabled:opacity-0"
           style={{ color: "var(--color-muted)", background: "none", border: "none", cursor: isFirst ? "default" : "pointer", padding: 0 }}
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -39,7 +39,7 @@ export function AdminItemRow({ item, currency, isFirst, isLast, onEdit, onMoveUp
           onClick={onMoveDown}
           disabled={isLast}
           aria-label="Nach unten"
-          className="w-6 h-6 flex items-center justify-center transition-opacity disabled:opacity-0"
+          className="w-11 h-11 flex items-center justify-center transition-opacity disabled:opacity-0"
           style={{ color: "var(--color-muted)", background: "none", border: "none", cursor: isLast ? "default" : "pointer", padding: 0 }}
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
