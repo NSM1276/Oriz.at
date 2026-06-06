@@ -36,6 +36,9 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
   // 900×900 px source → rendered at 28mm (sharp at any printer DPI)
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=900x900&margin=0&color=${qrColor}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}`;
 
+  // Direct PNG download link — used on mobile instead of window.print()
+  const qrDownload = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&margin=20&color=${qrColor}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}&format=png`;
+
   // Scale factor for on-screen preview.
   // 40mm × 3.5 ≈ 140mm ≈ 530 px — comfortably visible in the viewport.
   const SCALE = 3.5;
@@ -61,10 +64,13 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
         .qr-toolbar-meta { display: flex; align-items: center; gap: 12px; }
         .qr-toolbar-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .qr-subtitle { display: inline; }
+        .qr-btn-print { display: inline-flex; }
+        .qr-btn-save  { display: none; }
         @media (max-width: 480px) {
           .qr-toolbar { padding: 10px 14px !important; }
           .qr-subtitle { display: none; }
-          .qr-btn-print { padding: 8px 12px !important; }
+          .qr-btn-print { display: none; }
+          .qr-btn-save  { display: inline-flex; }
           .qr-btn-close { display: none; }
         }
       `}</style>
@@ -121,6 +127,21 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
           >
             Drucken / PDF ↓
           </button>
+          {/* Mobile: direct PNG download instead of print */}
+          <a
+            href={qrDownload}
+            download={`qr-${dark ? "dunkel" : "hell"}.png`}
+            className="qr-btn-save"
+            style={{
+              fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase",
+              padding: "8px 18px", background: "#C69B3C", color: "#0A0A0A",
+              border: "none", cursor: "pointer", fontFamily: "inherit",
+              minHeight: 44, whiteSpace: "nowrap", textDecoration: "none",
+              alignItems: "center",
+            }}
+          >
+            QR speichern ↓
+          </a>
           <button
             onClick={() => window.close()}
             className="qr-btn-close"
