@@ -36,8 +36,8 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
   // 900×900 px source → rendered at 28mm (sharp at any printer DPI)
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=900x900&margin=0&color=${qrColor}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}`;
 
-  // Direct PNG download link — used on mobile instead of window.print()
-  const qrDownload = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&margin=20&color=${qrColor}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}&format=png`;
+  // Styled card PNG — generated server-side via /api/qr-card-image
+  const cardDownload = `/api/qr-card-image?slug=${encodeURIComponent(url.replace(/^https?:\/\/oriz\.at\//, ""))}&name=${encodeURIComponent(name)}&dark=${dark ? "1" : "0"}&accent=${encodeURIComponent(accent)}&kind=${kind}`;
 
   // Scale factor for on-screen preview.
   // 40mm × 3.5 ≈ 140mm ≈ 530 px — comfortably visible in the viewport.
@@ -127,10 +127,10 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
           >
             Drucken / PDF ↓
           </button>
-          {/* Mobile: direct PNG download instead of print */}
+          {/* Mobile: styled card PNG download instead of print */}
           <a
-            href={qrDownload}
-            download={`qr-${dark ? "dunkel" : "hell"}.png`}
+            href={cardDownload}
+            download={`qr-sticker-${dark ? "dunkel" : "hell"}.png`}
             className="qr-btn-save"
             style={{
               fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase",
