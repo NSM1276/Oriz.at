@@ -14,6 +14,13 @@ import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
 const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 const ALLOWED_THEMES = new Set(["classic", "modern", "visual"]);
 
+// Demo venues — publicly accessible without auth (nightly reset at 03:00)
+const DEMO_VENUE_IDS = new Set([
+  "5781d254-df4b-4713-bfed-41111bd75a2d", // Ristorante Tosca
+  "f039c06c-d196-4f12-8145-fb20eeab0502", // Brasserie Lumière
+  "ac0094c8-4c04-42e7-b404-a57ebbbed314", // Sushi Schönbrunn
+]);
+
 function svc() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,14 +30,6 @@ function svc() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const userSb = await createServerSupabase();
-  const {
-    data: { user },
-  } = await userSb.auth.getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
-
   let body: { venueId?: unknown; presetId?: unknown; theme?: unknown };
   try {
     body = await req.json();
@@ -44,18 +43,26 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "venueId required" }, { status: 400 });
   }
 
+  const isDemo = DEMO_VENUE_IDS.has(venueId);
   const admin = svc();
 
-  // Ownership check
-  const { data: venue } = await admin
-    .from("venues")
-    .select("id, owner_id")
-    .eq("id", venueId)
-    .maybeSingle<{ id: string; owner_id: string | null }>();
+  // Auth — skipped for demo venues (public playground, nightly reset)
+  let isSuper = false;
+  if (!isDemo) {
+    const userSb = await createServerSupabase();
+    const { data: { user } } = await userSb.auth.getUser();
+    if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    isSuper = user.email === SUPER_ADMIN_EMAIL;
 
-  if (!venue) return NextResponse.json({ error: "venue not found" }, { status: 404 });
-  if (!isSuper && venue.owner_id !== user.id) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    const { data: venue } = await admin
+      .from("venues")
+      .select("id, owner_id")
+      .eq("id", venueId)
+      .maybeSingle<{ id: string; owner_id: string | null }>();
+    if (!venue) return NextResponse.json({ error: "venue not found" }, { status: 404 });
+    if (!isSuper && venue.owner_id !== user.id) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
   }
 
   const updates: Record<string, unknown> = {};

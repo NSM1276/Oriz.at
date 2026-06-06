@@ -4,15 +4,25 @@ import { createClient as createServerSupabase } from "@/lib/supabase/server";
 
 const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 
+// Demo venues — publicly accessible without auth (nightly reset at 03:00)
+const DEMO_VENUE_IDS = new Set([
+  "5781d254-df4b-4713-bfed-41111bd75a2d", // Ristorante Tosca
+  "f039c06c-d196-4f12-8145-fb20eeab0502", // Brasserie Lumière
+  "ac0094c8-4c04-42e7-b404-a57ebbbed314", // Sushi Schönbrunn
+]);
+
 // Item update endpoint — replaces direct browser-client mutations in ItemEditor.
 //
-// Auth: must be logged in. Super-admin can update any item; regular owners
-// must own the parent venue. Uses service-role client to bypass RLS.
+// Auth: must be logged in (skipped for demo venues).
+// Super-admin can update any item; regular owners must own the parent venue.
 //
 // Body: { itemId: string, updates: Record<string, unknown> }
-// Allowed fields: price_cents, allergens, ai_caption, is_active
+// Allowed fields: price_cents, name, description, allergens, diet_tags, ai_caption, is_active
 
-const ALLOWED_FIELDS = new Set(["price_cents", "allergens", "ai_caption", "is_active", "position"]);
+const ALLOWED_FIELDS = new Set([
+  "price_cents", "name", "description", "allergens", "diet_tags",
+  "ai_caption", "is_active", "position",
+]);
 
 function svc() {
   return createClient(
@@ -23,12 +33,6 @@ function svc() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const userSb = await createServerSupabase();
-  const { data: { user } } = await userSb.auth.getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
-
   let body: { itemId?: unknown; updates?: unknown };
   try {
     body = await req.json();
@@ -61,8 +65,18 @@ export async function PATCH(req: NextRequest) {
     .maybeSingle<ItemRow>();
 
   if (!item) return NextResponse.json({ error: "item not found" }, { status: 404 });
-  if (!isSuper && item.venues.owner_id !== user.id) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+
+  const isDemo = DEMO_VENUE_IDS.has(item.venue_id);
+
+  // Auth — skipped for demo venues (public playground, nightly reset)
+  if (!isDemo) {
+    const userSb = await createServerSupabase();
+    const { data: { user } } = await userSb.auth.getUser();
+    if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    const isSuper = user.email === SUPER_ADMIN_EMAIL;
+    if (!isSuper && item.venues.owner_id !== user.id) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
   }
 
   const { error } = await admin.from("items").update(safeUpdates).eq("id", itemId);

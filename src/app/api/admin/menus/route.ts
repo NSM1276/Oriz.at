@@ -4,6 +4,13 @@ import { createClient as createServerSupabase } from "@/lib/supabase/server";
 
 const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 
+// Demo venues — publicly accessible without auth (nightly reset at 03:00)
+const DEMO_VENUE_IDS = new Set([
+  "5781d254-df4b-4713-bfed-41111bd75a2d", // Ristorante Tosca
+  "f039c06c-d196-4f12-8145-fb20eeab0502", // Brasserie Lumière
+  "ac0094c8-4c04-42e7-b404-a57ebbbed314", // Sushi Schönbrunn
+]);
+
 function svc() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,15 +48,17 @@ async function checkMenuOwnership(menuId: string, userId: string, isSuper: boole
 
 // GET ?venueId=<uuid> — list menus for venue
 export async function GET(req: NextRequest) {
-  const user = await getAuthUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
   const venueId = req.nextUrl.searchParams.get("venueId");
   if (!venueId) return NextResponse.json({ error: "venueId required" }, { status: 400 });
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
-  const owns = await checkOwnership(venueId, user.id, isSuper);
-  if (!owns) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  const isDemo = DEMO_VENUE_IDS.has(venueId);
+  if (!isDemo) {
+    const user = await getAuthUser();
+    if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    const isSuper = user.email === SUPER_ADMIN_EMAIL;
+    const owns = await checkOwnership(venueId, user.id, isSuper);
+    if (!owns) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
 
   const { data, error } = await svc()
     .from("menus")
@@ -63,9 +72,6 @@ export async function GET(req: NextRequest) {
 
 // POST — create menu
 export async function POST(req: NextRequest) {
-  const user = await getAuthUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
   let body: { venueId?: unknown; name?: unknown; active_days?: unknown; time_from?: unknown; time_to?: unknown };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "invalid json" }, { status: 400 }); }
 
@@ -74,9 +80,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "venueId and name required" }, { status: 400 });
   }
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
-  const owns = await checkOwnership(venueId, user.id, isSuper);
-  if (!owns) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  const isDemo = DEMO_VENUE_IDS.has(venueId);
+  if (!isDemo) {
+    const user = await getAuthUser();
+    if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    const isSuper = user.email === SUPER_ADMIN_EMAIL;
+    const owns = await checkOwnership(venueId, user.id, isSuper);
+    if (!owns) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
 
   // get next position
   const { count } = await svc().from("menus").select("*", { count: "exact", head: true }).eq("venue_id", venueId);
@@ -100,18 +111,24 @@ export async function POST(req: NextRequest) {
 
 // PATCH — update menu
 export async function PATCH(req: NextRequest) {
-  const user = await getAuthUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
   let body: { menuId?: unknown; name?: unknown; active_days?: unknown; time_from?: unknown; time_to?: unknown; position?: unknown };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "invalid json" }, { status: 400 }); }
 
   const { menuId } = body;
   if (typeof menuId !== "string") return NextResponse.json({ error: "menuId required" }, { status: 400 });
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
-  const venueId = await checkMenuOwnership(menuId, user.id, isSuper);
-  if (!venueId) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  // Check if this menu belongs to a demo venue
+  const { data: menuRow } = await svc().from("menus").select("venue_id").eq("id", menuId).maybeSingle<{ venue_id: string }>();
+  const isDemo = menuRow ? DEMO_VENUE_IDS.has(menuRow.venue_id) : false;
+  let venueId: string | null = menuRow?.venue_id ?? null;
+
+  if (!isDemo) {
+    const user = await getAuthUser();
+    if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    const isSuper = user.email === SUPER_ADMIN_EMAIL;
+    venueId = await checkMenuOwnership(menuId, user.id, isSuper);
+    if (!venueId) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
 
   const updates: Record<string, unknown> = {};
   if (typeof body.name === "string") updates.name = body.name.trim();
@@ -133,15 +150,19 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE ?id=<uuid> — delete menu
 export async function DELETE(req: NextRequest) {
-  const user = await getAuthUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
   const menuId = req.nextUrl.searchParams.get("id");
   if (!menuId) return NextResponse.json({ error: "id required" }, { status: 400 });
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
-  const venueId = await checkMenuOwnership(menuId, user.id, isSuper);
-  if (!venueId) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  const { data: menuRow } = await svc().from("menus").select("venue_id").eq("id", menuId).maybeSingle<{ venue_id: string }>();
+  const isDemo = menuRow ? DEMO_VENUE_IDS.has(menuRow.venue_id) : false;
+
+  if (!isDemo) {
+    const user = await getAuthUser();
+    if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    const isSuper = user.email === SUPER_ADMIN_EMAIL;
+    const venueId = await checkMenuOwnership(menuId, user.id, isSuper);
+    if (!venueId) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
 
   const { error } = await svc().from("menus").delete().eq("id", menuId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
