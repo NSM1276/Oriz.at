@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/format";
 import { ItemDetailModal } from "./ItemDetailModal";
 import { StickyActionBar } from "./StickyActionBar";
 import { VenueLogo } from "@/components/brand/VenueLogo";
+import { getActiveMenuId } from "@/lib/menu-schedule";
 import type { Item, MenuPayload, Section } from "@/lib/supabase/types";
 
 // ── Modern Item Row ─────────────────────────────────────────────
@@ -204,12 +205,19 @@ function ModernSection({
 
 // ── Main ────────────────────────────────────────────────────────
 export function MenuViewModern({ initial }: { initial: MenuPayload }) {
-  const { venue, sections } = initial;
+  const { venue, sections, menus = [] } = initial;
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
   const closeItem = useCallback(() => setSelectedItem(null), []);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  const defaultMenuId = useMemo(
+    () => (menus.length > 1 ? getActiveMenuId(menus) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(defaultMenuId);
 
   const [items, setItems] = useState<Map<string, Item>>(() => {
     const map = new Map<string, Item>();
@@ -239,7 +247,7 @@ export function MenuViewModern({ initial }: { initial: MenuPayload }) {
     return () => { supabase.removeChannel(channel); };
   }, [venue.id]);
 
-  const sectionsWithItems = useMemo(() => {
+  const allSectionsWithItems = useMemo(() => {
     return sections.map((s) => ({
       ...s,
       items: Array.from(items.values())
@@ -247,6 +255,14 @@ export function MenuViewModern({ initial }: { initial: MenuPayload }) {
         .sort((a, b) => a.position - b.position),
     }));
   }, [sections, items]);
+
+  // Filter by selected menu; sections with null menu_id are always shown
+  const sectionsWithItems = useMemo(() => {
+    if (menus.length <= 1 || !selectedMenuId) return allSectionsWithItems;
+    return allSectionsWithItems.filter(
+      (s) => s.menu_id === selectedMenuId || s.menu_id == null,
+    );
+  }, [allSectionsWithItems, menus.length, selectedMenuId]);
 
   useEffect(() => {
     if (venue.color_bg) {
@@ -375,6 +391,44 @@ export function MenuViewModern({ initial }: { initial: MenuPayload }) {
             <div className="h-px flex-1" style={{ backgroundColor: border }} />
           </div>
         </motion.header>
+
+        {/* Menu switcher tabs — shown only when venue has multiple menus */}
+        {menus.length > 1 && (
+          <div
+            className="overflow-x-auto -mx-6 px-6 mb-8 -mt-8"
+            style={{ scrollbarWidth: "none" }}
+          >
+            <div className="flex gap-2 whitespace-nowrap">
+              {menus.map((m) => {
+                const isActive = selectedMenuId === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => { setSelectedMenuId(m.id); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    style={{
+                      minHeight: 44,
+                      background: "none",
+                      color: isActive ? accent : muted,
+                      border: "none",
+                      borderBottom: isActive ? `2px solid ${accent}` : "2px solid transparent",
+                      padding: "0 4px",
+                      marginRight: 16,
+                      fontFamily: "var(--font-inter, sans-serif)",
+                      fontSize: 11,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      cursor: "pointer",
+                      transition: "color 0.18s, border-color 0.18s",
+                      fontWeight: isActive ? 600 : 400,
+                    }}
+                  >
+                    {m.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Sections */}
         {sectionsWithItems.map((s, i) => (

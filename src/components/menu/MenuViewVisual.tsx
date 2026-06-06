@@ -7,15 +7,23 @@ import { ItemDetailModal } from "./ItemDetailModal";
 import { StickyActionBar } from "./StickyActionBar";
 import { MenuItemCardVisual } from "./MenuItemCardVisual";
 import { VenueLogo } from "@/components/brand/VenueLogo";
+import { getActiveMenuId } from "@/lib/menu-schedule";
 import type { Item, MenuPayload } from "@/lib/supabase/types";
 
 export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
-  const { venue, sections } = initial;
+  const { venue, sections, menus = [] } = initial;
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
   const closeItem = useCallback(() => setSelectedItem(null), []);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  const defaultMenuId = useMemo(
+    () => (menus.length > 1 ? getActiveMenuId(menus) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  const [selectedMenuId, setSelectedMenuId] = useState<string | null>(defaultMenuId);
 
   const [items, setItems] = useState<Map<string, Item>>(() => {
     const map = new Map<string, Item>();
@@ -47,7 +55,7 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
     return () => { supabase.removeChannel(channel); };
   }, [venue.id]);
 
-  const sectionsWithItems = useMemo(() => {
+  const allSectionsWithItems = useMemo(() => {
     return sections.map((s) => {
       const list = Array.from(items.values())
         .filter((it) => it.section_id === s.id)
@@ -55,6 +63,14 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
       return { ...s, items: list };
     });
   }, [sections, items]);
+
+  // Filter by selected menu; sections with null menu_id are always shown
+  const sectionsWithItems = useMemo(() => {
+    if (menus.length <= 1 || !selectedMenuId) return allSectionsWithItems;
+    return allSectionsWithItems.filter(
+      (s) => s.menu_id === selectedMenuId || s.menu_id == null,
+    );
+  }, [allSectionsWithItems, menus.length, selectedMenuId]);
 
   useEffect(() => {
     if (venue.color_bg) {
@@ -138,6 +154,43 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
           )}
           <div className="w-10 h-px mx-auto mt-3" style={{ backgroundColor: accent, opacity: 0.4 }} />
         </header>
+
+        {/* Menu switcher tabs — shown only when venue has multiple menus */}
+        {menus.length > 1 && (
+          <div
+            className="overflow-x-auto -mx-4 px-4 mt-4 mb-2"
+            style={{ scrollbarWidth: "none" }}
+          >
+            <div className="flex gap-2 whitespace-nowrap">
+              {menus.map((m) => {
+                const isActive = selectedMenuId === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => { setSelectedMenuId(m.id); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    style={{
+                      minHeight: 44,
+                      background: isActive ? accent : "transparent",
+                      color: isActive ? bg : accent,
+                      border: `1px solid ${isActive ? accent : border}`,
+                      borderRadius: 22,
+                      padding: "0 18px",
+                      fontFamily: "var(--font-inter, sans-serif)",
+                      fontSize: 11,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      cursor: "pointer",
+                      transition: "background 0.18s, color 0.18s",
+                      fontWeight: isActive ? 600 : 400,
+                    }}
+                  >
+                    {m.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Sticky pill section nav */}
         {sectionsWithItems.length > 1 && (
