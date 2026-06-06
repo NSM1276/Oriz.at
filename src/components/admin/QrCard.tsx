@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { COLOR_PRESETS, type ColorPreset } from "@/lib/colorPresets";
 
 type Props = {
   name: string;
@@ -8,40 +9,50 @@ type Props = {
   accent: string;
   kind: "carta" | "casa";
   subtitle?: string;
-  // logoSvg / logoUrl reserved for future styled-QR feature (qr-code-styling)
   logoSvg?: string | null;
   logoUrl?: string | null;
 };
 
-// Print-ready 40×50 mm QR sticker with Hell/Dunkel toggle.
-// Physical output: 40 mm wide × 50 mm tall — glue directly to table/menu stand.
-// Screen shows a 3.5× scaled preview so the tiny card is clearly visible.
-// "Drucken / als PDF" prints at exact physical size via @page.
+// Print-ready 40×50 mm QR sticker.
+// Toolbar: choose any of 10 ORIZ color presets.
+// Print: A4 sheet with 25 stickers (5×5), dashed cut lines.
+// print-color-adjust: exact — backgrounds print correctly in all modes.
 
-export function QrCard({ name, url, accent, kind, subtitle }: Props) {
-  const [dark, setDark] = useState(false);
+function isDark(hex: string): boolean {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
+}
 
-  const title = kind === "carta" ? "Speisekarte" : "Willkommen";
+export function QrCard({ name, url, kind, subtitle }: Props) {
+  // Default: Pergament (first light preset)
+  const [preset, setPreset] = useState<ColorPreset>(COLOR_PRESETS[0]);
 
-  // ── Color palette ─────────────────────────────────────────────────
-  const cardBg    = dark ? "#0A0A0A"                    : "#F5F0EC";
-  const textMain  = dark ? "#F5F0EC"                    : "#0A0A0A";
-  const textMuted = dark ? "rgba(245,240,236,0.32)"     : "rgba(10,10,10,0.32)";
-  const qrBg      = dark ? "0A0A0A"                     : "ffffff";
-  const qrColor   = dark ? "F5F0EC"                     : "0A0A0A";
-  const qrBoxBg   = dark ? "#141414"                    : "#ffffff";
-  const qrBorder  = dark ? "1px solid rgba(245,240,236,0.10)" : "1px solid rgba(10,10,10,0.08)";
-  const screenBg  = dark ? "#111111"                    : "#E5E0DA";
+  const dark = isDark(preset.color_bg);
+  const cardBg    = preset.color_bg;
+  const accent    = preset.color_primary;
+  const textMain  = dark ? "rgba(245,240,236,0.90)" : "rgba(10,10,10,0.88)";
+  const textMuted = dark ? "rgba(245,240,236,0.38)" : "rgba(10,10,10,0.32)";
+  const qrFg      = dark ? "F5F0EC" : "0A0A0A";
+  const qrBg      = dark
+    ? preset.color_bg.replace("#", "")
+    : preset.color_bg.replace("#", "");
+  const qrBoxBg   = cardBg;
+  const qrBorder  = dark
+    ? "1px solid rgba(245,240,236,0.10)"
+    : "1px solid rgba(10,10,10,0.08)";
+  const screenBg  = dark ? "#111111" : "#E5E0DA";
 
-  // 900×900 px source → rendered at 28mm (sharp at any printer DPI)
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=900x900&margin=0&color=${qrColor}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}`;
+  const SCALE = 3.5;
 
-  // Styled card PNG — generated server-side via /api/qr-card-image
+  // 900×900 px source → rendered at 28mm
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=900x900&margin=0&color=${qrFg}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}`;
+
+  // Styled card PNG download
   const cardDownload = `/api/qr-card-image?slug=${encodeURIComponent(url.replace(/^https?:\/\/oriz\.at\//, ""))}&name=${encodeURIComponent(name)}&dark=${dark ? "1" : "0"}&accent=${encodeURIComponent(accent)}&kind=${kind}`;
 
-  // Scale factor for on-screen preview.
-  // 40mm × 3.5 ≈ 140mm ≈ 530 px — comfortably visible in the viewport.
-  const SCALE = 3.5;
+  const stickerProps = { cardBg, textMain, textMuted, qrBoxBg, qrBorder, accent, name, subtitle, url, qrSrc };
 
   return (
     <>
@@ -52,24 +63,29 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
           html, body      { background: white !important; margin: 0; padding: 0; }
           .no-print       { display: none !important; }
           .print-sheet    { display: grid !important; }
-          .qr-card        { transform: none !important; box-shadow: none !important;
-                            width: 40mm !important; height: 50mm !important; }
+          .qr-card        {
+            transform: none !important;
+            box-shadow: none !important;
+            width: 40mm !important;
+            height: 50mm !important;
+            /* CRITICAL: force background colors to print */
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
         }
         /* ── Screen: scaled preview ── */
         html, body { background: ${screenBg}; margin: 0; padding: 0; transition: background 0.25s; }
         .qr-card   { transform: scale(${SCALE}); transform-origin: center center; }
         .print-sheet { display: none; }
 
-        /* ── Mobile toolbar ── */
+        /* ── Toolbar ── */
         .qr-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
         .qr-toolbar-meta { display: flex; align-items: center; gap: 12px; }
         .qr-toolbar-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        .qr-subtitle { display: inline; }
         .qr-btn-print { display: inline-flex; }
         .qr-btn-save  { display: none; }
-        @media (max-width: 480px) {
+        @media (max-width: 540px) {
           .qr-toolbar { padding: 10px 14px !important; }
-          .qr-subtitle { display: none; }
           .qr-btn-print { display: none; }
           .qr-btn-save  { display: inline-flex; }
           .qr-btn-close { display: none; }
@@ -82,7 +98,7 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
         style={{
           position: "fixed", top: 0, left: 0, right: 0,
           padding: "12px 20px",
-          background: "rgba(10,10,10,0.90)",
+          background: "rgba(10,10,10,0.92)",
           backdropFilter: "blur(8px)",
           fontFamily: "var(--font-inter, sans-serif)", zIndex: 100,
         }}
@@ -91,28 +107,33 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
           <span style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#C69B3C", whiteSpace: "nowrap" }}>
             ORIZ · Druckvorschau
           </span>
-          <span className="qr-subtitle" style={{ fontSize: 10, color: "rgba(245,240,236,0.35)", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 10, color: "rgba(245,240,236,0.35)", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
             Aufkleber 40 × 50 mm
           </span>
         </div>
 
         <div className="qr-toolbar-actions">
-          {/* Hell / Dunkel */}
-          <div style={{ display: "flex", border: "1px solid rgba(245,240,236,0.2)", overflow: "hidden" }}>
-            {([{ label: "Hell", val: false }, { label: "Dunkel", val: true }] as const).map(({ label, val }) => (
+          {/* Color preset swatches */}
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            {COLOR_PRESETS.map((p) => (
               <button
-                key={label}
-                onClick={() => setDark(val)}
+                key={p.id}
+                title={p.label}
+                onClick={() => setPreset(p)}
                 style={{
-                  fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase",
-                  padding: "8px 14px", cursor: "pointer", fontFamily: "inherit",
-                  background: dark === val ? "#C69B3C" : "transparent",
-                  color:      dark === val ? "#0A0A0A" : "rgba(245,240,236,0.55)",
-                  border: "none", minHeight: 44,
+                  width: 22, height: 22,
+                  borderRadius: "50%",
+                  background: p.color_bg,
+                  border: preset.id === p.id
+                    ? `2px solid ${p.color_primary}`
+                    : "2px solid rgba(245,240,236,0.2)",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                  transition: "border-color 0.15s",
+                  outline: preset.id === p.id ? `1px solid ${p.color_primary}` : "none",
+                  outlineOffset: 1,
                 }}
-              >
-                {label}
-              </button>
+              />
             ))}
           </div>
 
@@ -128,21 +149,23 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
           >
             25× auf A4 drucken ↓
           </button>
-          {/* Mobile: styled card PNG download instead of print */}
+
+          {/* Mobile: PNG download */}
           <a
             href={cardDownload}
-            download={`qr-sticker-${dark ? "dunkel" : "hell"}.png`}
+            download={`qr-sticker-${preset.id}.png`}
             className="qr-btn-save"
             style={{
               fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase",
               padding: "8px 18px", background: "#C69B3C", color: "#0A0A0A",
               border: "none", cursor: "pointer", fontFamily: "inherit",
               minHeight: 44, whiteSpace: "nowrap", textDecoration: "none",
-              alignItems: "center",
+              display: "none", alignItems: "center",
             }}
           >
             QR speichern ↓
           </a>
+
           <button
             onClick={() => window.close()}
             className="qr-btn-close"
@@ -162,8 +185,10 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
       <div
         className="no-print"
         style={{
-          minHeight: "100vh", display: "flex", alignItems: "center",
-          justifyContent: "center", padding: "80px 20px 40px",
+          minHeight: "100vh", display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          padding: "80px 20px 40px",
+          gap: 16,
         }}
       >
         {/* Space-reservation shell — SCALE × physical size */}
@@ -175,17 +200,20 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
             flexShrink: 0,
           }}
         >
-          <QrSticker
-            cardBg={cardBg} textMain={textMain} textMuted={textMuted}
-            qrBoxBg={qrBoxBg} qrBorder={qrBorder}
-            accent={accent} title={title}
-            name={name} subtitle={subtitle} url={url} qrSrc={qrSrc}
-          />
+          <QrSticker {...stickerProps} />
+        </div>
+
+        {/* Preset label */}
+        <div style={{
+          fontFamily: "var(--font-inter, sans-serif)",
+          fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase",
+          color: "rgba(245,240,236,0.45)",
+        }}>
+          {preset.label}
         </div>
       </div>
 
       {/* ── Print sheet: A4, 5 cols × 5 rows = 25 stickers ────────── */}
-      {/* Hidden on screen, shown only when printing                    */}
       <div
         className="print-sheet"
         style={{
@@ -205,12 +233,7 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
               outline: "0.3mm dashed rgba(0,0,0,0.18)",
             }}
           >
-            <QrSticker
-              cardBg={cardBg} textMain={textMain} textMuted={textMuted}
-              qrBoxBg={qrBoxBg} qrBorder={qrBorder}
-              accent={accent} title={title}
-              name={name} subtitle={subtitle} url={url} qrSrc={qrSrc}
-            />
+            <QrSticker {...stickerProps} />
           </div>
         ))}
       </div>
@@ -219,14 +242,13 @@ export function QrCard({ name, url, accent, kind, subtitle }: Props) {
 }
 
 // ── Inner sticker card ─────────────────────────────────────────────
-// Extracted so it can be reused for screen (scaled) and print (raw).
 function QrSticker({
   cardBg, textMain, textMuted, qrBoxBg, qrBorder,
-  accent, title, name, subtitle, url, qrSrc,
+  accent, name, subtitle, url, qrSrc,
 }: {
   cardBg: string; textMain: string; textMuted: string;
   qrBoxBg: string; qrBorder: string;
-  accent: string; title: string;
+  accent: string;
   name: string; subtitle?: string; url: string; qrSrc: string;
 }) {
   return (
