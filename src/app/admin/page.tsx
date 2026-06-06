@@ -82,7 +82,7 @@ export default async function AdminPage() {
   const { data: venues } = await supabase
     .from("venues")
     .select(
-      "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, owner_id, created_at, plan, ai_credits_used, ai_credits_reset, phone, address, website_url, google_review_url, tripadvisor_url, facebook_url, price_range, opening_hours, gallery, sections(id, venue_id, name, position, items(id, section_id, venue_id, name, description, price_cents, image_url, ai_caption, allergens, is_active, position, updated_at))",
+      "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, owner_id, created_at, plan, ai_credits_used, ai_credits_reset, phone, address, website_url, google_review_url, tripadvisor_url, facebook_url, price_range, opening_hours, gallery, sections(id, venue_id, name, position, menu_id, items(id, section_id, venue_id, name, description, price_cents, image_url, ai_caption, allergens, is_active, position, updated_at))",
     )
     .eq("owner_id", user.id)
     .returns<VenueRow[]>();

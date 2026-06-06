@@ -302,7 +302,7 @@ export function CartaOwnerView({
 
         {/* Menus manager — multiple menus with schedule */}
         {venue && activeTab === "menu" && (
-          <MenusManager venueId={venue.id} accent={accent} border={border} text={text} dim={dim} muted={muted} isDark={isDark} />
+          <MenusManager venueId={venue.id} accent={accent} border={border} text={text} dim={dim} muted={muted} isDark={isDark} sections={venue.sections} />
         )}
 
         {/* Style picker — color palette + theme switcher */}
