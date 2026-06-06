@@ -1,10 +1,26 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { QrCard } from "@/components/admin/QrCard";
 
 export const dynamic = "force-dynamic";
 
 type Params = { type: "carta" | "casa"; slug: string };
+
+// Demo venues — QR card accessible without auth (nightly reset at 03:00)
+const DEMO_SLUGS = new Set([
+  "ristorante-tosca",
+  "brasserie-lumiere",
+  "sushi-schonbrunn",
+]);
+
+function svc() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } },
+  );
+}
 
 export default async function QrCardPage({
   params,
@@ -14,16 +30,21 @@ export default async function QrCardPage({
   const { type, slug } = await params;
   if (type !== "carta" && type !== "casa") notFound();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect(`/admin/login?next=/admin/qr/${type}/${slug}`);
+  const isDemo = DEMO_SLUGS.has(slug);
+
+  if (!isDemo) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      redirect(`/admin/login?next=/admin/qr/${type}/${slug}`);
+    }
   }
 
+  // Use service client for demo venues (no session), regular client otherwise
+  const db = isDemo ? svc() : await createClient();
+
   if (type === "carta") {
-    const { data } = await supabase
+    const { data } = await db
       .from("venues")
       .select("name, color_primary, logo_svg, logo_url")
       .eq("slug", slug)
@@ -42,7 +63,7 @@ export default async function QrCardPage({
   }
 
   // casa
-  const { data } = await supabase
+  const { data } = await db
     .schema("casa")
     .from("properties")
     .select("name, city, color_primary, logo_svg, logo_url")
