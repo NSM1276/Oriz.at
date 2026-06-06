@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { COLOR_PRESETS, type ColorPreset } from "@/lib/colorPresets";
+import { COLOR_PRESETS, findPreset, type ColorPreset } from "@/lib/colorPresets";
 
 type Props = {
   name: string;
   url: string;
   accent: string;
+  colorBg?: string;   // venue's current background — used to pick default preset
   kind: "carta" | "casa";
   subtitle?: string;
   logoSvg?: string | null;
@@ -25,9 +26,10 @@ function isDark(hex: string): boolean {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
 }
 
-export function QrCard({ name, url, kind, subtitle }: Props) {
-  // Default: Pergament (first light preset)
-  const [preset, setPreset] = useState<ColorPreset>(COLOR_PRESETS[0]);
+export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
+  // Default: venue's own color preset (matched by color_bg), fallback to Pergament
+  const defaultPreset = findPreset(colorBg) ?? COLOR_PRESETS[0];
+  const [preset, setPreset] = useState<ColorPreset>(defaultPreset);
 
   const dark = isDark(preset.color_bg);
   const cardBg    = preset.color_bg;
