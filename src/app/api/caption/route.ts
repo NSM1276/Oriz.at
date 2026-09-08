@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { limitForPlan } from "@/lib/plans";
+import { AI_CAPTION_ENABLED } from "@/lib/feature-flags";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,6 +24,8 @@ function bad(status: number, msg: string, extra?: Record<string, unknown>) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!AI_CAPTION_ENABLED) return bad(503, "Funktion vorübergehend deaktiviert.");
+
   // 1. Auth — owner must be signed in.
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

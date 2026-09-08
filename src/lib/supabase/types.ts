@@ -27,7 +27,12 @@ export type Venue = {
   opening_hours?: OpeningHours | null;
   gallery?: string[] | null;
   cover_url?: string | null;
+  // ── Guest-menu translations (manual, no AI) ──
+  enabled_locales?: string[] | null;
 };
+
+export type ItemTranslation = { name?: string; description?: string };
+export type TranslationsMap = Record<string, ItemTranslation>;
 
 export type OpeningHours = Partial<Record<Weekday, [string, string][]>>;
 export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
@@ -47,6 +52,7 @@ export type Section = {
   name: string;
   position: number;
   menu_id?: string | null;
+  translations?: TranslationsMap | null;
 };
 
 export type Item = {
@@ -63,6 +69,7 @@ export type Item = {
   is_active: boolean;
   position: number;
   updated_at: string;
+  translations?: TranslationsMap | null;
 };
 
 export type MenuPayload = {

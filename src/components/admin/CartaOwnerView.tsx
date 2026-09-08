@@ -9,6 +9,7 @@ import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
 import { QRCodeBlock } from "@/components/admin/QRCodeBlock";
 import { OwnerStylePicker } from "@/components/admin/OwnerStylePicker";
 import { limitForPlan } from "@/lib/plans";
+import { AI_CAPTION_ENABLED } from "@/lib/feature-flags";
 import { OwnerProfileTab } from "@/components/admin/OwnerProfileTab";
 import { MenusManager } from "@/components/admin/MenusManager";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
@@ -220,29 +221,31 @@ export function CartaOwnerView({
                 {plan}
               </span>
             </div>
-            <div className="text-right">
-              <div
-                className="font-sans text-[10px] tracking-regal uppercase"
-                style={{ color: muted }}
-              >
-                AI-Texte diesen Monat
-              </div>
-              <div className="font-display text-lg tabular-nums">
-                <span
-                  style={{
-                    color:
-                      remaining === 0
-                        ? isDark
-                          ? "#FCA5A5"
-                          : "#DC2626"
-                        : text,
-                  }}
+            {AI_CAPTION_ENABLED && (
+              <div className="text-right">
+                <div
+                  className="font-sans text-[10px] tracking-regal uppercase"
+                  style={{ color: muted }}
                 >
-                  {used}
-                </span>
-                <span style={{ color: muted }}> / {limit}</span>
+                  AI-Texte diesen Monat
+                </div>
+                <div className="font-display text-lg tabular-nums">
+                  <span
+                    style={{
+                      color:
+                        remaining === 0
+                          ? isDark
+                            ? "#FCA5A5"
+                            : "#DC2626"
+                          : text,
+                    }}
+                  >
+                    {used}
+                  </span>
+                  <span style={{ color: muted }}> / {limit}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 

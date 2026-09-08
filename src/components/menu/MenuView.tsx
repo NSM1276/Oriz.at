@@ -8,7 +8,9 @@ import { StickyActionBar } from "./StickyActionBar";
 import { MenuViewVisual } from "./MenuViewVisual";
 import { MenuViewModern } from "./MenuViewModern";
 import { VenueLogo } from "@/components/brand/VenueLogo";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { getActiveMenuId } from "@/lib/menu-schedule";
+import { localizeSection, BASE_LOCALE } from "@/lib/menu-i18n";
 import type { Item, MenuData, MenuPayload } from "@/lib/supabase/types";
 
 // ── Menu tab bar (Classic style) ────────────────────────────────
@@ -74,12 +76,26 @@ function isAlcoholSection(name: string): boolean {
   return ALCOHOL_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
-export function MenuView({ initial }: { initial: MenuPayload }) {
+export function MenuView({ initial, initialLocale = BASE_LOCALE }: { initial: MenuPayload; initialLocale?: string }) {
   const theme = initial.venue.menu_theme ?? "classic";
-  if (theme === "visual") return <MenuViewVisual initial={initial} />;
-  if (theme === "modern") return <MenuViewModern initial={initial} />;
+  if (theme === "visual") return <MenuViewVisual initial={initial} initialLocale={initialLocale} />;
+  if (theme === "modern") return <MenuViewModern initial={initial} initialLocale={initialLocale} />;
   // falls through to Classic below
   const { venue, sections, menus = [] } = initial;
+  const enabledLocales = venue.enabled_locales ?? [];
+
+  const [locale, setLocale] = useState(initialLocale);
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(`oriz-lang-${venue.slug}`);
+      if (saved) setLocale(saved);
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  function changeLocale(next: string) {
+    setLocale(next);
+    try { window.localStorage.setItem(`oriz-lang-${venue.slug}`, next); } catch { /* ignore */ }
+  }
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
@@ -172,6 +188,11 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
       .filter((s) => s.items.length > 0);
   }, [sectionsWithItems, hideAlcohol, dietFilters]);
 
+  const localizedSections = useMemo(
+    () => filteredSections.map((s) => localizeSection(s, locale)),
+    [filteredSections, locale],
+  );
+
   useEffect(() => {
     if (venue.color_bg) {
       document.body.style.backgroundColor = venue.color_bg;
@@ -250,7 +271,7 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
         />
 
         {/* Section jump nav */}
-        {sectionsWithItems.length > 1 && (
+        {localizedSections.length > 1 && (
           <div
             className="sticky top-0 z-20 mt-8 -mx-6 px-6 overflow-x-auto"
             style={{
@@ -260,7 +281,7 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
             }}
           >
             <div className="flex gap-0 py-3 whitespace-nowrap">
-              {sectionsWithItems.map((s, i) => (
+              {localizedSections.map((s, i) => (
                 <button
                   key={s.id}
                   onClick={() => {
@@ -273,13 +294,27 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer',
                     color: accent,
-                    borderRight: i < sectionsWithItems.length - 1 ? `1px solid ${border}` : 'none',
+                    borderRight: i < localizedSections.length - 1 ? `1px solid ${border}` : 'none',
                   }}
                 >
                   {s.name}
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Language switcher — only shown when venue has extra languages configured */}
+        {enabledLocales.length > 0 && (
+          <div className="mt-4">
+            <LanguageSwitcher
+              enabledLocales={enabledLocales}
+              locale={locale}
+              onChange={changeLocale}
+              accent={accent}
+              text={text}
+              border={border}
+            />
           </div>
         )}
 
@@ -333,7 +368,7 @@ export function MenuView({ initial }: { initial: MenuPayload }) {
           </div>
         </div>
 
-        {filteredSections.map((s) => (
+        {localizedSections.map((s) => (
           <SectionBlock key={s.id} section={s} items={s.items} currency={venue.currency} onItemClick={openItem} />
         ))}
 

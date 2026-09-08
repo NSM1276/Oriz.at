@@ -7,7 +7,9 @@ import { ItemDetailModal } from "./ItemDetailModal";
 import { StickyActionBar } from "./StickyActionBar";
 import { MenuItemCardVisual } from "./MenuItemCardVisual";
 import { VenueLogo } from "@/components/brand/VenueLogo";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { getActiveMenuId } from "@/lib/menu-schedule";
+import { localizeSection, BASE_LOCALE } from "@/lib/menu-i18n";
 import type { Item, MenuPayload } from "@/lib/supabase/types";
 
 type DietFilter = "vegan" | "vegetarisch" | "glutenfrei";
@@ -17,8 +19,22 @@ function isAlcoholSection(name: string): boolean {
   return ALCOHOL_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
-export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
+export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initial: MenuPayload; initialLocale?: string }) {
   const { venue, sections, menus = [] } = initial;
+  const enabledLocales = venue.enabled_locales ?? [];
+
+  const [locale, setLocale] = useState(initialLocale);
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(`oriz-lang-${venue.slug}`);
+      if (saved) setLocale(saved);
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  function changeLocale(next: string) {
+    setLocale(next);
+    try { window.localStorage.setItem(`oriz-lang-${venue.slug}`, next); } catch { /* ignore */ }
+  }
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
@@ -101,6 +117,15 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
       .filter((s) => s.items.length > 0);
   }, [sectionsWithItems, hideAlcohol, dietFilters]);
 
+  const localizedNavSections = useMemo(
+    () => sectionsWithItems.map((s) => localizeSection(s, locale)),
+    [sectionsWithItems, locale],
+  );
+  const localizedSections = useMemo(
+    () => filteredSections.map((s) => localizeSection(s, locale)),
+    [filteredSections, locale],
+  );
+
   useEffect(() => {
     if (venue.color_bg) {
       document.body.style.backgroundColor = venue.color_bg;
@@ -182,6 +207,18 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
             </p>
           )}
           <div className="w-10 h-px mx-auto mt-3" style={{ backgroundColor: accent, opacity: 0.4 }} />
+          {enabledLocales.length > 0 && (
+            <div className="mt-3">
+              <LanguageSwitcher
+                enabledLocales={enabledLocales}
+                locale={locale}
+                onChange={changeLocale}
+                accent={accent}
+                text={text}
+                border={border}
+              />
+            </div>
+          )}
         </header>
 
         {/* Menu switcher tabs — shown only when venue has multiple menus */}
@@ -228,7 +265,7 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
             style={{ backgroundColor: bg, borderBottom: `1px solid ${border}`, scrollbarWidth: "none" }}
           >
             <div className="flex gap-2 whitespace-nowrap">
-              {sectionsWithItems.map((s) => {
+              {localizedNavSections.map((s) => {
                 const isActive = activeSection === s.id;
                 return (
                   <button
@@ -291,7 +328,7 @@ export function MenuViewVisual({ initial }: { initial: MenuPayload }) {
         </div>
 
         {/* Sections */}
-        {filteredSections.map((s, sIdx) => {
+        {localizedSections.map((s, sIdx) => {
           if (s.items.length === 0) return null;
 
           // Split items: photo items in a 2-col grid, text-only items in a list

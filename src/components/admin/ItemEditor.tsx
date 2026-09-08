@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { PhotoUploader } from "@/components/admin/PhotoUploader";
+import { AI_CAPTION_ENABLED } from "@/lib/feature-flags";
 import type { Item } from "@/lib/supabase/types";
 
 type Props = {
@@ -264,22 +265,24 @@ export function ItemEditor({ initial, canUseAi = true }: Props) {
               borderTop: '1px solid var(--color-border)', flexShrink: 0,
             }}
           >
-            {/* AI row */}
-            <button
-              type="button"
-              onClick={generateCaption}
-              disabled={aiBusy || !canUseAi}
-              title={!canUseAi ? "Monatliches AI-Limit erreicht" : "Text generieren"}
-              style={{
-                width: '100%', marginBottom: 10,
-                fontFamily: 'var(--font-inter, sans-serif)', fontSize: 11, letterSpacing: '0.1em',
-                textTransform: 'uppercase', padding: '11px 16px', cursor: 'pointer',
-                border: '1px solid var(--accent)', color: 'var(--accent)', background: 'none',
-                opacity: (aiBusy || !canUseAi) ? 0.3 : 1,
-              }}
-            >
-              {aiBusy ? "Generiert…" : "✦ Generieren"}
-            </button>
+            {/* AI row — hidden while AI_CAPTION_ENABLED is off */}
+            {AI_CAPTION_ENABLED && (
+              <button
+                type="button"
+                onClick={generateCaption}
+                disabled={aiBusy || !canUseAi}
+                title={!canUseAi ? "Monatliches AI-Limit erreicht" : "Text generieren"}
+                style={{
+                  width: '100%', marginBottom: 10,
+                  fontFamily: 'var(--font-inter, sans-serif)', fontSize: 11, letterSpacing: '0.1em',
+                  textTransform: 'uppercase', padding: '11px 16px', cursor: 'pointer',
+                  border: '1px solid var(--accent)', color: 'var(--accent)', background: 'none',
+                  opacity: (aiBusy || !canUseAi) ? 0.3 : 1,
+                }}
+              >
+                {aiBusy ? "Generiert…" : "✦ Generieren"}
+              </button>
+            )}
 
             {/* Action row */}
             <div style={{ display: 'flex', gap: 8 }}>

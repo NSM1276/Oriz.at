@@ -7,7 +7,9 @@ import { formatPrice } from "@/lib/format";
 import { ItemDetailModal } from "./ItemDetailModal";
 import { StickyActionBar } from "./StickyActionBar";
 import { VenueLogo } from "@/components/brand/VenueLogo";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { getActiveMenuId } from "@/lib/menu-schedule";
+import { localizeSection, BASE_LOCALE } from "@/lib/menu-i18n";
 import type { Item, MenuPayload, Section } from "@/lib/supabase/types";
 
 // ── Filter helpers ───────────────────────────────────────────────
@@ -212,8 +214,22 @@ function ModernSection({
 }
 
 // ── Main ────────────────────────────────────────────────────────
-export function MenuViewModern({ initial }: { initial: MenuPayload }) {
+export function MenuViewModern({ initial, initialLocale = BASE_LOCALE }: { initial: MenuPayload; initialLocale?: string }) {
   const { venue, sections, menus = [] } = initial;
+  const enabledLocales = venue.enabled_locales ?? [];
+
+  const [locale, setLocale] = useState(initialLocale);
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(`oriz-lang-${venue.slug}`);
+      if (saved) setLocale(saved);
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  function changeLocale(next: string) {
+    setLocale(next);
+    try { window.localStorage.setItem(`oriz-lang-${venue.slug}`, next); } catch { /* ignore */ }
+  }
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
@@ -294,6 +310,15 @@ export function MenuViewModern({ initial }: { initial: MenuPayload }) {
       .filter((s) => s.items.length > 0);
   }, [sectionsWithItems, hideAlcohol, dietFilters]);
 
+  const localizedNavSections = useMemo(
+    () => sectionsWithItems.map((s) => localizeSection(s, locale)),
+    [sectionsWithItems, locale],
+  );
+  const localizedSections = useMemo(
+    () => filteredSections.map((s) => localizeSection(s, locale)),
+    [filteredSections, locale],
+  );
+
   useEffect(() => {
     if (venue.color_bg) {
       document.body.style.backgroundColor = venue.color_bg;
@@ -356,7 +381,7 @@ export function MenuViewModern({ initial }: { initial: MenuPayload }) {
           }}
         >
           <div className="flex gap-0 whitespace-nowrap max-w-2xl mx-auto px-6">
-            {sectionsWithItems.map((s) => {
+            {localizedNavSections.map((s) => {
               const isActive = activeSection === s.id;
               return (
                 <button
@@ -420,6 +445,18 @@ export function MenuViewModern({ initial }: { initial: MenuPayload }) {
             </span>
             <div className="h-px flex-1" style={{ backgroundColor: border }} />
           </div>
+          {enabledLocales.length > 0 && (
+            <div className="mt-5">
+              <LanguageSwitcher
+                enabledLocales={enabledLocales}
+                locale={locale}
+                onChange={changeLocale}
+                accent={accent}
+                text={text}
+                border={border}
+              />
+            </div>
+          )}
         </motion.header>
 
         {/* Menu switcher tabs — shown only when venue has multiple menus */}
@@ -495,7 +532,7 @@ export function MenuViewModern({ initial }: { initial: MenuPayload }) {
         </div>
 
         {/* Sections */}
-        {filteredSections.map((s, i) => (
+        {localizedSections.map((s, i) => (
           <ModernSection
             key={s.id}
             section={s}

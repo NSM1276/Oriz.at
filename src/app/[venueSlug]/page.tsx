@@ -1,7 +1,9 @@
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MenuView } from "@/components/menu/MenuView";
 import { DemoBanner } from "@/components/menu/DemoBanner";
+import { resolveInitialLocale } from "@/lib/menu-i18n";
 import type { Item, MenuData, MenuPayload, Section, Venue } from "@/lib/supabase/types";
 
 const DEMO_SLUGS = ["ristorante-tosca", "brasserie-lumiere", "sushi-schonbrunn"];
@@ -24,7 +26,7 @@ export default async function GuestMenuPage({
   const { data, error } = await supabase
     .from("venues")
     .select(
-      "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, menu_theme, owner_id, created_at, instagram_url, google_maps_url, phone, address, tripadvisor_url, facebook_url, website_url, google_review_url, price_range, opening_hours, gallery, menus(id, name, position, active_days, time_from, time_to), sections(id, venue_id, name, position, menu_id, items(id, section_id, venue_id, name, description, price_cents, image_url, allergens, diet_tags, ai_caption, is_active, position, updated_at))",
+      "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, menu_theme, owner_id, created_at, instagram_url, google_maps_url, phone, address, tripadvisor_url, facebook_url, website_url, google_review_url, price_range, opening_hours, gallery, enabled_locales, menus(id, name, position, active_days, time_from, time_to), sections(id, venue_id, name, position, menu_id, translations, items(id, section_id, venue_id, name, description, price_cents, image_url, allergens, diet_tags, ai_caption, is_active, position, updated_at, translations))",
     )
     .eq("slug", venueSlug)
     .maybeSingle<Row>();
@@ -68,12 +70,16 @@ export default async function GuestMenuPage({
       price_range: (data as Partial<Venue>).price_range ?? null,
       opening_hours: (data as Partial<Venue>).opening_hours ?? null,
       gallery: (data as Partial<Venue>).gallery ?? null,
+      enabled_locales: (data as Partial<Venue>).enabled_locales ?? [],
     },
     sections,
     menus,
   };
 
   const isDemo = DEMO_SLUGS.includes(venueSlug);
+
+  const acceptLanguage = (await headers()).get("accept-language");
+  const initialLocale = resolveInitialLocale(acceptLanguage, initial.venue.enabled_locales);
 
   return (
     <>
@@ -84,7 +90,7 @@ export default async function GuestMenuPage({
           accent={initial.venue.color_primary ?? "#C69B3C"}
         />
       )}
-      <MenuView initial={initial} />
+      <MenuView initial={initial} initialLocale={initialLocale} />
     </>
   );
 }

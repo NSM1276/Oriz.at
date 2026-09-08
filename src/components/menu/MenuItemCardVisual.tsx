@@ -66,7 +66,7 @@ export function MenuItemCardVisual({ item, currency, onClick }: Props) {
 
         {/* Text overlay at bottom */}
         <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
-          <div className="flex items-end gap-2">
+          <div className="flex items-start gap-2">
             <h3
               className="font-sans font-semibold text-white flex-1 min-w-0"
               style={{
@@ -74,10 +74,11 @@ export function MenuItemCardVisual({ item, currency, onClick }: Props) {
                 lineHeight: 1.2,
                 textShadow: "0 1px 8px rgba(0,0,0,0.95)",
                 overflow: "hidden",
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
                 letterSpacing: "0.01em",
-              }}
+              } as React.CSSProperties}
             >
               {item.name}
             </h3>
