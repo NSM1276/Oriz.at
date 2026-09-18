@@ -39,7 +39,8 @@ export function ScreenItemCard({ item, currency, palette }: Props) {
       )}
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "1.2vw" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "1.2vw" }}>
+          {/* Name may wrap to 2 lines — a truncated dish name is useless on a menu board */}
           <span
             className="font-display"
             style={{
@@ -49,9 +50,11 @@ export function ScreenItemCard({ item, currency, palette }: Props) {
               lineHeight: 1.15,
               fontWeight: 500,
               color: palette.text,
-              whiteSpace: "nowrap",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
               overflow: "hidden",
-              textOverflow: "ellipsis",
+              overflowWrap: "anywhere",
             }}
           >
             {item.name}
@@ -61,7 +64,7 @@ export function ScreenItemCard({ item, currency, palette }: Props) {
             style={{
               flex: "0 0 auto",
               fontSize: "3vh",
-              lineHeight: 1,
+              lineHeight: 1.15,
               fontWeight: 600,
               color: palette.accent,
               fontVariantNumeric: "tabular-nums",

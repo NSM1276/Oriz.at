@@ -169,16 +169,18 @@ export function ScreenBoard({ initial, params, palette }: Props) {
             color: palette.text,
           }}
         >
-          <VenueLogo
-            svg={venue.logo_svg}
-            url={venue.logo_url}
-            name={venue.name}
-            color="auto"
-            bg={palette.bg}
-            accent={palette.accent}
-            isDarkBg={palette.isDark}
-            height={120}
-          />
+          <div className="screen-logo">
+            <VenueLogo
+              svg={venue.logo_svg}
+              url={venue.logo_url}
+              name={venue.name}
+              color="auto"
+              bg={palette.bg}
+              accent={palette.accent}
+              isDarkBg={palette.isDark}
+              height={120}
+            />
+          </div>
           <div className="font-display" style={{ fontSize: "4vh", fontWeight: 300, color: palette.dim }}>
             Speisekarte wird vorbereitet
           </div>

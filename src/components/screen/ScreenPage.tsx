@@ -5,6 +5,8 @@ import type { ScreenPalette } from "./screen-colors";
 import { ScreenItemCard } from "./ScreenItemCard";
 
 export const ROWS_PER_PAGE = 5;
+/** Body is 82vh minus 3vh vertical padding, divided into ROWS_PER_PAGE rows. */
+const ROW_HEIGHT = `calc(79vh / ${ROWS_PER_PAGE})`;
 
 type Props = {
   venue: Venue;
@@ -17,6 +19,8 @@ type Props = {
 
 /** One full TV frame: header strip, item grid, footer strip, progress bar. */
 export function ScreenPage({ venue, page, columns, palette, seconds, clock }: Props) {
+  const rows = Math.min(ROWS_PER_PAGE, Math.max(1, Math.ceil(page.items.length / columns)));
+
   return (
     <div
       style={{
@@ -38,16 +42,18 @@ export function ScreenPage({ venue, page, columns, palette, seconds, clock }: Pr
           borderBottom: `1px solid ${palette.border}`,
         }}
       >
-        <VenueLogo
-          svg={venue.logo_svg}
-          url={venue.logo_url}
-          name={venue.name}
-          color="auto"
-          bg={palette.bg}
-          accent={palette.accent}
-          isDarkBg={palette.isDark}
-          height={56}
-        />
+        <div className="screen-logo">
+          <VenueLogo
+            svg={venue.logo_svg}
+            url={venue.logo_url}
+            name={venue.name}
+            color="auto"
+            bg={palette.bg}
+            accent={palette.accent}
+            isDarkBg={palette.isDark}
+            height={56}
+          />
+        </div>
         <div style={{ textAlign: "right" }}>
           <div
             className="font-display"
@@ -66,13 +72,17 @@ export function ScreenPage({ venue, page, columns, palette, seconds, clock }: Pr
         </div>
       </header>
 
-      {/* Grid — column-major so the board reads like a printed menu */}
+      {/* Grid — column-major so the board reads like a printed menu.
+          Row height is fixed (body height / ROWS_PER_PAGE) and the row count
+          shrinks to ceil(items / columns), so a short section spreads evenly
+          across columns (3+3+2) instead of stacking in the first one (5+3+0). */}
       <section
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${ROWS_PER_PAGE}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${rows}, ${ROW_HEIGHT})`,
           gridAutoFlow: "column",
+          alignContent: "start",
           columnGap: "3vw",
           padding: "1.5vh 0",
           minHeight: 0,

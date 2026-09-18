@@ -151,3 +151,11 @@ html, body {
   from { width: 0%; }
   to   { width: 100%; }
 }
+
+/* Text-fallback logo on the TV board: no shimmer sweep — it would replay on every page change */
+.screen-logo .shimmer-heading {
+  animation: none;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: inherit;
+}
