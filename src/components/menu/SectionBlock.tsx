@@ -6,16 +6,18 @@ export function SectionBlock({
   items,
   currency,
   onItemClick,
+  locale = "de",
 }: {
   section: Section;
   items: Item[];
   currency: string;
   onItemClick: (item: Item) => void;
+  locale?: string;
 }) {
   if (items.length === 0) return null;
   return (
-    <section id={`section-${section.id}`} className="mt-16">
-      <header className="mb-6 flex items-center gap-4">
+    <section id={`section-${section.id}`} className="mt-10 md:mt-16">
+      <header className="mb-5 flex items-center gap-4">
         <span className="font-sans text-[11px] tracking-regal uppercase shimmer-title">
           {section.name}
         </span>
@@ -23,7 +25,7 @@ export function SectionBlock({
       </header>
       <ul>
         {items.map((item) => (
-          <ItemRow key={item.id} item={item} currency={currency} onClick={onItemClick} />
+          <ItemRow key={item.id} item={item} currency={currency} onClick={onItemClick} locale={locale} />
         ))}
       </ul>
     </section>

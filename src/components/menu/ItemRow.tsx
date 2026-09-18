@@ -1,4 +1,5 @@
 import { formatPrice } from "@/lib/format";
+import { ui } from "@/lib/menu-i18n";
 import type { Item } from "@/lib/supabase/types";
 
 // Every item with description (or photo / AI caption) is tappable.
@@ -9,13 +10,16 @@ export function ItemRow({
   item,
   currency,
   onClick,
+  locale = "de",
 }: {
   item: Item;
   currency: string;
   onClick: (item: Item) => void;
+  locale?: string;
 }) {
   const dim      = !item.is_active;
   const clickable = hasDetail(item);
+  const t = ui(locale);
 
   return (
     <li
@@ -53,7 +57,7 @@ export function ItemRow({
               className="font-sans text-[10px] tracking-regal uppercase px-1.5 py-0.5"
               style={{ color: 'var(--color-dim)', border: '1px solid var(--color-border)' }}
             >
-              Nicht verfügbar
+              {t.notAvailable}
             </span>
           )}
         </div>
@@ -70,9 +74,9 @@ export function ItemRow({
         {item.allergens?.trim() && (
           <p
             className="font-sans text-[11px] mt-1.5 tracking-wide"
-            style={{ color: 'var(--color-muted)' }}
+            style={{ color: 'var(--color-dim)' }}
           >
-            Allergene: {item.allergens}
+            {t.allergens}: {item.allergens}
           </p>
         )}
       </div>

@@ -2,19 +2,22 @@
 
 import { useState } from "react";
 import { formatPrice } from "@/lib/format";
+import { ui } from "@/lib/menu-i18n";
 import type { Item } from "@/lib/supabase/types";
 
 interface Props {
   item: Item;
   currency: string;
   onClick: (item: Item) => void;
+  locale?: string;
 }
 
 const hasDetail = (item: Item) =>
   !!(item.description || item.image_url || item.ai_caption);
 
-export function MenuItemCardVisual({ item, currency, onClick }: Props) {
+export function MenuItemCardVisual({ item, currency, onClick, locale = "de" }: Props) {
   const [imgError, setImgError] = useState(false);
+  const t = ui(locale);
   const dim = !item.is_active;
   const clickable = hasDetail(item);
   const hasPhoto = !!item.image_url && !imgError;
@@ -70,7 +73,7 @@ export function MenuItemCardVisual({ item, currency, onClick }: Props) {
             <h3
               className="font-sans font-semibold text-white flex-1 min-w-0"
               style={{
-                fontSize: "0.85rem",
+                fontSize: "0.95rem",
                 lineHeight: 1.2,
                 textShadow: "0 1px 8px rgba(0,0,0,0.95)",
                 overflow: "hidden",
@@ -101,7 +104,7 @@ export function MenuItemCardVisual({ item, currency, onClick }: Props) {
               className="font-sans text-[10px] tracking-regal uppercase px-2 py-1"
               style={{ color: "rgba(245,240,236,0.7)", border: "1px solid rgba(245,240,236,0.3)" }}
             >
-              Nicht verfügbar
+              {t.notAvailable}
             </span>
           </div>
         )}

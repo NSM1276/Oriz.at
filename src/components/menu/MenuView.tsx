@@ -10,7 +10,7 @@ import { MenuViewModern } from "./MenuViewModern";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { getActiveMenuId } from "@/lib/menu-schedule";
-import { localizeSection, BASE_LOCALE } from "@/lib/menu-i18n";
+import { localizeSection, localizeAbout, ui, BASE_LOCALE } from "@/lib/menu-i18n";
 import type { Item, MenuData, MenuPayload } from "@/lib/supabase/types";
 
 // ── Menu tab bar (Classic style) ────────────────────────────────
@@ -96,6 +96,8 @@ export function MenuView({ initial, initialLocale = BASE_LOCALE }: { initial: Me
     setLocale(next);
     try { window.localStorage.setItem(`oriz-lang-${venue.slug}`, next); } catch { /* ignore */ }
   }
+  const t = ui(locale);
+  const about = localizeAbout(venue, locale);
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
@@ -230,7 +232,7 @@ export function MenuView({ initial, initialLocale = BASE_LOCALE }: { initial: Me
 
   return (
     <div style={{ backgroundColor: bg, minHeight: '100vh', ...cssVars }}>
-      <main className="max-w-3xl mx-auto px-6 pt-8 md:pt-16 pb-28" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}>
+      <main className="max-w-3xl mx-auto px-6 pt-6 md:pt-16 pb-28" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}>
         <header className="text-center mb-0">
           <VenueLogo
             name={venue.name}
@@ -239,22 +241,22 @@ export function MenuView({ initial, initialLocale = BASE_LOCALE }: { initial: Me
             bg={venue.color_bg}
             accent={venue.color_primary}
             color="auto"
-            height={70}
+            height={56}
             textColor={text}
             isDarkBg={isDark}
           />
-          {venue.about && (
+          {about && (
             <p
-              className="font-display italic text-base md:text-lg mt-3 max-w-xs md:max-w-xl mx-auto"
+              className="font-display italic text-base md:text-lg mt-2 max-w-xs md:max-w-xl mx-auto"
               style={{
                 color: dim,
                 overflow: "hidden",
                 display: "-webkit-box",
-                WebkitLineClamp: 2,
+                WebkitLineClamp: 3,
                 WebkitBoxOrient: "vertical",
               } as React.CSSProperties}
             >
-              {venue.about}
+              {about}
             </p>
           )}
           <div className="w-16 h-px mx-auto mt-4" style={{ backgroundColor: accent, opacity: 0.6 }} />
@@ -273,7 +275,7 @@ export function MenuView({ initial, initialLocale = BASE_LOCALE }: { initial: Me
         {/* Section jump nav */}
         {localizedSections.length > 1 && (
           <div
-            className="sticky top-0 z-20 mt-8 -mx-6 px-6 overflow-x-auto"
+            className="sticky top-0 z-20 mt-5 -mx-6 px-6 overflow-x-auto"
             style={{
               backgroundColor: bg,
               borderBottom: `1px solid ${border}`,
@@ -304,36 +306,35 @@ export function MenuView({ initial, initialLocale = BASE_LOCALE }: { initial: Me
           </div>
         )}
 
-        {/* Language switcher — only shown when venue has extra languages configured */}
-        {enabledLocales.length > 0 && (
-          <div className="mt-4">
-            <LanguageSwitcher
-              enabledLocales={enabledLocales}
-              locale={locale}
-              onChange={changeLocale}
-              accent={accent}
-              text={text}
-              border={border}
-            />
-          </div>
-        )}
-
-        {/* Filter bar */}
+        {/* Language + filter bar — one row, one pill style */}
         <div
           style={{
             overflowX: "auto",
             scrollbarWidth: "none",
-            margin: "16px -24px 0",
+            margin: "12px -24px 0",
             padding: "0 16px 0",
           }}
         >
-          <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap", paddingBottom: 12, paddingTop: 4 }}>
+          <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap", paddingBottom: 12, paddingTop: 4, alignItems: "center" }}>
+            {enabledLocales.length > 0 && (
+              <>
+                <LanguageSwitcher
+                  enabledLocales={enabledLocales}
+                  locale={locale}
+                  onChange={changeLocale}
+                  accent={accent}
+                  text={text}
+                  border={border}
+                />
+                <span aria-hidden style={{ width: 1, height: 22, margin: "0 2px", backgroundColor: border, flexShrink: 0 }} />
+              </>
+            )}
             {(
               [
-                { key: "alcohol" as const, label: "Alkohol" },
-                { key: "vegan" as const, label: "Vegan" },
-                { key: "vegetarisch" as const, label: "Vegetarisch" },
-                { key: "glutenfrei" as const, label: "Glutenfrei" },
+                { key: "alcohol" as const, label: t.filters.alcohol },
+                { key: "vegan" as const, label: t.filters.vegan },
+                { key: "vegetarisch" as const, label: t.filters.vegetarian },
+                { key: "glutenfrei" as const, label: t.filters.glutenFree },
               ] as const
             ).map(({ key, label }) => {
               const isActive = key === "alcohol" ? hideAlcohol : dietFilters.has(key);
@@ -369,7 +370,7 @@ export function MenuView({ initial, initialLocale = BASE_LOCALE }: { initial: Me
         </div>
 
         {localizedSections.map((s) => (
-          <SectionBlock key={s.id} section={s} items={s.items} currency={venue.currency} onItemClick={openItem} />
+          <SectionBlock key={s.id} section={s} items={s.items} currency={venue.currency} onItemClick={openItem} locale={locale} />
         ))}
 
         <footer className="mt-24 mb-10 flex flex-col items-center gap-6">
@@ -438,8 +439,8 @@ export function MenuView({ initial, initialLocale = BASE_LOCALE }: { initial: Me
         </footer>
       </main>
 
-      <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} />
-      <StickyActionBar venue={venue} theme="classic" />
+      <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} locale={locale} />
+      <StickyActionBar venue={venue} theme="classic" locale={locale} />
     </div>
   );
 }

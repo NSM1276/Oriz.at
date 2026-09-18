@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { ui } from "@/lib/menu-i18n";
 import type { Venue } from "@/lib/supabase/types";
 
 function useScrollDirection() {
@@ -79,7 +80,7 @@ function ActionLabel({ children, theme }: { children: string; theme: Theme }) {
     <span
       className="font-sans tracking-regal uppercase"
       style={{
-        fontSize: theme === "modern" ? "8px" : "9px",
+        fontSize: "9px",
         letterSpacing: theme === "modern" ? "0.18em" : undefined,
       }}
     >
@@ -88,13 +89,14 @@ function ActionLabel({ children, theme }: { children: string; theme: Theme }) {
   );
 }
 
-export function StickyActionBar({ venue, theme }: { venue: Venue; theme: Theme }) {
+export function StickyActionBar({ venue, theme, locale = "de" }: { venue: Venue; theme: Theme; locale?: string }) {
   const iconSize = theme === "modern" ? 18 : 20;
   const visible = useScrollDirection();
+  const t = ui(locale);
 
   const handleShare = useCallback(async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
-    const title = `${venue.name} — Speisekarte`;
+    const title = `${venue.name} — ${t.menu}`;
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
         await navigator.share({ title, url });
@@ -111,7 +113,7 @@ export function StickyActionBar({ venue, theme }: { venue: Venue; theme: Theme }
         /* ignore */
       }
     }
-  }, [venue.name]);
+  }, [venue.name, t.menu]);
 
   const mapHref = venue.google_maps_url
     ? venue.google_maps_url
@@ -121,6 +123,10 @@ export function StickyActionBar({ venue, theme }: { venue: Venue; theme: Theme }
 
   const showLocation = !!mapHref;
   const showCall = !!venue.phone;
+  // With only Share + Info the bar looked "unfinished" (two items pinned to the
+  // far edges) — group them in the middle instead of stretching across.
+  const actionCount = 2 + (showLocation ? 1 : 0) + (showCall ? 1 : 0);
+  const actionStyle: React.CSSProperties = actionCount <= 2 ? { flex: "0 0 140px" } : {};
 
   // ── Per-theme shell ──
   const maxWidth = theme === "classic" ? "max-w-3xl" : "max-w-2xl";
@@ -145,7 +151,7 @@ export function StickyActionBar({ venue, theme }: { venue: Venue; theme: Theme }
       ? `${maxWidth} mx-auto flex items-stretch`
       : `${maxWidth} mx-auto flex items-stretch`;
 
-  const padY = theme === "modern" ? "py-3" : "py-2.5";
+  const padY = "py-2.5";
 
   return (
     <AnimatePresence>
@@ -173,17 +179,17 @@ export function StickyActionBar({ venue, theme }: { venue: Venue; theme: Theme }
         .sticky-action:active { color: var(--accent); }
       `}</style>
       <div style={innerStyle} className={innerClass}>
-        <div className={`flex items-stretch w-full px-2 ${padY}`}>
+        <div className={`flex items-stretch w-full px-2 ${padY} ${actionCount <= 2 ? "justify-center" : ""}`}>
           {/* Share — always */}
           <button
             type="button"
             onClick={handleShare}
             className={actionClassName}
-            style={{ background: "none", border: "none", cursor: "pointer" }}
-            aria-label="Teilen"
+            style={{ background: "none", border: "none", cursor: "pointer", ...actionStyle }}
+            aria-label={t.share}
           >
             <span className="sticky-action-icon"><ShareIcon size={iconSize} /></span>
-            <ActionLabel theme={theme}>Teilen</ActionLabel>
+            <ActionLabel theme={theme}>{t.share}</ActionLabel>
           </button>
 
           {/* Location */}
@@ -193,10 +199,11 @@ export function StickyActionBar({ venue, theme }: { venue: Venue; theme: Theme }
               target="_blank"
               rel="noreferrer"
               className={actionClassName}
-              aria-label="Karte"
+              style={actionStyle}
+              aria-label={t.map}
             >
               <span className="sticky-action-icon"><MapIcon size={iconSize} /></span>
-              <ActionLabel theme={theme}>Karte</ActionLabel>
+              <ActionLabel theme={theme}>{t.map}</ActionLabel>
             </a>
           )}
 
@@ -205,10 +212,11 @@ export function StickyActionBar({ venue, theme }: { venue: Venue; theme: Theme }
             <a
               href={`tel:${venue.phone}`}
               className={actionClassName}
-              aria-label="Anrufen"
+              style={actionStyle}
+              aria-label={t.call}
             >
               <span className="sticky-action-icon"><PhoneIcon size={iconSize} /></span>
-              <ActionLabel theme={theme}>Anrufen</ActionLabel>
+              <ActionLabel theme={theme}>{t.call}</ActionLabel>
             </a>
           )}
 
@@ -216,10 +224,11 @@ export function StickyActionBar({ venue, theme }: { venue: Venue; theme: Theme }
           <Link
             href={`/${venue.slug}/profile`}
             className={actionClassName}
-            aria-label="Info"
+            style={actionStyle}
+            aria-label={t.info}
           >
             <span className="sticky-action-icon"><InfoIcon size={iconSize} /></span>
-            <ActionLabel theme={theme}>Info</ActionLabel>
+            <ActionLabel theme={theme}>{t.info}</ActionLabel>
           </Link>
         </div>
       </div>

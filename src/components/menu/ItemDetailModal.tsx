@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice } from "@/lib/format";
+import { ui } from "@/lib/menu-i18n";
 import type { Item } from "@/lib/supabase/types";
 import { AllergenIcons } from "./AllergenIcons";
 
@@ -58,10 +59,14 @@ type Props = {
   onClose: () => void;
   theme?: Theme;
   accent?: string;
+  locale?: string;
 };
 
+type ModalProps = Omit<Props, "theme"> & { item: Item; accent: string; locale: string };
+
 // ── Classic modal ───────────────────────────────────────────────
-function ModalClassic({ item, currency, onClose, accent }: Omit<Props, "theme"> & { item: Item; accent: string }) {
+function ModalClassic({ item, currency, onClose, accent, locale }: ModalProps) {
+  const t = ui(locale);
   return (
     <>
       <motion.div
@@ -101,7 +106,7 @@ function ModalClassic({ item, currency, onClose, accent }: Omit<Props, "theme"> 
           <div className="overflow-y-auto px-7 pt-6 pb-8 relative">
             <button onClick={onClose}
               className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center transition-opacity hover:opacity-50"
-              style={{ color: "var(--color-dim, rgba(10,10,10,0.5))" }} aria-label="Schließen">
+              style={{ color: "var(--color-dim, rgba(10,10,10,0.5))" }} aria-label={t.close}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -131,11 +136,11 @@ function ModalClassic({ item, currency, onClose, accent }: Omit<Props, "theme"> 
                 {item.description}
               </p>
             ) : null}
-            <AllergenIcons codes={item.allergens} />
+            <AllergenIcons codes={item.allergens} locale={locale} />
             {!item.is_active && (
               <div className="mt-5 font-sans text-[11px] tracking-regal uppercase px-3 py-1.5 inline-block"
                 style={{ color: "var(--color-muted)", border: "1px solid var(--color-border)" }}>
-                Derzeit nicht verfügbar
+                {t.currentlyNotAvailable}
               </div>
             )}
           </div>
@@ -146,7 +151,8 @@ function ModalClassic({ item, currency, onClose, accent }: Omit<Props, "theme"> 
 }
 
 // ── Visual modal — dark, immersive, bottom sheet ────────────────
-function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> & { item: Item; accent: string }) {
+function ModalVisual({ item, currency, onClose, accent, locale }: ModalProps) {
+  const t = ui(locale);
   return (
     <>
       <motion.div
@@ -214,7 +220,7 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
           <div className="overflow-y-auto px-7 pt-5 pb-10 relative">
             <button onClick={onClose}
               className="absolute top-4 right-5 w-8 h-8 flex items-center justify-center transition-opacity hover:opacity-50"
-              style={{ color: "rgba(245,240,236,0.4)" }} aria-label="Schließen">
+              style={{ color: "rgba(245,240,236,0.4)" }} aria-label={t.close}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -246,12 +252,12 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
               </p>
             ) : null}
 
-            <AllergenIcons codes={item.allergens} />
+            <AllergenIcons codes={item.allergens} locale={locale} />
 
             {!item.is_active && (
               <div className="mt-4 font-sans text-[11px] tracking-regal uppercase px-3 py-1.5 inline-block"
                 style={{ color: "rgba(245,240,236,0.3)", border: "1px solid rgba(245,240,236,0.12)" }}>
-                Derzeit nicht verfügbar
+                {t.currentlyNotAvailable}
               </div>
             )}
           </div>
@@ -262,7 +268,8 @@ function ModalVisual({ item, currency, onClose, accent }: Omit<Props, "theme"> &
 }
 
 // ── Modern modal — clean side panel, slides from right ──────────
-function ModalModern({ item, currency, onClose, accent }: Omit<Props, "theme"> & { item: Item; accent: string }) {
+function ModalModern({ item, currency, onClose, accent, locale }: ModalProps) {
+  const t = ui(locale);
   return (
     <>
       <motion.div
@@ -307,7 +314,7 @@ function ModalModern({ item, currency, onClose, accent }: Omit<Props, "theme"> &
             </div>
             <button onClick={onClose}
               className="w-8 h-8 flex items-center justify-center shrink-0 mt-1 transition-opacity hover:opacity-40"
-              style={{ color: "var(--color-muted, rgba(10,10,10,0.3))" }} aria-label="Schließen">
+              style={{ color: "var(--color-muted, rgba(10,10,10,0.3))" }} aria-label={t.close}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -347,16 +354,16 @@ function ModalModern({ item, currency, onClose, accent }: Omit<Props, "theme"> &
               </p>
             ) : (
               <p className="font-sans text-sm italic" style={{ color: "var(--color-muted, rgba(10,10,10,0.3))" }}>
-                Keine Beschreibung verfügbar.
+                {t.noDescription}
               </p>
             )}
 
-            <AllergenIcons codes={item.allergens} />
+            <AllergenIcons codes={item.allergens} locale={locale} />
 
             {!item.is_active && (
               <div className="mt-6 font-sans text-[11px] tracking-regal uppercase px-3 py-1.5 inline-block"
                 style={{ color: "var(--color-muted)", border: "1px solid var(--color-border)" }}>
-                Derzeit nicht verfügbar
+                {t.currentlyNotAvailable}
               </div>
             )}
           </div>
@@ -370,7 +377,7 @@ function ModalModern({ item, currency, onClose, accent }: Omit<Props, "theme"> &
 }
 
 // ── Main export ─────────────────────────────────────────────────
-export function ItemDetailModal({ item, currency, onClose, theme = "classic", accent = "#C69B3C" }: Props) {
+export function ItemDetailModal({ item, currency, onClose, theme = "classic", accent = "#C69B3C", locale = "de" }: Props) {
   const isOpen = item !== null;
 
   useEffect(() => {
@@ -388,11 +395,11 @@ export function ItemDetailModal({ item, currency, onClose, theme = "classic", ac
     <AnimatePresence>
       {item && (
         theme === "visual" ? (
-          <ModalVisual key="v" item={item} currency={currency} onClose={onClose} accent={accent} />
+          <ModalVisual key="v" item={item} currency={currency} onClose={onClose} accent={accent} locale={locale} />
         ) : theme === "modern" ? (
-          <ModalModern key="m" item={item} currency={currency} onClose={onClose} accent={accent} />
+          <ModalModern key="m" item={item} currency={currency} onClose={onClose} accent={accent} locale={locale} />
         ) : (
-          <ModalClassic key="c" item={item} currency={currency} onClose={onClose} accent={accent} />
+          <ModalClassic key="c" item={item} currency={currency} onClose={onClose} accent={accent} locale={locale} />
         )
       )}
     </AnimatePresence>

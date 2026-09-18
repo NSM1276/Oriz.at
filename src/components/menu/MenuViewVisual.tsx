@@ -9,7 +9,7 @@ import { MenuItemCardVisual } from "./MenuItemCardVisual";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { getActiveMenuId } from "@/lib/menu-schedule";
-import { localizeSection, BASE_LOCALE } from "@/lib/menu-i18n";
+import { localizeSection, localizeAbout, ui, BASE_LOCALE } from "@/lib/menu-i18n";
 import type { Item, MenuPayload } from "@/lib/supabase/types";
 
 type DietFilter = "vegan" | "vegetarisch" | "glutenfrei";
@@ -35,6 +35,8 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
     setLocale(next);
     try { window.localStorage.setItem(`oriz-lang-${venue.slug}`, next); } catch { /* ignore */ }
   }
+  const t = ui(locale);
+  const about = localizeAbout(venue, locale);
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
@@ -180,7 +182,7 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
     <div style={{ backgroundColor: bg, minHeight: "100vh", ...cssVars }}>
       <main className="max-w-2xl mx-auto px-4 pt-8 md:pt-14 pb-28" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}>
         {/* Header — compact on mobile */}
-        <header className="text-center mb-5">
+        <header className="text-center mb-4">
           <VenueLogo
             name={venue.name}
             svg={venue.logo_svg}
@@ -188,37 +190,25 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
             bg={venue.color_bg}
             accent={venue.color_primary}
             color="auto"
-            height={60}
+            height={52}
             textColor={text}
             isDarkBg={isDark}
           />
-          {venue.about && (
+          {about && (
             <p
               className="font-sans text-sm mt-2 max-w-xs mx-auto leading-snug"
               style={{
                 color: dim,
                 overflow: "hidden",
                 display: "-webkit-box",
-                WebkitLineClamp: 2,
+                WebkitLineClamp: 3,
                 WebkitBoxOrient: "vertical",
               } as React.CSSProperties}
             >
-              {venue.about}
+              {about}
             </p>
           )}
           <div className="w-10 h-px mx-auto mt-3" style={{ backgroundColor: accent, opacity: 0.4 }} />
-          {enabledLocales.length > 0 && (
-            <div className="mt-3">
-              <LanguageSwitcher
-                enabledLocales={enabledLocales}
-                locale={locale}
-                onChange={changeLocale}
-                accent={accent}
-                text={text}
-                border={border}
-              />
-            </div>
-          )}
         </header>
 
         {/* Menu switcher tabs — shown only when venue has multiple menus */}
@@ -293,15 +283,28 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
           </div>
         )}
 
-        {/* Filter bar */}
-        <div style={{ overflowX: "auto", scrollbarWidth: "none", margin: "12px -16px 0", padding: "0 16px" }}>
-          <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap", paddingBottom: 10, paddingTop: 2 }}>
+        {/* Language + filter bar — one row, one pill style */}
+        <div style={{ overflowX: "auto", scrollbarWidth: "none", margin: "8px -16px 0", padding: "0 16px" }}>
+          <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap", paddingBottom: 10, paddingTop: 2, alignItems: "center" }}>
+            {enabledLocales.length > 0 && (
+              <>
+                <LanguageSwitcher
+                  enabledLocales={enabledLocales}
+                  locale={locale}
+                  onChange={changeLocale}
+                  accent={accent}
+                  text={text}
+                  border={border}
+                />
+                <span aria-hidden style={{ width: 1, height: 22, margin: "0 2px", backgroundColor: border, flexShrink: 0 }} />
+              </>
+            )}
             {(
               [
-                { key: "alcohol" as const, label: "Alkohol" },
-                { key: "vegan" as const, label: "Vegan" },
-                { key: "vegetarisch" as const, label: "Vegetarisch" },
-                { key: "glutenfrei" as const, label: "Glutenfrei" },
+                { key: "alcohol" as const, label: t.filters.alcohol },
+                { key: "vegan" as const, label: t.filters.vegan },
+                { key: "vegetarisch" as const, label: t.filters.vegetarian },
+                { key: "glutenfrei" as const, label: t.filters.glutenFree },
               ] as const
             ).map(({ key, label }) => {
               const isActive = key === "alcohol" ? hideAlcohol : dietFilters.has(key);
@@ -362,7 +365,7 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
                         key={item.id}
                         style={isLastOdd ? { gridColumn: "1 / -1" } : undefined}
                       >
-                        <MenuItemCardVisual item={item} currency={venue.currency} onClick={openItem} />
+                        <MenuItemCardVisual item={item} currency={venue.currency} onClick={openItem} locale={locale} />
                       </div>
                     );
                   })}
@@ -374,7 +377,7 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
                 <ul>
                   {textItems.map((item) => (
                     <li key={item.id}>
-                      <MenuItemCardVisual item={item} currency={venue.currency} onClick={openItem} />
+                      <MenuItemCardVisual item={item} currency={venue.currency} onClick={openItem} locale={locale} />
                     </li>
                   ))}
                 </ul>
@@ -427,8 +430,8 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
         </footer>
       </main>
 
-      <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} theme="visual" accent={accent} />
-      <StickyActionBar venue={venue} theme="visual" />
+      <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} theme="visual" accent={accent} locale={locale} />
+      <StickyActionBar venue={venue} theme="visual" locale={locale} />
     </div>
   );
 }

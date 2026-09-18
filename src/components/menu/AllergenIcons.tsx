@@ -1,8 +1,10 @@
 import { parseAllergenCodes, allergenIcon } from "@/lib/allergens";
+import { allergenName, ui } from "@/lib/menu-i18n";
 
 type Props = {
   codes: string | null | undefined;
   variant?: "modal" | "inline";
+  locale?: string;
 };
 
 /**
@@ -10,9 +12,10 @@ type Props = {
  * Colors strictly via CSS vars set on the menu root, so it adapts
  * to light and dark venue themes. Renders nothing if no known codes.
  */
-export function AllergenIcons({ codes, variant = "modal" }: Props) {
+export function AllergenIcons({ codes, variant = "modal", locale = "de" }: Props) {
   const parsed = parseAllergenCodes(codes);
   if (parsed.length === 0) return null;
+  const t = ui(locale);
 
   const wrapStyle =
     variant === "modal"
@@ -25,7 +28,7 @@ export function AllergenIcons({ codes, variant = "modal" }: Props) {
         className="font-sans text-[10px] tracking-regal uppercase block mb-2"
         style={{ color: "var(--color-muted)" }}
       >
-        Allergene
+        {t.allergens}
       </span>
       <div className="flex flex-wrap gap-1.5">
         {parsed.map(({ code, label }) => (
@@ -40,7 +43,7 @@ export function AllergenIcons({ codes, variant = "modal" }: Props) {
             <span className="shrink-0 opacity-80" aria-hidden>
               {allergenIcon(code)}
             </span>
-            <span>{label}</span>
+            <span>{allergenName(code, locale, label)}</span>
           </span>
         ))}
       </div>

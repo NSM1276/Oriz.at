@@ -9,7 +9,7 @@ import { StickyActionBar } from "./StickyActionBar";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { getActiveMenuId } from "@/lib/menu-schedule";
-import { localizeSection, BASE_LOCALE } from "@/lib/menu-i18n";
+import { localizeSection, localizeAbout, ui, BASE_LOCALE } from "@/lib/menu-i18n";
 import type { Item, MenuPayload, Section } from "@/lib/supabase/types";
 
 // ── Filter helpers ───────────────────────────────────────────────
@@ -35,15 +35,17 @@ function ModernItemRow({
   const dim = !item.is_active;
   const clickable = !!(item.description || item.image_url || item.ai_caption);
 
+  // Only a subtle slide — never animate from opacity 0: on iOS Safari rows below
+  // the fold could stay invisible after a fast scroll.
   return (
     <motion.li
-      initial={{ opacity: 0, y: 8 }}
-      whileInView={{ opacity: dim ? 0.35 : 1, y: 0 }}
+      initial={{ y: 8 }}
+      whileInView={{ y: 0 }}
       viewport={{ once: true, margin: "-20px" }}
-      transition={{ duration: 0.35, delay: index * 0.04 }}
+      transition={{ duration: 0.35, delay: Math.min(index, 8) * 0.04 }}
       onClick={clickable ? () => onClick(item) : undefined}
       className="group relative"
-      style={{ cursor: clickable ? "pointer" : "default" }}
+      style={{ cursor: clickable ? "pointer" : "default", opacity: dim ? 0.35 : 1 }}
     >
       {/* Full-width hover background */}
       <div
@@ -103,7 +105,7 @@ function ModernItemRow({
           {item.description && (
             <p
               className="font-sans text-sm mt-0.5 leading-snug"
-              style={{ color: "var(--color-muted)" }}
+              style={{ color: "var(--color-dim)" }}
             >
               {item.description}
             </p>
@@ -163,16 +165,9 @@ function ModernSection({
   if (items.length === 0) return null;
 
   return (
-    <motion.section
-      id={`section-${section.id}`}
-      className="mt-20"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.5 }}
-    >
+    <section id={`section-${section.id}`} className="mt-12 md:mt-20">
       {/* Section header — large number + name */}
-      <div className="flex items-end gap-5 mb-8">
+      <div className="flex items-end gap-5 mb-5">
         <span
           className="font-display font-light leading-none select-none"
           style={{
@@ -209,7 +204,7 @@ function ModernSection({
           />
         ))}
       </ul>
-    </motion.section>
+    </section>
   );
 }
 
@@ -230,6 +225,8 @@ export function MenuViewModern({ initial, initialLocale = BASE_LOCALE }: { initi
     setLocale(next);
     try { window.localStorage.setItem(`oriz-lang-${venue.slug}`, next); } catch { /* ignore */ }
   }
+  const t = ui(locale);
+  const about = localizeAbout(venue, locale);
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const openItem = useCallback((item: Item) => setSelectedItem(item), []);
@@ -410,10 +407,10 @@ export function MenuViewModern({ initial, initialLocale = BASE_LOCALE }: { initi
         </nav>
       )}
 
-      <main className="max-w-2xl mx-auto px-6 pt-16 pb-28" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}>
+      <main className="max-w-2xl mx-auto px-6 pt-8 md:pt-16 pb-28" style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}>
         {/* Header */}
         <motion.header
-          className="mb-16"
+          className="mb-8 md:mb-16"
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -425,44 +422,38 @@ export function MenuViewModern({ initial, initialLocale = BASE_LOCALE }: { initi
             bg={venue.color_bg}
             accent={venue.color_primary}
             color="auto"
-            height={90}
+            height={60}
             textColor={text}
             isDarkBg={isDark}
           />
-          {venue.about && (
+          {about && (
             <p
-              className="font-sans text-sm mt-5 leading-relaxed max-w-md"
-              style={{ color: dim }}
+              className="font-sans text-sm mt-3 leading-relaxed max-w-md"
+              style={{
+                color: dim,
+                overflow: "hidden",
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+              } as React.CSSProperties}
             >
-              {venue.about}
+              {about}
             </p>
           )}
           {/* Gold rule */}
-          <div className="mt-7 flex items-center gap-4">
+          <div className="mt-5 flex items-center gap-4">
             <div className="h-px flex-1" style={{ backgroundColor: border }} />
             <span className="font-sans text-[10px] tracking-regal uppercase" style={{ color: muted }}>
-              Speisekarte
+              {t.menu}
             </span>
             <div className="h-px flex-1" style={{ backgroundColor: border }} />
           </div>
-          {enabledLocales.length > 0 && (
-            <div className="mt-5">
-              <LanguageSwitcher
-                enabledLocales={enabledLocales}
-                locale={locale}
-                onChange={changeLocale}
-                accent={accent}
-                text={text}
-                border={border}
-              />
-            </div>
-          )}
         </motion.header>
 
         {/* Menu switcher tabs — shown only when venue has multiple menus */}
         {menus.length > 1 && (
           <div
-            className="overflow-x-auto -mx-6 px-6 mb-4 -mt-8"
+            className="overflow-x-auto -mx-6 px-6 mb-4 -mt-2"
             style={{ scrollbarWidth: "none" }}
           >
             <div className="flex gap-2 whitespace-nowrap">
@@ -497,15 +488,28 @@ export function MenuViewModern({ initial, initialLocale = BASE_LOCALE }: { initi
           </div>
         )}
 
-        {/* Filter bar */}
+        {/* Language + filter bar — one row, one pill style */}
         <div style={{ overflowX: "auto", scrollbarWidth: "none", margin: "0 -24px", padding: "0 16px" }}>
-          <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap", paddingBottom: 10, paddingTop: 2 }}>
+          <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap", paddingBottom: 10, paddingTop: 2, alignItems: "center" }}>
+            {enabledLocales.length > 0 && (
+              <>
+                <LanguageSwitcher
+                  enabledLocales={enabledLocales}
+                  locale={locale}
+                  onChange={changeLocale}
+                  accent={accent}
+                  text={text}
+                  border={border}
+                />
+                <span aria-hidden style={{ width: 1, height: 22, margin: "0 2px", backgroundColor: border, flexShrink: 0 }} />
+              </>
+            )}
             {(
               [
-                { key: "alcohol" as const, label: "Alkohol" },
-                { key: "vegan" as const, label: "Vegan" },
-                { key: "vegetarisch" as const, label: "Vegetarisch" },
-                { key: "glutenfrei" as const, label: "Glutenfrei" },
+                { key: "alcohol" as const, label: t.filters.alcohol },
+                { key: "vegan" as const, label: t.filters.vegan },
+                { key: "vegetarisch" as const, label: t.filters.vegetarian },
+                { key: "glutenfrei" as const, label: t.filters.glutenFree },
               ] as const
             ).map(({ key, label }) => {
               const isActive = key === "alcohol" ? hideAlcohol : dietFilters.has(key);
@@ -564,8 +568,8 @@ export function MenuViewModern({ initial, initialLocale = BASE_LOCALE }: { initi
         </footer>
       </main>
 
-      <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} theme="modern" accent={accent} />
-      <StickyActionBar venue={venue} theme="modern" />
+      <ItemDetailModal item={selectedItem} currency={venue.currency} onClose={closeItem} theme="modern" accent={accent} locale={locale} />
+      <StickyActionBar venue={venue} theme="modern" locale={locale} />
     </div>
   );
 }
