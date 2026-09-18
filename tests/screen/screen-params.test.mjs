@@ -6,7 +6,7 @@ import { parseScreenParams } from "../../src/components/screen/screen-params.ts"
 const opts = { enabledLocales: ["en", "it"], presetIds: new Set(["onyx", "pergament"]) };
 
 test("defaults when nothing is given", () => {
-  assert.deepEqual(parseScreenParams({}, opts), { seconds: null, presetId: null, lang: "de" });
+  assert.deepEqual(parseScreenParams({}, opts), { seconds: null, presetId: null, lang: "de", preview: false });
 });
 
 test("clamps seconds into 3..60 and ignores garbage", () => {
@@ -21,6 +21,12 @@ test("accepts only known preset ids", () => {
   assert.equal(parseScreenParams({ preset: "onyx" }, opts).presetId, "onyx");
   assert.equal(parseScreenParams({ preset: "ONYX" }, opts).presetId, "onyx");
   assert.equal(parseScreenParams({ preset: "neon" }, opts).presetId, null);
+});
+
+test("preview flag only on ?preview=1", () => {
+  assert.equal(parseScreenParams({ preview: "1" }, opts).preview, true);
+  assert.equal(parseScreenParams({ preview: "true" }, opts).preview, false);
+  assert.equal(parseScreenParams({}, opts).preview, false);
 });
 
 test("accepts only enabled locales, falls back to de", () => {

@@ -32,6 +32,7 @@ export default async function ScreenRoute({ params, searchParams }: Props) {
     seconds: url.seconds,
     preset: preset ? { color_bg: preset.color_bg, color_primary: preset.color_primary } : null,
     lang: url.lang,
+    preview: url.preview,
   });
 
   const palette = buildPalette(config.colorBg, config.colorPrimary);

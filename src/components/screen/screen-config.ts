@@ -16,6 +16,8 @@ export type ScreenConfig = {
   /** { [sectionId]: itemId } */
   heroPins: Record<string, string>;
   lang: string;
+  /** Embedded in an iframe: no Realtime, no daily reload, no fullscreen-on-click. */
+  preview: boolean;
 };
 
 export type ScreenUrlOverrides = {
@@ -24,6 +26,7 @@ export type ScreenUrlOverrides = {
   /** resolved preset colors from `?preset=`, null = not given / unknown */
   preset: { color_bg: string; color_primary: string } | null;
   lang: string;
+  preview: boolean;
 };
 
 export function resolveScreenConfig(
@@ -40,5 +43,6 @@ export function resolveScreenConfig(
     sectionIds: Array.isArray(row?.sections) ? row.sections : null,
     heroPins: row?.hero_items && typeof row.hero_items === "object" ? row.hero_items : {},
     lang: url.lang,
+    preview: url.preview,
   };
 }

@@ -11,6 +11,9 @@ export type ScreenParams = {
   presetId: string | null;
   /** locale for names/descriptions, "de" = base fields */
   lang: string;
+  /** `?preview=1` — embedded in an iframe (admin tab, landing page).
+   *  No Realtime subscription, no daily reload, no fullscreen-on-click. */
+  preview: boolean;
 };
 
 export const MIN_SECONDS = 3;
@@ -37,5 +40,7 @@ export function parseScreenParams(
   const rawLang = first(sp.lang)?.toLowerCase() ?? BASE_LANG;
   const lang = rawLang !== BASE_LANG && opts.enabledLocales.includes(rawLang) ? rawLang : BASE_LANG;
 
-  return { seconds, presetId, lang };
+  const preview = first(sp.preview) === "1";
+
+  return { seconds, presetId, lang, preview };
 }

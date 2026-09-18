@@ -37,14 +37,14 @@ const PRODUCTS = [
     badge: null as string | null,
   },
   {
-    slug: null as string | null,
+    slug: "screen" as string | null,
     eyebrow: "Screen",
-    title: "TV- & Lobby-Displays",
-    body: "Stille, redaktionell gepflegte Bildschirme für Lobby, Bar und Lounge.",
-    cta: "Bald verfügbar",
-    accent: "#8A8A8A",
-    available: false,
-    badge: "Bald verfügbar" as string | null,
+    title: "Die Karte an der Wand",
+    body: "Ihr Fernseher zeigt die Speisekarte — in Echtzeit, in Ihren Farben, ohne Zusatzgerät und ohne Installation.",
+    cta: "Mehr erfahren",
+    accent: "#C69B3C",
+    available: true,
+    badge: "Neu" as string | null,
   },
 ];
 

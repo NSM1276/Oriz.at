@@ -39,6 +39,7 @@ export function ScreenBoard({ initial, config, palette }: Props) {
   });
 
   useEffect(() => {
+    if (config.preview) return; // embedded thumbnail: don't hold a Realtime channel
     const supabase = createClient();
     const channel = supabase
       .channel(`venue:${venue.id}:items`)
@@ -57,7 +58,7 @@ export function ScreenBoard({ initial, config, palette }: Props) {
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [venue.id]);
+  }, [venue.id, config.preview]);
 
   // ── Active menu by schedule, re-evaluated every minute ──
   const [activeMenuId, setActiveMenuId] = useState<string | null>(() => getActiveMenuId(menus));
@@ -110,11 +111,15 @@ export function ScreenBoard({ initial, config, palette }: Props) {
   useEffect(() => {
     const prev = document.body.style.backgroundColor;
     document.body.style.backgroundColor = palette.bg;
+    if (config.preview) {
+      return () => { document.body.style.backgroundColor = prev; };
+    }
     const id = setTimeout(() => window.location.reload(), RELOAD_AFTER_MS);
     return () => { document.body.style.backgroundColor = prev; clearTimeout(id); };
-  }, [palette.bg]);
+  }, [palette.bg, config.preview]);
 
   function requestFullscreen() {
+    if (config.preview) return; // embedded: a click must not grab the whole screen
     const el = document.documentElement;
     if (!document.fullscreenElement && el.requestFullscreen) {
       el.requestFullscreen().catch(() => {});

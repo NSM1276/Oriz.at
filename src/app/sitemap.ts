@@ -18,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE}/`, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
     { url: `${SITE}/carta`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${SITE}/casa`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE}/screen`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
   ];
 
   // Dynamic: Carta venues and Casa properties — pulled live from DB

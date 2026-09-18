@@ -40,7 +40,7 @@ export function StickyNav() {
           {[
             { label: "Carta", href: "/carta" },
             { label: "Casa", href: "/casa" },
-            { label: "Screen", href: "#screen" },
+            { label: "Screen", href: "/screen" },
           ].map(({ label, href }) => (
             <Link
               key={label}
