@@ -243,6 +243,13 @@ export async function POST() {
     .in("venue_id", demoVenueIds);
   if (menuError) errors.push(`menus: ${menuError.message}`);
 
+  // 5. Drop Screen (TV board) settings visitors changed in the demo admin → defaults
+  const { error: screenError } = await supabase
+    .from("screen_settings")
+    .delete()
+    .in("venue_id", demoVenueIds);
+  if (screenError) errors.push(`screen_settings: ${screenError.message}`);
+
   if (errors.length > 0) {
     return NextResponse.json({ ok: false, errors }, { status: 500 });
   }

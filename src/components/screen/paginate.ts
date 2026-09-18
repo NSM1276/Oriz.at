@@ -40,12 +40,16 @@ export function selectVisibleSections(
   sections: SectionWithItems[],
   items: Map<string, Item>,
   activeMenuId: string | null,
+  /** Owner's pick from screen_settings: only these ids, in this order. null = all. */
+  sectionIds: string[] | null = null,
 ): SectionWithItems[] {
   const live = Array.from(items.values());
+  const order = sectionIds ? new Map(sectionIds.map((id, i) => [id, i])) : null;
   return sections
     .filter((s) => s.menu_id == null || s.menu_id === activeMenuId)
+    .filter((s) => !order || order.has(s.id))
     .slice()
-    .sort((a, b) => a.position - b.position)
+    .sort((a, b) => (order ? order.get(a.id)! - order.get(b.id)! : a.position - b.position))
     .map((s) => ({
       ...s,
       items: live
@@ -62,6 +66,9 @@ export function sectionIsVisual(items: Item[]): boolean {
 export type BuildPagesOptions = {
   /** Insert one full-screen spotlight after every section that has photos. Default true. */
   spotlight?: boolean;
+  /** { [sectionId]: itemId } — pinned hero dish; must exist in the section and have a photo,
+   *  otherwise the pin is ignored and the hero cycles as usual. */
+  heroPins?: Record<string, string>;
 };
 
 /** Splits every section into board pages (tiles or rows) and, for sections with
@@ -71,13 +78,17 @@ export function buildPages(
   opts: BuildPagesOptions = {},
 ): ScreenPageData[] {
   const spotlight = opts.spotlight ?? true;
+  const heroPins = opts.heroPins ?? {};
   const pages: ScreenPageData[] = [];
 
   sections.forEach((s, sectionIndex) => {
     if (s.items.length === 0) return;
     const visual = sectionIsVisual(s.items);
     const cap = visual ? VISUAL_CAPACITY : TEXT_CAPACITY;
-    const heroItems = s.items.filter((it) => !!it.image_url);
+    const photoItems = s.items.filter((it) => !!it.image_url);
+    const pinned = photoItems.find((it) => it.id === heroPins[s.id]) ?? null;
+    // A pinned dish is the only hero (no cycling); otherwise cycle through every photo dish.
+    const heroItems = pinned ? [pinned] : photoItems;
     const pageCount = Math.ceil(s.items.length / cap);
     // Balanced split: 8 tiles → 4+4, not 6+2. A nearly empty last page looks broken on a TV.
     const perPage = Math.ceil(s.items.length / pageCount);
@@ -97,8 +108,8 @@ export function buildPages(
     }
 
     if (spotlight && heroItems.length > 0) {
-      // Deterministic pick that varies from section to section.
-      const item = heroItems[sectionIndex % heroItems.length];
+      // Pinned dish, else a deterministic pick that varies from section to section.
+      const item = pinned ?? heroItems[sectionIndex % heroItems.length];
       pages.push({
         kind: "spotlight",
         key: `${s.id}:spotlight`,

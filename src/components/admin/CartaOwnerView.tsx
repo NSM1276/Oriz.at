@@ -12,6 +12,7 @@ import { limitForPlan } from "@/lib/plans";
 import { AI_CAPTION_ENABLED } from "@/lib/feature-flags";
 import { OwnerProfileTab } from "@/components/admin/OwnerProfileTab";
 import { MenusManager } from "@/components/admin/MenusManager";
+import { OwnerScreenTab } from "@/components/admin/OwnerScreenTab";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
 type VenueWithSections = Venue & {
@@ -53,7 +54,7 @@ export function CartaOwnerView({
   venue: VenueWithSections | null;
   superAdminLink?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<"menu" | "profil">("menu");
+  const [activeTab, setActiveTab] = useState<"menu" | "profil" | "screen">("menu");
 
   // Item currently open in edit sheet
   const [editingItem, setEditingItem] = useState<Item | null>(null);
@@ -286,7 +287,7 @@ export function CartaOwnerView({
         {/* Tab switcher */}
         {venue && (
           <div className="flex mb-8 border-b" style={{ borderColor: border }}>
-            {(["menu", "profil"] as const).map((tab) => (
+            {(["menu", "profil", "screen"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
@@ -297,7 +298,7 @@ export function CartaOwnerView({
                   color: activeTab === tab ? accent : dim,
                 }}
               >
-                {tab === "menu" ? "Menü" : "Profil"}
+                {tab === "menu" ? "Menü" : tab === "profil" ? "Profil" : "Screen"}
               </button>
             ))}
           </div>
@@ -339,6 +340,21 @@ export function CartaOwnerView({
             initialOpeningHours={venue.opening_hours ?? null}
             initialGallery={venue.gallery ?? null}
             initialCoverUrl={venue.cover_url ?? null}
+          />
+        )}
+
+        {/* Screen tab — TV board settings + live preview */}
+        {venue && activeTab === "screen" && (
+          <OwnerScreenTab
+            venueId={venue.id}
+            slug={venue.slug}
+            sections={venue.sections ?? []}
+            isDark={isDark}
+            text={text}
+            dim={dim}
+            muted={muted}
+            border={border}
+            accent={accent}
           />
         )}
 

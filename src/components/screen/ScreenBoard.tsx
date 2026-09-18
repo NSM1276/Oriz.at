@@ -8,7 +8,7 @@ import { getActiveMenuId } from "@/lib/menu-schedule";
 import { localizeSection } from "@/lib/menu-i18n";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import { buildPages, selectVisibleSections } from "./paginate";
-import type { ScreenParams } from "./screen-params";
+import type { ScreenConfig } from "./screen-config";
 import type { ScreenPalette } from "./screen-colors";
 import { ScreenPage } from "./ScreenPage";
 import { ScreenSpotlight } from "./ScreenSpotlight";
@@ -20,7 +20,7 @@ const RELOAD_AFTER_MS = 24 * 60 * 60 * 1000;
 
 type Props = {
   initial: MenuPayload;
-  params: ScreenParams;
+  config: ScreenConfig;
   palette: ScreenPalette;
 };
 
@@ -28,7 +28,7 @@ function formatClock(d: Date): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-export function ScreenBoard({ initial, params, palette }: Props) {
+export function ScreenBoard({ initial, config, palette }: Props) {
   const { venue, sections, menus = [] } = initial;
 
   // ── Live items (same Realtime contract as the guest menu) ──
@@ -68,10 +68,11 @@ export function ScreenBoard({ initial, params, palette }: Props) {
 
   // ── Pages ──
   const pages = useMemo(() => {
-    const visible = selectVisibleSections(sections, items, activeMenuId)
-      .map((s) => localizeSection(s, params.lang));
-    return buildPages(visible);
-  }, [sections, items, activeMenuId, params.lang]);
+    if (!config.active) return [];
+    const visible = selectVisibleSections(sections, items, activeMenuId, config.sectionIds)
+      .map((s) => localizeSection(s, config.lang));
+    return buildPages(visible, { spotlight: config.spotlight, heroPins: config.heroPins });
+  }, [sections, items, activeMenuId, config]);
 
   // ── Rotation: setTimeout re-armed per page; page count read via ref so a
   //    Realtime recompute does not reset the timer ──
@@ -85,9 +86,9 @@ export function ScreenBoard({ initial, params, palette }: Props) {
     if (!hasMultiplePages) return;
     const id = setTimeout(() => {
       setIndex((i) => (pageCountRef.current ? (i + 1) % pageCountRef.current : 0));
-    }, params.seconds * 1000);
+    }, config.seconds * 1000);
     return () => clearTimeout(id);
-  }, [safeIndex, params.seconds, hasMultiplePages]);
+  }, [safeIndex, config.seconds, hasMultiplePages]);
 
   // ── Hero cycles through the section's photo dishes on its own clock ──
   const [heroTick, setHeroTick] = useState(0);
@@ -205,7 +206,7 @@ export function ScreenBoard({ initial, params, palette }: Props) {
               height: "0.45vh",
               width: "0%",
               background: palette.accent,
-              animation: `screen-progress ${params.seconds}s linear forwards`,
+              animation: `screen-progress ${config.seconds}s linear forwards`,
             }}
           />
         </>
@@ -234,9 +235,11 @@ export function ScreenBoard({ initial, params, palette }: Props) {
               height={120}
             />
           </div>
-          <div className="font-display" style={{ fontSize: "4vh", fontWeight: 300, color: palette.dim }}>
-            Speisekarte wird vorbereitet
-          </div>
+          {config.active && (
+            <div className="font-display" style={{ fontSize: "4vh", fontWeight: 300, color: palette.dim }}>
+              Speisekarte wird vorbereitet
+            </div>
+          )}
         </div>
       )}
     </div>

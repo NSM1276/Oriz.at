@@ -29,9 +29,10 @@ export type Venue = {
   cover_url?: string | null;
   // ── Guest-menu translations (manual, no AI) ──
   enabled_locales?: string[] | null;
+  translations?: TranslationsMap | null;
 };
 
-export type ItemTranslation = { name?: string; description?: string };
+export type ItemTranslation = { name?: string; description?: string; about?: string };
 export type TranslationsMap = Record<string, ItemTranslation>;
 
 export type OpeningHours = Partial<Record<Weekday, [string, string][]>>;
@@ -70,6 +71,22 @@ export type Item = {
   position: number;
   updated_at: string;
   translations?: TranslationsMap | null;
+};
+
+/** One row per venue in `screen_settings` (migration 0013). Missing row = defaults. */
+export type ScreenSettingsRow = {
+  venue_id: string;
+  active: boolean;
+  rotation_sec: number;
+  spotlight: boolean;
+  color_bg: string | null;
+  color_primary: string | null;
+  /** null = all sections in position order; else ordered section ids to show */
+  sections: string[] | null;
+  /** { [sectionId]: itemId } — pinned hero dish per section */
+  hero_items: Record<string, string>;
+  style: Record<string, unknown>;
+  updated_at: string;
 };
 
 export type MenuPayload = {

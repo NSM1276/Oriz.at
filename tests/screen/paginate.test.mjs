@@ -85,3 +85,35 @@ test("selectVisibleSections drops sections left without items", () => {
   const out = selectVisibleSections([section("s1")], new Map(), null);
   assert.equal(out.length, 0);
 });
+
+test("sectionIds filters and orders sections", () => {
+  const sections = [
+    section("s1", { position: 0 }),
+    section("s2", { position: 1 }),
+    section("s3", { position: 2 }),
+  ];
+  const map = new Map([
+    ["i1", item("i1", "s1")],
+    ["i2", item("i2", "s2")],
+    ["i3", item("i3", "s3")],
+  ]);
+  assert.deepEqual(selectVisibleSections(sections, map, null, ["s3", "s1"]).map((s) => s.id), ["s3", "s1"]);
+  assert.deepEqual(selectVisibleSections(sections, map, null, null).map((s) => s.id), ["s1", "s2", "s3"]);
+  assert.deepEqual(selectVisibleSections(sections, map, null, ["nope"]).map((s) => s.id), []);
+});
+
+test("heroPins: pinned photo dish is the only hero and the spotlight item", () => {
+  const items = [photo("i1", "s1"), photo("i2", "s1"), photo("i3", "s1")];
+  const pages = buildPages([section("s1", { items })], { heroPins: { s1: "i3" } });
+  assert.deepEqual(pages[0].heroItems.map((i) => i.id), ["i3"]);
+  assert.equal(pages.at(-1).kind, "spotlight");
+  assert.equal(pages.at(-1).item.id, "i3");
+});
+
+test("heroPins: pin without photo or unknown id is ignored", () => {
+  const items = [item("i1", "s1"), photo("i2", "s1")];
+  const noPhoto = buildPages([section("s1", { items })], { heroPins: { s1: "i1" } });
+  assert.deepEqual(noPhoto[0].heroItems.map((i) => i.id), ["i2"]);
+  const unknown = buildPages([section("s1", { items })], { heroPins: { s1: "zzz" } });
+  assert.deepEqual(unknown[0].heroItems.map((i) => i.id), ["i2"]);
+});

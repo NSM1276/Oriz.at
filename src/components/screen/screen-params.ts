@@ -1,18 +1,18 @@
 // Parses the TV board's URL tunables. No runtime imports — unit-tested with node --test.
-// The admin tab (next iteration) will replace these with a DB row; keep the shape stable.
+// These are testing overrides only; the source of truth is the screen_settings row
+// (see screen-config.ts for precedence).
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
 export type ScreenParams = {
-  /** seconds per page */
-  seconds: number;
-  /** id from COLOR_PRESETS or null = use venue colors */
+  /** seconds per page, null = not given */
+  seconds: number | null;
+  /** id from COLOR_PRESETS or null = not given / unknown */
   presetId: string | null;
   /** locale for names/descriptions, "de" = base fields */
   lang: string;
 };
 
-export const DEFAULT_SECONDS = 10;
 export const MIN_SECONDS = 3;
 export const MAX_SECONDS = 60;
 export const BASE_LANG = "de";
@@ -29,7 +29,7 @@ export function parseScreenParams(
   const seconds =
     Number.isFinite(rawS) && rawS > 0
       ? Math.min(MAX_SECONDS, Math.max(MIN_SECONDS, Math.round(rawS)))
-      : DEFAULT_SECONDS;
+      : null;
 
   const rawPreset = first(sp.preset)?.toLowerCase() ?? "";
   const presetId = opts.presetIds.has(rawPreset) ? rawPreset : null;
