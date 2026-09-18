@@ -3,15 +3,35 @@ import type { Item, Section } from "@/lib/supabase/types";
 
 export type SectionWithItems = Section & { items: Item[] };
 
+/** Photo tiles: 2 columns × 3 rows. */
+export const VISUAL_CAPACITY = 6;
+/** Text rows for sections without any photo: 2 columns × 5 rows. */
+export const TEXT_CAPACITY = 10;
+
 export type BoardPage = {
-  /** Stable key for React / framer-motion: `${sectionId}:${pageIndex}` */
+  kind: "board";
+  /** Stable key for React / framer-motion */
   key: string;
   sectionId: string;
   sectionName: string;
   pageIndex: number;
   pageCount: number;
   items: Item[];
+  /** true → photo tiles, false → text rows */
+  visual: boolean;
+  /** Every item of the section that has a photo — the hero panel cycles through them. */
+  heroItems: Item[];
 };
+
+export type SpotlightPage = {
+  kind: "spotlight";
+  key: string;
+  sectionId: string;
+  sectionName: string;
+  item: Item;
+};
+
+export type ScreenPageData = BoardPage | SpotlightPage;
 
 /** Rebuilds each section's item list from the live item map, drops inactive items,
  *  keeps only sections belonging to the active menu (or global ones), drops empty
@@ -35,23 +55,59 @@ export function selectVisibleSections(
     .filter((s) => s.items.length > 0);
 }
 
-/** Splits every section into pages of at most `capacity` items. */
-export function buildPages(sections: SectionWithItems[], capacity: number): BoardPage[] {
-  const cap = Math.max(1, Math.floor(capacity));
-  const pages: BoardPage[] = [];
-  for (const s of sections) {
-    if (s.items.length === 0) continue;
+export function sectionIsVisual(items: Item[]): boolean {
+  return items.some((it) => !!it.image_url);
+}
+
+export type BuildPagesOptions = {
+  /** Insert one full-screen spotlight after every section that has photos. Default true. */
+  spotlight?: boolean;
+};
+
+/** Splits every section into board pages (tiles or rows) and, for sections with
+ *  photos, appends one spotlight page showing a single dish full-screen. */
+export function buildPages(
+  sections: SectionWithItems[],
+  opts: BuildPagesOptions = {},
+): ScreenPageData[] {
+  const spotlight = opts.spotlight ?? true;
+  const pages: ScreenPageData[] = [];
+
+  sections.forEach((s, sectionIndex) => {
+    if (s.items.length === 0) return;
+    const visual = sectionIsVisual(s.items);
+    const cap = visual ? VISUAL_CAPACITY : TEXT_CAPACITY;
+    const heroItems = s.items.filter((it) => !!it.image_url);
     const pageCount = Math.ceil(s.items.length / cap);
+    // Balanced split: 8 tiles → 4+4, not 6+2. A nearly empty last page looks broken on a TV.
+    const perPage = Math.ceil(s.items.length / pageCount);
+
     for (let i = 0; i < pageCount; i++) {
       pages.push({
+        kind: "board",
         key: `${s.id}:${i}`,
         sectionId: s.id,
         sectionName: s.name,
         pageIndex: i,
         pageCount,
-        items: s.items.slice(i * cap, (i + 1) * cap),
+        items: s.items.slice(i * perPage, (i + 1) * perPage),
+        visual,
+        heroItems,
       });
     }
-  }
+
+    if (spotlight && heroItems.length > 0) {
+      // Deterministic pick that varies from section to section.
+      const item = heroItems[sectionIndex % heroItems.length];
+      pages.push({
+        kind: "spotlight",
+        key: `${s.id}:spotlight`,
+        sectionId: s.id,
+        sectionName: s.name,
+        item,
+      });
+    }
+  });
+
   return pages;
 }

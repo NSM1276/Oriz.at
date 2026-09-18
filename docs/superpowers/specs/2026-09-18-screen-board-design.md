@@ -118,3 +118,49 @@ subscribed to Realtime so the board comes alive when items are added.
 4. `/screen/golden-harp-meidling` (no photos) renders cleanly; `?preset=onyx` and
    `?preset=pergament` both read well; `?s=3` speeds up rotation.
 5. Unknown slug returns 404; a venue with no items shows the empty state.
+
+---
+
+## Revision 2 (2026-09-18, same day) — visual board after owner review
+
+The first build (text rows + thumbnails) was rejected by the owner as too far from
+real QSR menu boards (McDonald's, Burger King, MustHaveMenus/Behance references).
+Researched references and rebuilt the Board layout. Rotation, Realtime, URL params,
+TV hygiene and the empty state are unchanged; everything below replaces the old
+"Board layout" and "Rotation" sections.
+
+### Frame
+- Root grid: `40vw | 1fr` columns, footer strip `7vh` across the full width.
+- **Hero (left 40%)**: one dish full-bleed, `object-fit: cover`, slow Ken Burns zoom
+  (`screen-kenburns`, 14 s alternate). Bottom gradient to black. Eyebrow
+  «Empfehlung des Hauses», name 7vh Cormorant, 2-line description, price pill 3.6vh.
+  The hero cycles through **all photo items of the current section** every 6 s on its
+  own clock (`HERO_TICK_MS`), crossfading image and copy independently of the page.
+- **Hero fallback** (section without photos): venue `cover_url` → `gallery[0]` as
+  ambient photo with logo + «Unsere Karte» + section name; with no image at all, a
+  solid `panel` block with the section name only (footer already shows the logo).
+- **Right side**: section name 6.4vh, page dots, then either
+  - **Tiles** (section has ≥1 photo): 2 columns, rows = `max(2, ceil(n/2))`, photo
+    full-bleed with bottom gradient, name 3.4vh (2 lines), 1-line description, price pill;
+    items without photo render on a solid `panel` tile. Staggered fly-in 70 ms apart.
+  - **Rows** (no photos): 2 columns, rows = `max(3, ceil(n/2))`, column-major, name
+    3.4vh + description + price pill 2.4vh. Staggered 50 ms.
+- **Footer**: venue logo (40px) left, clock right; progress bar under it.
+
+### Pagination (`paginate.ts`)
+- Capacity: `VISUAL_CAPACITY = 6` (tiles), `TEXT_CAPACITY = 10` (rows).
+- **Balanced split**: `perPage = ceil(n / ceil(n / cap))` → 8 tiles = 4+4, never 6+2.
+- Page union: `BoardPage { kind:'board', visual, heroItems, … }` and
+  `SpotlightPage { kind:'spotlight', item }`.
+- **Spotlight**: after every section with photos, one full-screen page: photo with
+  Ken Burns, left-to-right dark gradient, section eyebrow, name 10vh, 3-line
+  description, price pill 4.6vh. Item = `heroItems[sectionIndex % heroItems.length]`
+  so consecutive sections feature different positions. `buildPages(sections, { spotlight:false })` disables it.
+
+### Palette additions (`screen-colors.ts`)
+- `onAccent`: dark text on light accents, parchment on dark accents (luminance < 0.35).
+- `panel`: translucent overlay used for photo-less tiles and the hero fallback.
+
+### Verified
+1920×1080 Tosca (tiles, hero cycling, spotlight, balanced 4+4), Golden Harp (rows,
+typographic hero), `?preset=pergament` (light), `tsc` clean, 16 unit tests green.

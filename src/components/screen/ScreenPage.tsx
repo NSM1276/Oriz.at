@@ -1,25 +1,37 @@
-import type { Venue } from "@/lib/supabase/types";
-import { VenueLogo } from "@/components/brand/VenueLogo";
+"use client";
+
+import type { Item, Venue } from "@/lib/supabase/types";
 import type { BoardPage } from "./paginate";
 import type { ScreenPalette } from "./screen-colors";
-import { ScreenItemCard } from "./ScreenItemCard";
-
-export const ROWS_PER_PAGE = 5;
-/** Body is 82vh minus 3vh vertical padding, divided into ROWS_PER_PAGE rows. */
-const ROW_HEIGHT = `calc(79vh / ${ROWS_PER_PAGE})`;
+import { ScreenHero } from "./ScreenHero";
+import { ScreenTile } from "./ScreenTile";
+import { ScreenRow } from "./ScreenRow";
 
 type Props = {
   venue: Venue;
   page: BoardPage;
-  columns: number;
+  /** Dish featured in the hero panel right now (cycles independently of the page). */
+  heroItem: Item | null;
   palette: ScreenPalette;
-  seconds: number;
-  clock: string;
 };
 
-/** One full TV frame: header strip, item grid, footer strip, progress bar. */
-export function ScreenPage({ venue, page, columns, palette, seconds, clock }: Props) {
-  const rows = Math.min(ROWS_PER_PAGE, Math.max(1, Math.ceil(page.items.length / columns)));
+/** One board frame: hero panel on the left, section title + tiles/rows on the right. */
+export function ScreenPage({ venue, page, heroItem, palette }: Props) {
+  // Rows follow the item count (pages are balanced by paginate.ts), with a floor so
+  // a 2-item page does not become two gigantic tiles.
+  const rows = Math.max(page.visual ? 2 : 3, Math.ceil(page.items.length / 2));
+  const gridStyle = page.visual
+    ? {
+        gridTemplateColumns: "1fr 1fr",
+        gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+        gap: "2.4vh 2vw",
+      }
+    : {
+        gridTemplateColumns: "1fr 1fr",
+        gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+        gridAutoFlow: "column" as const,
+        columnGap: "3vw",
+      };
 
   return (
     <div
@@ -27,101 +39,63 @@ export function ScreenPage({ venue, page, columns, palette, seconds, clock }: Pr
         position: "absolute",
         inset: 0,
         display: "grid",
-        gridTemplateRows: "10vh 82vh 8vh",
-        padding: "0 3vw",
-        boxSizing: "border-box",
-        color: palette.text,
+        gridTemplateColumns: "40vw 1fr",
       }}
     >
-      {/* Header */}
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: `1px solid ${palette.border}`,
-        }}
-      >
-        <div className="screen-logo">
-          <VenueLogo
-            svg={venue.logo_svg}
-            url={venue.logo_url}
-            name={venue.name}
-            color="auto"
-            bg={palette.bg}
-            accent={palette.accent}
-            isDarkBg={palette.isDark}
-            height={56}
-          />
-        </div>
-        <div style={{ textAlign: "right" }}>
-          <div
-            className="font-display"
-            style={{ fontSize: "5.2vh", lineHeight: 1, fontWeight: 400, letterSpacing: "0.02em" }}
-          >
-            {page.sectionName}
-          </div>
-          {page.pageCount > 1 && (
-            <div
-              className="font-sans"
-              style={{ marginTop: "0.6vh", fontSize: "1.8vh", letterSpacing: "0.18em", color: palette.muted }}
-            >
-              {page.pageIndex + 1} / {page.pageCount}
-            </div>
-          )}
-        </div>
-      </header>
+      <ScreenHero venue={venue} sectionName={page.sectionName} item={heroItem} palette={palette} />
 
-      {/* Grid — column-major so the board reads like a printed menu.
-          Row height is fixed (body height / ROWS_PER_PAGE) and the row count
-          shrinks to ceil(items / columns), so a short section spreads evenly
-          across columns (3+3+2) instead of stacking in the first one (5+3+0). */}
       <section
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${rows}, ${ROW_HEIGHT})`,
-          gridAutoFlow: "column",
-          alignContent: "start",
-          columnGap: "3vw",
-          padding: "1.5vh 0",
-          minHeight: 0,
+          gridTemplateRows: "11vh 1fr",
+          padding: "0 3vw 0 2.6vw",
+          minWidth: 0,
+          color: palette.text,
         }}
       >
-        {page.items.map((item) => (
-          <ScreenItemCard key={item.id} item={item} currency={venue.currency} palette={palette} />
-        ))}
+        <header
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            paddingBottom: "1.6vh",
+            borderBottom: `1px solid ${palette.border}`,
+          }}
+        >
+          <h2
+            className="font-display"
+            style={{ fontWeight: 400, fontSize: "6.4vh", lineHeight: 1, margin: 0 }}
+          >
+            {page.sectionName}
+          </h2>
+          {page.pageCount > 1 && (
+            <div style={{ display: "flex", gap: "0.8vh", paddingBottom: "1vh" }} aria-hidden>
+              {Array.from({ length: page.pageCount }, (_, i) => (
+                <i
+                  key={i}
+                  style={{
+                    width: "1.2vh",
+                    height: "1.2vh",
+                    borderRadius: "50%",
+                    background: i === page.pageIndex ? palette.accent : palette.muted,
+                    display: "block",
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </header>
+
+        <div style={{ display: "grid", padding: "2.4vh 0", minHeight: 0, ...gridStyle }}>
+          {page.items.map((item, i) =>
+            page.visual ? (
+              <ScreenTile key={item.id} item={item} currency={venue.currency} palette={palette} index={i} />
+            ) : (
+              <ScreenRow key={item.id} item={item} currency={venue.currency} palette={palette} index={i} />
+            ),
+          )}
+        </div>
       </section>
-
-      {/* Footer */}
-      <footer
-        className="font-sans"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          fontSize: "1.7vh",
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          color: palette.muted,
-        }}
-      >
-        <span>Powered by ORIZ</span>
-        <span style={{ fontVariantNumeric: "tabular-nums", letterSpacing: "0.1em" }}>{clock}</span>
-      </footer>
-
-      {/* Progress bar — restarts because the parent remounts this component per page key */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          bottom: 0,
-          height: "0.4vh",
-          width: "0%",
-          background: palette.accent,
-          animation: `screen-progress ${seconds}s linear forwards`,
-        }}
-      />
     </div>
   );
 }

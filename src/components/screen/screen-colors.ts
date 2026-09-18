@@ -8,6 +8,10 @@ export type ScreenPalette = {
   muted: string;
   border: string;
   accent: string;
+  /** Text color that reads on top of `accent` (price pills). */
+  onAccent: string;
+  /** Slightly darker/lighter panel than bg — tiles without photo, hero fallback. */
+  panel: string;
   isDark: boolean;
 };
 
@@ -29,14 +33,17 @@ export function buildPalette(
   accent: string | null | undefined,
 ): ScreenPalette {
   const base = bg ?? PARCHMENT;
+  const acc = accent ?? GOLD;
   const isDark = luminance(base) < 0.4;
   return {
     bg: base,
     text: isDark ? PARCHMENT : ONYX,
-    dim: isDark ? "rgba(245,240,236,0.60)" : "rgba(10,10,10,0.60)",
-    muted: isDark ? "rgba(245,240,236,0.30)" : "rgba(10,10,10,0.30)",
+    dim: isDark ? "rgba(245,240,236,0.68)" : "rgba(10,10,10,0.64)",
+    muted: isDark ? "rgba(245,240,236,0.35)" : "rgba(10,10,10,0.35)",
     border: isDark ? "rgba(245,240,236,0.12)" : "rgba(10,10,10,0.12)",
-    accent: accent ?? GOLD,
+    accent: acc,
+    onAccent: luminance(acc) < 0.35 ? PARCHMENT : "#1A1210",
+    panel: isDark ? "rgba(0,0,0,0.28)" : "rgba(10,10,10,0.06)",
     isDark,
   };
 }

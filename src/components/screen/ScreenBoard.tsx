@@ -10,11 +10,12 @@ import { VenueLogo } from "@/components/brand/VenueLogo";
 import { buildPages, selectVisibleSections } from "./paginate";
 import type { ScreenParams } from "./screen-params";
 import type { ScreenPalette } from "./screen-colors";
-import { ScreenPage, ROWS_PER_PAGE } from "./ScreenPage";
+import { ScreenPage } from "./ScreenPage";
+import { ScreenSpotlight } from "./ScreenSpotlight";
 
-const WIDE_QUERY = "(min-width: 1600px)";
 const MENU_RECHECK_MS = 60_000;
 const CLOCK_TICK_MS = 15_000;
+const HERO_TICK_MS = 6_000;
 const RELOAD_AFTER_MS = 24 * 60 * 60 * 1000;
 
 type Props = {
@@ -65,22 +66,12 @@ export function ScreenBoard({ initial, params, palette }: Props) {
     return () => clearInterval(id);
   }, [menus]);
 
-  // ── Columns from viewport width ──
-  const [columns, setColumns] = useState(3);
-  useEffect(() => {
-    const mq = window.matchMedia(WIDE_QUERY);
-    const apply = () => setColumns(mq.matches ? 3 : 2);
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
-  }, []);
-
   // ── Pages ──
   const pages = useMemo(() => {
     const visible = selectVisibleSections(sections, items, activeMenuId)
       .map((s) => localizeSection(s, params.lang));
-    return buildPages(visible, columns * ROWS_PER_PAGE);
-  }, [sections, items, activeMenuId, columns, params.lang]);
+    return buildPages(visible);
+  }, [sections, items, activeMenuId, params.lang]);
 
   // ── Rotation: setTimeout re-armed per page; page count read via ref so a
   //    Realtime recompute does not reset the timer ──
@@ -97,6 +88,13 @@ export function ScreenBoard({ initial, params, palette }: Props) {
     }, params.seconds * 1000);
     return () => clearTimeout(id);
   }, [safeIndex, params.seconds, hasMultiplePages]);
+
+  // ── Hero cycles through the section's photo dishes on its own clock ──
+  const [heroTick, setHeroTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setHeroTick((t) => t + 1), HERO_TICK_MS);
+    return () => clearInterval(id);
+  }, []);
 
   // ── Clock ──
   const [clock, setClock] = useState("");
@@ -123,6 +121,10 @@ export function ScreenBoard({ initial, params, palette }: Props) {
   }
 
   const page = pages[safeIndex];
+  const heroItem =
+    page?.kind === "board" && page.heroItems.length
+      ? page.heroItems[heroTick % page.heroItems.length]
+      : null;
 
   return (
     <div
@@ -137,25 +139,76 @@ export function ScreenBoard({ initial, params, palette }: Props) {
       }}
     >
       {page ? (
-        <AnimatePresence initial={false}>
-          <motion.div
-            key={page.key}
-            initial={{ opacity: 0, y: "2vh" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "-2vh" }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            style={{ position: "absolute", inset: 0 }}
+        <>
+          <div style={{ position: "absolute", inset: "0 0 7vh 0" }}>
+            <AnimatePresence initial={false}>
+              <motion.div
+                key={page.key}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
+                style={{ position: "absolute", inset: 0 }}
+              >
+                {page.kind === "spotlight" ? (
+                  <ScreenSpotlight venue={venue} page={page} palette={palette} />
+                ) : (
+                  <ScreenPage venue={venue} page={page} heroItem={heroItem} palette={palette} />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Footer strip — shared by every page kind */}
+          <footer
+            className="font-sans"
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: "7vh",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0 3vw",
+              borderTop: `1px solid ${palette.border}`,
+              background: palette.bg,
+              color: palette.muted,
+              fontSize: "1.7vh",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+            }}
           >
-            <ScreenPage
-              venue={venue}
-              page={page}
-              columns={columns}
-              palette={palette}
-              seconds={params.seconds}
-              clock={clock}
-            />
-          </motion.div>
-        </AnimatePresence>
+            <div className="screen-logo" style={{ color: palette.text }}>
+              <VenueLogo
+                svg={venue.logo_svg}
+                url={venue.logo_url}
+                name={venue.name}
+                color="auto"
+                bg={palette.bg}
+                accent={palette.accent}
+                isDarkBg={palette.isDark}
+                height={40}
+              />
+            </div>
+            <span style={{ fontVariantNumeric: "tabular-nums", letterSpacing: "0.1em" }}>{clock}</span>
+          </footer>
+
+          {/* Progress bar — remounts per page key so the animation restarts */}
+          <div
+            key={page.key}
+            style={{
+              position: "absolute",
+              left: 0,
+              bottom: 0,
+              height: "0.45vh",
+              width: "0%",
+              background: palette.accent,
+              animation: `screen-progress ${params.seconds}s linear forwards`,
+            }}
+          />
+        </>
       ) : (
         <div
           style={{

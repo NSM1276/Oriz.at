@@ -159,3 +159,8 @@ html, body {
   -webkit-text-fill-color: currentColor;
   color: inherit;
 }
+
+@keyframes screen-kenburns {
+  from { transform: scale(1.02); }
+  to   { transform: scale(1.12); }
+}

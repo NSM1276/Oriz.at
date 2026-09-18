@@ -28,3 +28,8 @@ test("missing colors fall back to parchment + gold", () => {
 test("invalid hex is treated as light", () => {
   assert.equal(buildPalette("not-a-color", null).isDark, false);
 });
+
+test("price pill text contrasts with the accent", () => {
+  assert.equal(buildPalette("#0A0A0A", "#C69B3C").onAccent, "#1A1210"); // gold → dark text
+  assert.equal(buildPalette("#F5F0EC", "#0F1624").onAccent, "#F5F0EC"); // navy → light text
+});
