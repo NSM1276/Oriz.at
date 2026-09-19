@@ -117,3 +117,15 @@ test("heroPins: pin without photo or unknown id is ignored", () => {
   const unknown = buildPages([section("s1", { items })], { heroPins: { s1: "zzz" } });
   assert.deepEqual(unknown[0].heroItems.map((i) => i.id), ["i2"]);
 });
+
+test("a visual section puts photo items first so no grey gaps sit in the grid", () => {
+  const items = [item("i1", "s1"), photo("i2", "s1"), item("i3", "s1"), photo("i4", "s1")];
+  const pages = buildPages([section("s1", { items })], { spotlight: false });
+  assert.deepEqual(pages[0].items.map((i) => i.id), ["i2", "i4", "i1", "i3"]);
+});
+
+test("a text-only section keeps its own order untouched", () => {
+  const items = [item("i1", "s1"), item("i2", "s1"), item("i3", "s1")];
+  const pages = buildPages([section("s1", { items })], { spotlight: false });
+  assert.deepEqual(pages[0].items.map((i) => i.id), ["i1", "i2", "i3"]);
+});

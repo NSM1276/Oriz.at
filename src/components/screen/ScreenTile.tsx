@@ -16,7 +16,9 @@ type Props = {
 
 const PARCHMENT = "#F5F0EC";
 
-/** Photo tile (2×3 grid). Falls back to a solid panel when the dish has no photo. */
+/** A dish in the tile grid. With a photo it is a full-bleed tile; without one it
+ *  is a deliberate text entry — never a grey box where an image should have been
+ *  (MotionD §9: a missing photo changes the layout, it does not leave a hole). */
 export function ScreenTile({ item, currency, palette, index }: Props) {
   const description = item.ai_caption ?? item.description;
   const hasPhoto = !!item.image_url;
@@ -30,9 +32,12 @@ export function ScreenTile({ item, currency, palette, index }: Props) {
       transition={{ duration: 0.7, delay: 0.08 + index * 0.07, ease: [0.22, 1, 0.36, 1] }}
       style={{
         position: "relative",
-        borderRadius: "1.6vh",
+        borderRadius: hasPhoto ? "1.6vh" : 0,
         overflow: "hidden",
-        background: palette.panel,
+        // No photo → no photo-shaped panel. A hairline and open space read as a
+        // list entry; a filled rectangle reads as a broken image.
+        background: hasPhoto ? palette.panel : "transparent",
+        borderTop: hasPhoto ? undefined : `1px solid ${palette.accent}`,
         minWidth: 0,
       }}
     >
@@ -56,9 +61,9 @@ export function ScreenTile({ item, currency, palette, index }: Props) {
       <div
         style={{
           position: "absolute",
-          left: "1.6vw",
-          right: "1.6vw",
-          bottom: "2vh",
+          left: hasPhoto ? "1.6vw" : "0.4vw",
+          right: hasPhoto ? "1.6vw" : "0.4vw",
+          ...(hasPhoto ? { bottom: "2vh" } : { top: "50%", transform: "translateY(-50%)" }),
           display: "flex",
           alignItems: "flex-end",
           justifyContent: "space-between",

@@ -85,7 +85,12 @@ export function buildPages(
     if (s.items.length === 0) return;
     const visual = sectionIsVisual(s.items);
     const cap = visual ? VISUAL_CAPACITY : TEXT_CAPACITY;
-    const photoItems = s.items.filter((it) => !!it.image_url);
+    // Photos first: the tiles cluster at the top like a showcase and the plain
+    // entries follow, instead of grey gaps scattered through the grid.
+    const ordered = visual
+      ? [...s.items].sort((a, b) => Number(!!b.image_url) - Number(!!a.image_url))
+      : s.items;
+    const photoItems = ordered.filter((it) => !!it.image_url);
     const pinned = photoItems.find((it) => it.id === heroPins[s.id]) ?? null;
     // A pinned dish is the only hero (no cycling); otherwise cycle through every photo dish.
     const heroItems = pinned ? [pinned] : photoItems;
@@ -101,7 +106,7 @@ export function buildPages(
         sectionName: s.name,
         pageIndex: i,
         pageCount,
-        items: s.items.slice(i * perPage, (i + 1) * perPage),
+        items: ordered.slice(i * perPage, (i + 1) * perPage),
         visual,
         heroItems,
       });
