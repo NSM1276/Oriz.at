@@ -10,6 +10,8 @@ import { AI_CAPTION_ENABLED } from "@/lib/feature-flags";
 
 type Props = {
   slug: string;
+  /** super admin only: link to the paste-a-menu importer */
+  showImport?: boolean;
   plan: string;
   aiUsed: number;
   aiLimit: number;
@@ -27,7 +29,7 @@ const SHORTCUT_QR = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&da
 )}&bgcolor=ffffff&color=0a0a0a&margin=2`;
 
 export function OwnerToolbox({
-  slug, plan, aiUsed, aiLimit, isDark, text, dim, muted, border, accent,
+  slug, plan, aiUsed, aiLimit, isDark, text, dim, muted, border, accent, showImport = false,
 }: Props) {
   const aiLow = AI_CAPTION_ENABLED && aiLimit - aiUsed <= 0;
 
@@ -76,6 +78,15 @@ export function OwnerToolbox({
           >
             Menü drucken / PDF ↓
           </a>
+          {showImport && (
+            <a
+              href={`/admin/import/${slug}`}
+              className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-80"
+              style={{ border: `1px dashed ${border}`, color: dim }}
+            >
+              Menü importieren →
+            </a>
+          )}
         </div>
 
         {/* Phone shortcut */}

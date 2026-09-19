@@ -207,6 +207,7 @@ export function CartaOwnerView({
             muted={muted}
             border={border}
             accent={accent}
+            showImport={!!superAdminLink}
           />
         )}
 
