@@ -95,7 +95,7 @@ export default async function DemoPage() {
         </span>
       </div>
 
-      <main className="max-w-3xl mx-auto px-6 py-12" style={cssVars}>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-12" style={cssVars}>
         {/* Header */}
         <div className="flex items-start justify-between mb-10 gap-6 flex-wrap">
           <div>

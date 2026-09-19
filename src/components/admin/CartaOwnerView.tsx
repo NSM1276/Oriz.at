@@ -5,14 +5,12 @@ import { AdminItemRow } from "@/components/admin/AdminItemRow";
 import { ItemEditSheet } from "@/components/admin/ItemEditSheet";
 import { SectionNav } from "@/components/admin/SectionNav";
 import { SignOutButton } from "@/components/admin/SignOutButton";
-import { ChangePasswordButton } from "@/components/admin/ChangePasswordButton";
-import { QRCodeBlock } from "@/components/admin/QRCodeBlock";
 import { OwnerStylePicker } from "@/components/admin/OwnerStylePicker";
 import { limitForPlan } from "@/lib/plans";
-import { AI_CAPTION_ENABLED } from "@/lib/feature-flags";
 import { OwnerProfileTab } from "@/components/admin/OwnerProfileTab";
 import { MenusManager } from "@/components/admin/MenusManager";
 import { OwnerScreenTab } from "@/components/admin/OwnerScreenTab";
+import { OwnerToolbox } from "@/components/admin/OwnerToolbox";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
 type VenueWithSections = Venue & {
@@ -193,95 +191,23 @@ export function CartaOwnerView({
                 ← Super Admin
               </a>
             )}
-            <ChangePasswordButton />
             <SignOutButton />
           </div>
         </div>
 
         {venue && (
-          <div
-            className="mb-10 flex items-center justify-between gap-4 px-5 py-3"
-            style={{
-              border: `1px solid ${border}`,
-              backgroundColor: isDark
-                ? "rgba(245,240,236,0.05)"
-                : "rgba(10,10,10,0.03)",
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <span
-                className="font-sans text-[10px] tracking-regal uppercase"
-                style={{ color: muted }}
-              >
-                Plan
-              </span>
-              <span
-                className="font-display text-lg capitalize"
-                style={{ color: text }}
-              >
-                {plan}
-              </span>
-            </div>
-            {AI_CAPTION_ENABLED && (
-              <div className="text-right">
-                <div
-                  className="font-sans text-[10px] tracking-regal uppercase"
-                  style={{ color: muted }}
-                >
-                  AI-Texte diesen Monat
-                </div>
-                <div className="font-display text-lg tabular-nums">
-                  <span
-                    style={{
-                      color:
-                        remaining === 0
-                          ? isDark
-                            ? "#FCA5A5"
-                            : "#DC2626"
-                          : text,
-                    }}
-                  >
-                    {used}
-                  </span>
-                  <span style={{ color: muted }}> / {limit}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {venue && (
-          <>
-            <QRCodeBlock slug={venue.slug} />
-            <div className="mb-10 flex gap-3 flex-wrap">
-              <a
-                href={`/${venue.slug}`}
-                target="_blank"
-                rel="noreferrer"
-                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-80"
-                style={{
-                  border: `1px solid ${
-                    isDark ? "rgba(245,240,236,0.35)" : "rgba(10,10,10,0.35)"
-                  }`,
-                  color: text,
-                }}
-              >
-                Menü ansehen →
-              </a>
-              <a
-                href={`/${venue.slug}/print`}
-                target="_blank"
-                rel="noreferrer"
-                className="font-sans text-[10px] tracking-regal uppercase px-4 py-2.5 transition-opacity hover:opacity-80"
-                style={{
-                  backgroundColor: accent,
-                  color: isDark ? "#0A0A0A" : "#FFFFFF",
-                }}
-              >
-                Menü drucken / PDF ↓
-              </a>
-            </div>
-          </>
+          <OwnerToolbox
+            slug={venue.slug}
+            plan={plan}
+            aiUsed={used}
+            aiLimit={limit}
+            isDark={isDark}
+            text={text}
+            dim={dim}
+            muted={muted}
+            border={border}
+            accent={accent}
+          />
         )}
 
         {/* Tab switcher */}

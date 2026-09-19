@@ -15,7 +15,10 @@ export function SectionNav({ sections, topOffset = 0 }: Props) {
   }
 
   return (
+    // The bleed must match the page container's padding (px-4 sm:px-6),
+    // otherwise the bar pokes past the viewport and the phone scrolls sideways.
     <div
+      className="-mx-4 sm:-mx-6 pl-4 sm:pl-6 pr-2"
       style={{
         position: "sticky",
         top: topOffset,
@@ -23,10 +26,6 @@ export function SectionNav({ sections, topOffset = 0 }: Props) {
         backgroundColor: "var(--color-bg)",
         borderBottom: "1px solid var(--color-border)",
         boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-        marginLeft: -24,
-        marginRight: -24,
-        paddingLeft: 24,
-        paddingRight: 8,
         overflowX: "auto",
         scrollbarWidth: "none",
         msOverflowStyle: "none",
