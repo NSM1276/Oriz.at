@@ -24,7 +24,7 @@ const DEMO_VENUE_IDS = new Set([
 ]);
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const SELECT = "venue_id, active, rotation_sec, spotlight, color_bg, color_primary, sections, hero_items, style, updated_at";
+const SELECT = "venue_id, active, mode, rotation_sec, spotlight, color_bg, color_primary, sections, hero_items, style, updated_at";
 
 function svc() {
   return createClient(
@@ -91,6 +91,12 @@ export async function PATCH(req: NextRequest) {
       case "spotlight":
         if (typeof v !== "boolean") return NextResponse.json({ error: `${key} must be boolean` }, { status: 400 });
         updates[key] = v;
+        break;
+      case "mode":
+        if (v !== "showcase" && v !== "tafel") {
+          return NextResponse.json({ error: "mode must be showcase or tafel" }, { status: 400 });
+        }
+        updates.mode = v;
         break;
       case "rotation_sec":
         if (typeof v !== "number" || !Number.isInteger(v) || v < 3 || v > 60) {

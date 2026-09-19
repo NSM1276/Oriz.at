@@ -164,3 +164,18 @@ html, body {
   from { transform: scale(1.02); }
   to   { transform: scale(1.12); }
 }
+
+/* Attention wave on the static Tafel board: one price at a time lifts very
+   slightly, so a screen that never rotates is still alive. Deliberately subtle. */
+@keyframes screen-attention {
+  0%, 88%, 100% { transform: scale(1);    filter: brightness(1); }
+  94%           { transform: scale(1.035); filter: brightness(1.22); }
+}
+.screen-wave {
+  display: inline-block;
+  animation: screen-attention 24s ease-in-out infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen-wave { animation: none; }
+}

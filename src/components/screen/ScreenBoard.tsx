@@ -8,10 +8,12 @@ import { getActiveMenuId } from "@/lib/menu-schedule";
 import { localizeSection } from "@/lib/menu-i18n";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import { buildPages, selectVisibleSections } from "./paginate";
+import { computeBoardFit } from "./board-fit";
 import { resolveScreenConfig, type ScreenUrlOverrides } from "./screen-config";
 import { buildPalette } from "./screen-colors";
 import { ScreenPage } from "./ScreenPage";
 import { ScreenSpotlight } from "./ScreenSpotlight";
+import { ScreenTafel } from "./ScreenTafel";
 
 const MENU_RECHECK_MS = 60_000;
 const CLOCK_TICK_MS = 15_000;
@@ -130,13 +132,24 @@ export function ScreenBoard({ initial, initialSettings, url }: Props) {
     return () => clearInterval(id);
   }, [menus]);
 
-  // ── Pages ──
-  const pages = useMemo(() => {
+  // ── Visible sections (shared by both modes) ──
+  const visibleSections = useMemo(() => {
     if (!config.active) return [];
-    const visible = selectVisibleSections(sectionMeta, items, activeMenuId, config.sectionIds)
+    return selectVisibleSections(sectionMeta, items, activeMenuId, config.sectionIds)
       .map((s) => localizeSection(s, config.lang));
-    return buildPages(visible, { spotlight: config.spotlight, heroPins: config.heroPins });
-  }, [sectionMeta, items, activeMenuId, config]);
+  }, [sectionMeta, items, activeMenuId, config.active, config.sectionIds, config.lang]);
+
+  // ── Showcase: pages that rotate ──
+  const pages = useMemo(() => {
+    if (config.mode === "tafel") return [];
+    return buildPages(visibleSections, { spotlight: config.spotlight, heroPins: config.heroPins });
+  }, [visibleSections, config.mode, config.spotlight, config.heroPins]);
+
+  // ── Tafel: everything at once, sizes derived from how much there is ──
+  const tafelFit = useMemo(
+    () => (config.mode === "tafel" ? computeBoardFit(visibleSections) : null),
+    [visibleSections, config.mode],
+  );
 
   // ── Rotation: setTimeout re-armed per page; page count read via ref so a
   //    Realtime recompute does not reset the timer ──
@@ -189,6 +202,7 @@ export function ScreenBoard({ initial, initialSettings, url }: Props) {
     }
   }
 
+  const isTafel = config.mode === "tafel";
   const page = pages[safeIndex];
   const heroItem =
     page?.kind === "board" && page.heroItems.length
@@ -208,7 +222,15 @@ export function ScreenBoard({ initial, initialSettings, url }: Props) {
         transition: "background-color 600ms ease",
       }}
     >
-      {page ? (
+      {isTafel && visibleSections.length > 0 && tafelFit ? (
+        <ScreenTafel
+          venue={venue}
+          sections={visibleSections}
+          fit={tafelFit}
+          palette={palette}
+          clock={clock}
+        />
+      ) : page ? (
         <>
           <div style={{ position: "absolute", inset: "0 0 7vh 0" }}>
             <AnimatePresence initial={false}>

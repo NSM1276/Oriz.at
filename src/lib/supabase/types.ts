@@ -73,10 +73,14 @@ export type Item = {
   translations?: TranslationsMap | null;
 };
 
+export type ScreenMode = "showcase" | "tafel";
+
 /** One row per venue in `screen_settings` (migration 0013). Missing row = defaults. */
 export type ScreenSettingsRow = {
   venue_id: string;
   active: boolean;
+  /** 'showcase' = rotating board, 'tafel' = whole menu at once */
+  mode: ScreenMode;
   rotation_sec: number;
   spotlight: boolean;
   color_bg: string | null;

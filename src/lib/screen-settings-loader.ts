@@ -6,7 +6,7 @@ export async function loadScreenSettings(venueId: string): Promise<ScreenSetting
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("screen_settings")
-    .select("venue_id, active, rotation_sec, spotlight, color_bg, color_primary, sections, hero_items, style, updated_at")
+    .select("venue_id, active, mode, rotation_sec, spotlight, color_bg, color_primary, sections, hero_items, style, updated_at")
     .eq("venue_id", venueId)
     .maybeSingle<ScreenSettingsRow>();
   if (error || !data) return null;

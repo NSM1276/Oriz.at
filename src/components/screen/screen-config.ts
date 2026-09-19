@@ -1,12 +1,13 @@
 // Resolves what the TV board actually runs with. No runtime imports — unit-tested with node --test.
 //
 // Precedence per knob: URL override (testing only) → screen_settings row → venue / default.
-import type { ScreenSettingsRow } from "@/lib/supabase/types";
+import type { ScreenMode, ScreenSettingsRow } from "@/lib/supabase/types";
 
 export const DEFAULT_ROTATION_SEC = 10;
 
 export type ScreenConfig = {
   active: boolean;
+  mode: ScreenMode;
   seconds: number;
   spotlight: boolean;
   colorBg: string | null;
@@ -36,6 +37,7 @@ export function resolveScreenConfig(
 ): ScreenConfig {
   return {
     active: row?.active ?? true,
+    mode: row?.mode === "tafel" ? "tafel" : "showcase",
     seconds: url.seconds ?? row?.rotation_sec ?? DEFAULT_ROTATION_SEC,
     spotlight: row?.spotlight ?? true,
     colorBg: url.preset?.color_bg ?? row?.color_bg ?? venue.color_bg ?? null,

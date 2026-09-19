@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { COLOR_PRESETS, findPreset } from "@/lib/colorPresets";
-import type { Item, ScreenSettingsRow, Section } from "@/lib/supabase/types";
+import { computeBoardFit } from "@/components/screen/board-fit";
+import type { Item, ScreenMode, ScreenSettingsRow, Section } from "@/lib/supabase/types";
 
 // Admin tab «Screen» — six knobs + live preview of /screen/[slug].
 // Every change PATCHes immediately (optimistic, revert + alert on error).
@@ -23,6 +24,7 @@ const ROTATION_OPTIONS = [5, 10, 15, 20];
 
 type Patch = Partial<{
   active: boolean;
+  mode: ScreenMode;
   spotlight: boolean;
   rotation_sec: number;
   presetId: string | null;
@@ -32,6 +34,7 @@ type Patch = Partial<{
 
 const DEFAULTS: Omit<ScreenSettingsRow, "venue_id" | "updated_at"> = {
   active: true,
+  mode: "showcase",
   rotation_sec: 10,
   spotlight: true,
   color_bg: null,
@@ -136,6 +139,13 @@ export function OwnerScreenTab({ venueId, slug, sections, isDark, text, dim, mut
     save({ hero_items: next }, { hero_items: next });
   }
 
+  // On a static Tafel the whole menu must fit one screen. If it cannot, say so
+  // here, where the operator can act: drop sections or switch back to Vitrine.
+  const tafelFit =
+    settings.mode === "tafel"
+      ? computeBoardFit(sorted.filter((s) => visibleIds.includes(s.id)))
+      : null;
+
   const pill = (active: boolean): React.CSSProperties => ({
     borderColor: active ? accent : border,
     backgroundColor: active ? accent : "transparent",
@@ -200,7 +210,55 @@ export function OwnerScreenTab({ venueId, slug, sections, isDark, text, dim, mut
         </div>
       </section>
 
-      {/* Rotation + Spotlight */}
+      {/* Darstellung */}
+      <section>
+        <Title text={text} muted={muted} accent={accent}>Darstellung</Title>
+        <div className="mt-4 grid sm:grid-cols-2 gap-3">
+          {([
+            { id: "showcase" as const, label: "Vitrine", body: "Ein Bereich nach dem anderen, mit großem Empfehlungsbild. Für Restaurant, Bar, Lounge." },
+            { id: "tafel" as const, label: "Tafel", body: "Die ganze Karte auf einmal, ohne Blättern. Für Theke, Imbiss, Bäckerei." },
+          ]).map(({ id, label, body }) => {
+            const active = settings.mode === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                disabled={!loaded || saving}
+                onClick={() => save({ mode: id }, { mode: id })}
+                className="text-left px-4 py-3 border transition-colors"
+                style={{
+                  borderColor: active ? accent : border,
+                  backgroundColor: active ? accent : "transparent",
+                  color: active ? (isDark ? "#0A0A0A" : "#FFFFFF") : text,
+                }}
+              >
+                <span className="font-sans text-[11px] tracking-regal uppercase block">{label}</span>
+                <span
+                  className="font-sans text-xs block mt-1"
+                  style={{ color: active ? (isDark ? "rgba(10,10,10,0.7)" : "rgba(255,255,255,0.8)") : muted }}
+                >
+                  {body}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {tafelFit && !tafelFit.readable && (
+        <p
+          className="font-sans text-xs leading-relaxed px-4 py-3"
+          style={{ border: `1px solid ${accent}`, color: text, backgroundColor: `${accent}14` }}
+        >
+          Diese Karte passt nicht lesbar auf einen Bildschirm. Blenden Sie unten
+          Bereiche aus, verteilen Sie die Karte auf zwei Bildschirme oder wechseln
+          Sie auf „Vitrine“. Kleiner wird die Schrift nicht — sie wäre aus fünf
+          Metern nicht mehr zu lesen.
+        </p>
+      )}
+
+      {/* Rotation + Spotlight — meaningless on a static Tafel */}
+      {settings.mode !== "tafel" && (
       <section>
         <Title text={text} muted={muted} accent={accent}>Wechsel</Title>
         <div className="mt-4 flex items-center gap-2 flex-wrap">
@@ -232,6 +290,7 @@ export function OwnerScreenTab({ venueId, slug, sections, isDark, text, dim, mut
           Spotlight zeigt nach jedem Bereich ein Gericht bildschirmfüllend.
         </p>
       </section>
+      )}
 
       {/* Colors */}
       <section>
@@ -306,8 +365,8 @@ export function OwnerScreenTab({ venueId, slug, sections, isDark, text, dim, mut
         </ul>
       </section>
 
-      {/* Hero per section */}
-      {sorted.some((s) => s.items.some((it) => it.image_url)) && (
+      {/* Hero per section — there is no hero panel on a Tafel */}
+      {settings.mode !== "tafel" && sorted.some((s) => s.items.some((it) => it.image_url)) && (
         <section>
           <Title text={text} muted={muted} accent={accent}>Empfehlung pro Bereich</Title>
           <p className="font-sans text-xs mt-2" style={{ color: muted }}>

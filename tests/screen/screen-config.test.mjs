@@ -6,7 +6,7 @@ import { resolveScreenConfig, DEFAULT_ROTATION_SEC } from "../../src/components/
 const venue = { color_bg: "#1C1208", color_primary: "#C8963E" };
 const noUrl = { seconds: null, preset: null, lang: "de", preview: false };
 const row = {
-  venue_id: "v", active: false, rotation_sec: 15, spotlight: false,
+  venue_id: "v", active: false, mode: "tafel", rotation_sec: 15, spotlight: false,
   color_bg: "#0A0A0A", color_primary: "#C69B3C",
   sections: ["s2", "s1"], hero_items: { s1: "i9" }, style: {}, updated_at: "",
 };
@@ -14,7 +14,7 @@ const row = {
 test("no row → venue colors, defaults, every section", () => {
   const c = resolveScreenConfig(null, venue, noUrl);
   assert.deepEqual(c, {
-    active: true, seconds: DEFAULT_ROTATION_SEC, spotlight: true,
+    active: true, mode: "showcase", seconds: DEFAULT_ROTATION_SEC, spotlight: true,
     colorBg: "#1C1208", colorPrimary: "#C8963E", sectionIds: null, heroPins: {}, lang: "de", preview: false,
   });
 });
@@ -27,6 +27,7 @@ test("row overrides venue and defaults", () => {
   assert.equal(c.colorBg, "#0A0A0A");
   assert.deepEqual(c.sectionIds, ["s2", "s1"]);
   assert.deepEqual(c.heroPins, { s1: "i9" });
+  assert.equal(c.mode, "tafel");
 });
 
 test("URL overrides beat the row for seconds and colors only", () => {
