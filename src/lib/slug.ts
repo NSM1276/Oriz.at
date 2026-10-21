@@ -6,7 +6,7 @@ export const SLUG_MAX = 40;
 // Top-level routes of the app, plus names we may want later or that would
 // let a stranger pass as us. Kept as one list so a new route only needs one line.
 const RESERVED = new Set([
-  "admin", "api", "app", "auth", "c", "carta", "casa", "demo", "i", "screen", "t",
+  "admin", "api", "app", "auth", "c", "carta", "casa", "demo", "i", "s", "screen", "service", "t",
   "registrieren", "anmelden", "login", "logout", "signup", "register", "neu",
   "preise", "pricing", "hilfe", "help", "support", "kontakt", "contact", "blog",
   "impressum", "datenschutz", "agb", "privacy", "terms", "legal",

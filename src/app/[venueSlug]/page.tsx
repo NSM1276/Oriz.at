@@ -8,6 +8,9 @@ import { loadMenuPayload } from "@/lib/menu-loader";
 import { DEMO_SLUGS } from "@/lib/demo";
 import { currentTable } from "@/lib/table-session";
 import { TableBanner } from "@/components/menu/TableBanner";
+import { CallButton } from "@/components/menu/CallButton";
+import { serviceClient } from "@/lib/auth";
+import { tableDisplayName } from "@/lib/tables";
 
 export const revalidate = 0;
 
@@ -22,6 +25,16 @@ export default async function GuestMenuPage({
 
   const isDemo = DEMO_SLUGS.has(venueSlug);
   const table = await currentTable(venueSlug);
+  // The call button only for guests at a table, and only once the venue has switched it on.
+  let callsEnabled = false;
+  if (table) {
+    const { data } = await serviceClient()
+      .from("venues")
+      .select("service_calls_enabled")
+      .eq("id", table.venueId)
+      .single<{ service_calls_enabled: boolean }>();
+    callsEnabled = !!data?.service_calls_enabled;
+  }
 
   const acceptLanguage = (await headers()).get("accept-language");
   const initialLocale = resolveInitialLocale(acceptLanguage, initial.venue.enabled_locales);
@@ -39,6 +52,15 @@ export default async function GuestMenuPage({
         />
       )}
       <MenuView initial={initial} initialLocale={initialLocale} />
+      {table && callsEnabled && (
+        <CallButton
+          slug={venueSlug}
+          tableName={tableDisplayName(table.label)}
+          bg={initial.venue.color_bg}
+          accent={initial.venue.color_primary}
+          initialLocale={initialLocale}
+        />
+      )}
     </>
   );
 }

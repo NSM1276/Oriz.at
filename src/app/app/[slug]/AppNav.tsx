@@ -9,6 +9,7 @@ export function AppNav({ slug }: { slug: string }) {
   const tabs = [
     { href: base, label: "Übersicht", active: pathname === base },
     { href: `${base}/tische`, label: "Tische", active: pathname.startsWith(`${base}/tische`) },
+    { href: `${base}/service`, label: "Service", active: pathname.startsWith(`${base}/service`) },
   ];
 
   return (

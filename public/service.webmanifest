@@ -1,0 +1,11 @@
+{
+  "name": "ORIZ Service",
+  "short_name": "Service",
+  "description": "Rufe der Gäste für das Team",
+  "start_url": "/service",
+  "scope": "/service",
+  "display": "standalone",
+  "background_color": "#0c0a09",
+  "theme_color": "#1c1917",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
