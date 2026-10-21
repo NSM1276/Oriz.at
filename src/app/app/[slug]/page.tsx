@@ -72,7 +72,19 @@ export default async function VenueOverview({ params }: { params: Promise<{ slug
         ))}
       </section>
 
-      {(tableCount ?? 0) === 0 && (
+      {(itemCount ?? 0) === 0 && (
+        <Link
+          href={`/app/${venue.slug}/start`}
+          className="block rounded-2xl bg-stone-900 p-5 text-white shadow-sm"
+        >
+          <p className="font-semibold">Einrichtung fortsetzen</p>
+          <p className="mt-0.5 text-sm text-stone-300">
+            Speisekarte einfügen, Aussehen wählen, Tische anlegen — in wenigen Minuten.
+          </p>
+        </Link>
+      )}
+
+      {(itemCount ?? 0) > 0 && (tableCount ?? 0) === 0 && (
         <Link
           href={`/app/${venue.slug}/tische`}
           className="block rounded-2xl bg-stone-900 p-5 text-white shadow-sm"

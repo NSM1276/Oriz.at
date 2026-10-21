@@ -64,6 +64,15 @@
 - Отозвать у `anon` прямые INSERT/UPDATE/DELETE на `subscriptions`, `billing_events`; `is_platform_admin()` / `is_venue_member()` оставить исполняемыми (их зовут RLS-политики), `find_user_id_by_email` — убрать захардкоженную почту.
 - `/api/admin/venue-profile` (весь body в update) и `/api/admin/casa/property-update` (slug/logo_svg) — белый список полей.
 
+**Сделано 2026-10-21 (миграция 0018_signup_lockdown):** INSERT/DELETE в `venues` и `casa.properties` — только платформенный админ (или сервер); триггеры `venues_guard` / `casa.properties_guard` не дают участнику менять slug, owner_id, plan, ai_credits_*, custom_domain, logo_svg, logo_url; `casa.leads` читает только платформенный админ; запись в `subscriptions`, `billing_events`, `platform_admins`, `venue_members` — только сервер; `increment_ai_credits` — только service_role; `find_user_id_by_email` проверяет `is_platform_admin()`. Триггер `venues_sync_owner`: смена `venues.owner_id` (старая админка) обновляет `venue_members`, новое заведение сразу получает подписку `trialing` на 14 дней. Маршруты `venue-profile` и `casa/property-update` — белый список; `/auth/callback` больше не уводит на чужой сайт.
+
+## Этап 2 — регистрация (сделано 2026-10-21)
+
+- `/registrieren`: почта + пароль (мин. 8), Supabase `signUp` с подтверждением письма → `/auth/callback?next=/app/neu`. Одно и то же сообщение, был ли адрес уже зарегистрирован.
+- `/app` без заведений → `/app/neu`: название + адрес (`src/lib/slug.ts`: транслитерация умлаутов, 3–40 символов, список зарезервированных имён, живая проверка занятости). Одно заведение на аккаунт в самообслуживании (платформенный админ — без лимита). Создание — серверное действие через service role, остальное делает триггер.
+- `/app/<slug>/start?schritt=speisekarte|stil|tische|fertig`: вставить текст меню (тот же парсер, что у импорта супер-админа; текст под блюдом пишется в `items.description`, его показывают все три вида меню) → вид (classic / visual / modern) и цветовой пресет с живой превью в iframe → число столов → «готово» (ссылки на меню, печать QR, обзор). Любой шаг можно пропустить; обзор показывает «Einrichtung fortsetzen», пока в меню нет блюд.
+- Не проверено вживую: клик по ссылке из письма подтверждения (нужен доступ к ящику). Для настоящих клиентов в Supabase нужны свой SMTP и `https://www.oriz.at/auth/callback` в списке Redirect URLs.
+
 ## Оставлено исполнителю
 
 Тексты интерфейса, точный вид страниц, разбиение на коммиты, тесты чистых модулей (`node --test`), проверка вживую на localhost против живого Supabase с тестовым аккаунтом `carta-test@oriz.at` (заведение `belvedere`).

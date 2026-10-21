@@ -4,12 +4,15 @@ import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { isPlatformAdmin } from "@/lib/auth";
 
 const ALLOWED_FIELDS = new Set([
-  "name", "slug", "city", "about", "about_en",
+  "name", "city", "about", "about_en",
   "color_bg", "color_primary",
   "website_url", "instagram_url", "facebook_url", "google_maps_url",
   "phone", "email", "cover_url",
-  "logo_url", "logo_svg",
 ]);
+// The address is ours to change. Logos are uploaded through upload-photo
+// (super-admin, SVG normalized); here they can only be removed.
+const SUPER_ONLY_FIELDS = new Set(["slug"]);
+const CLEAR_ONLY_FIELDS = new Set(["logo_url", "logo_svg"]);
 
 function svc() {
   return createClient(
@@ -40,7 +43,12 @@ export async function PATCH(req: NextRequest) {
   }
 
   const safeUpdates = Object.fromEntries(
-    Object.entries(updates as Record<string, unknown>).filter(([k]) => ALLOWED_FIELDS.has(k)),
+    Object.entries(updates as Record<string, unknown>).filter(
+      ([k, v]) =>
+        ALLOWED_FIELDS.has(k) ||
+        (isSuper && SUPER_ONLY_FIELDS.has(k)) ||
+        (CLEAR_ONLY_FIELDS.has(k) && v === null),
+    ),
   );
   if (Object.keys(safeUpdates).length === 0) {
     return NextResponse.json({ error: "no allowed fields in updates" }, { status: 400 });

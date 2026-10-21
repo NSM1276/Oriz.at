@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { serviceClient, venueRole } from "@/lib/auth";
 import { limitForPlan } from "@/lib/plans";
 import { AI_CAPTION_ENABLED } from "@/lib/feature-flags";
 
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
   }).venues;
 
   // 5. Belt-and-suspenders ownership check (RLS would already block, but be explicit).
-  if (venue.owner_id !== user.id) return bad(403, "Kein Zugriff.");
+  if (!(await venueRole(user.id, venue.id))) return bad(403, "Kein Zugriff.");
 
   // 6. Sanitize input strings sent to the model.
   const name = String(item.name ?? "").slice(0, MAX_NAME).trim();
@@ -66,8 +67,10 @@ export async function POST(req: NextRequest) {
 
   // 7. Atomic credit increment via SECURITY DEFINER RPC.
   //    Returns empty when limit reached → we surface a 429.
+  //    Only the service role may call it, so the limit always comes from here.
   const limit = limitForPlan(venue.plan);
-  const { data: creditRow, error: rpcErr } = await supabase
+  const svc = serviceClient();
+  const { data: creditRow, error: rpcErr } = await svc
     .rpc("increment_ai_credits", { p_venue_id: venue.id, p_limit: limit })
     .maybeSingle<{ used: number; reset_date: string }>();
 
@@ -80,7 +83,7 @@ export async function POST(req: NextRequest) {
   // Refund the credit we just consumed if anything below this point fails —
   // the user shouldn't lose credits to our infrastructure problems.
   async function refundCredit() {
-    await supabase
+    await svc
       .from("venues")
       .update({ ai_credits_used: Math.max(0, creditRow!.used - 1) })
       .eq("id", venue.id);
