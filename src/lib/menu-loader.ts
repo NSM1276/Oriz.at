@@ -7,7 +7,7 @@ type Row = Venue & {
 };
 
 export const MENU_SELECT =
-  "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, menu_theme, owner_id, created_at, instagram_url, google_maps_url, phone, address, tripadvisor_url, facebook_url, website_url, google_review_url, price_range, opening_hours, gallery, cover_url, enabled_locales, translations, menus(id, name, position, active_days, time_from, time_to), sections(id, venue_id, name, position, menu_id, translations, items(id, section_id, venue_id, name, description, price_cents, image_url, allergens, diet_tags, ai_caption, is_active, position, updated_at, translations))";
+  "id, slug, name, logo_url, logo_svg, about, currency, color_primary, color_bg, menu_theme, owner_id, created_at, instagram_url, google_maps_url, phone, address, tripadvisor_url, facebook_url, website_url, google_review_url, price_range, opening_hours, gallery, cover_url, enabled_locales, translations, menus(id, name, position, active_days, time_from, time_to), sections(id, venue_id, name, position, menu_id, translations, items(id, section_id, venue_id, name, description, price_cents, price_variants, image_url, allergens, diet_tags, ai_caption, is_active, position, updated_at, translations))";
 
 /** Loads everything the guest menu and the TV screen need for one venue.
  *  Returns null when the slug does not exist (caller decides about notFound). */

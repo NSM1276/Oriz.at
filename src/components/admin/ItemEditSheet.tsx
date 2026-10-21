@@ -4,7 +4,24 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { PhotoUploader } from "@/components/admin/PhotoUploader";
 import { formatPrice } from "@/lib/format";
+import { parseVariantText, parseVariants, type PriceVariant } from "@/lib/guest-menu";
 import type { Item } from "@/lib/supabase/types";
+
+/** diet_tags is a text column: the old editor wrote arrays, the DB hands back '["vegan"]'. */
+function tagList(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.map(String);
+  if (typeof raw !== "string" || !raw.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return raw.split(",").map((t) => t.trim()).filter(Boolean);
+  }
+}
+
+function variantsToText(variants: PriceVariant[]): string {
+  return variants.map((v) => `${v.label} ${(v.priceCents / 100).toFixed(2).replace(".", ",")}`).join("; ");
+}
 
 // ── Types ───────────────────────────────────────────────────────
 
@@ -84,7 +101,9 @@ function Sheet({
   const [priceInput, setPriceInput] = useState((initial.price_cents / 100).toFixed(2));
   const [allergensInput, setAllergensInput] = useState(initial.allergens ?? "");
   const [captionDraft, setCaptionDraft] = useState(initial.ai_caption ?? "");
-  const [dietTags, setDietTags] = useState<string[]>(initial.diet_tags ?? []);
+  const [dietTags, setDietTags] = useState<string[]>(() => tagList(initial.diet_tags));
+  const [variantsInput, setVariantsInput] = useState(() => variantsToText(parseVariants(initial.price_variants)));
+  const [variantsFocused, setVariantsFocused] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -160,6 +179,34 @@ function Sheet({
     });
   }
 
+  async function commitVariants() {
+    const parsed = parseVariantText(variantsInput);
+    const current = parseVariants(item.price_variants);
+    if (parsed === null) {
+      setError("Bitte je Größe einen Preis angeben, z. B. „0,3 l 3,90; 0,5 l 4,90“.");
+      return;
+    }
+    if (variantsToText(parsed) === variantsToText(current)) { setVariantsInput(variantsToText(current)); return; }
+    const stored = parsed.map((v) => ({ label: v.label, price_cents: v.priceCents }));
+    // The single price follows the cheapest size, so lists that show one price stay right.
+    const patch: Partial<Item> = stored.length
+      ? { price_variants: stored, price_cents: Math.min(...stored.map((v) => v.price_cents)) }
+      : { price_variants: [] };
+    const prev = item;
+    update(patch);
+    setVariantsInput(variantsToText(parsed));
+    if (patch.price_cents !== undefined) setPriceInput((patch.price_cents / 100).toFixed(2));
+    startTransition(async () => {
+      const err = await patchItem(item.id, patch as Record<string, unknown>);
+      if (err) {
+        setItem(prev); onItemChange(prev);
+        setVariantsInput(variantsToText(parseVariants(prev.price_variants)));
+        setPriceInput((prev.price_cents / 100).toFixed(2));
+        setError(err);
+      } else setError(null);
+    });
+  }
+
   async function toggleActive() {
     const prev = item;
     const next = update({ is_active: !item.is_active });
@@ -180,7 +227,7 @@ function Sheet({
     startTransition(async () => {
       const err = await patchItem(item.id, { diet_tags: next });
       if (err) {
-        setDietTags(prev.diet_tags ?? []);
+        setDietTags(tagList(prev.diet_tags));
         setItem(prev);
         onItemChange(prev);
         setError(err);
@@ -256,6 +303,13 @@ function Sheet({
               </button>
             </div>
 
+            {/* Sizes / variants */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontFamily: "var(--font-inter, sans-serif)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: mutedColor, display: "block", marginBottom: 6 }}>Größen / Varianten</label>
+              <input type="text" value={variantsInput} onChange={(e) => setVariantsInput(e.target.value)} onFocus={() => setVariantsFocused(true)} onBlur={() => { setVariantsFocused(false); commitVariants(); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} placeholder="z. B. 0,3 l 3,90; 0,5 l 4,90" style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${variantsFocused ? accent : borderColor}`, outline: "none", fontFamily: "var(--font-inter, sans-serif)", fontSize: 14, color: textColor, padding: "6px 0", boxSizing: "border-box" }} />
+              <p style={{ fontFamily: "var(--font-inter, sans-serif)", fontSize: 11, color: mutedColor, margin: "6px 0 0" }}>Leer lassen, wenn es nur einen Preis gibt.</p>
+            </div>
+
             <div style={{ height: 1, backgroundColor: borderColor, margin: "20px 0" }} />
 
             {/* Story */}
@@ -277,8 +331,9 @@ function Sheet({
             <div style={{ marginBottom: 32 }}>
               <label style={{ fontFamily: "var(--font-inter, sans-serif)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: mutedColor, display: "block", marginBottom: 10 }}>Diät-Tags</label>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {(["vegan", "vegetarisch", "glutenfrei"] as const).map((tag) => {
-                  const labels: Record<string, string> = { vegan: "Vegan", vegetarisch: "Vegetarisch", glutenfrei: "Glutenfrei" };
+                {/* "Glutenfrei" is not a tag any more: guests filter gluten through the allergens above. */}
+                {(["vegan", "vegetarisch"] as const).map((tag) => {
+                  const labels: Record<string, string> = { vegan: "Vegan", vegetarisch: "Vegetarisch" };
                   const checked = dietTags.includes(tag);
                   return (
                     <label

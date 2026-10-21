@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { isPlatformAdmin } from "@/lib/auth";
 import { DEMO_VENUE_IDS } from "@/lib/demo";
+import { parseVariants } from "@/lib/guest-menu";
 
 // Item update endpoint — replaces direct browser-client mutations in ItemEditor.
 //
@@ -10,10 +11,10 @@ import { DEMO_VENUE_IDS } from "@/lib/demo";
 // Super-admin can update any item; regular owners must own the parent venue.
 //
 // Body: { itemId: string, updates: Record<string, unknown> }
-// Allowed fields: price_cents, name, description, allergens, diet_tags, ai_caption, is_active
+// Allowed fields: price_cents, price_variants, name, description, allergens, diet_tags, ai_caption, is_active
 
 const ALLOWED_FIELDS = new Set([
-  "price_cents", "name", "description", "allergens", "diet_tags",
+  "price_cents", "price_variants", "name", "description", "allergens", "diet_tags",
   "ai_caption", "is_active", "position",
 ]);
 
@@ -46,6 +47,14 @@ export async function PATCH(req: NextRequest) {
   );
   if (Object.keys(safeUpdates).length === 0) {
     return NextResponse.json({ error: "no allowed fields in updates" }, { status: 400 });
+  }
+  if ("price_variants" in safeUpdates) {
+    const raw = safeUpdates.price_variants;
+    const variants = parseVariants(raw);
+    if (!Array.isArray(raw) || variants.length !== raw.length) {
+      return NextResponse.json({ error: "invalid price_variants" }, { status: 400 });
+    }
+    safeUpdates.price_variants = variants.map((v) => ({ label: v.label, price_cents: v.priceCents }));
   }
 
   const admin = svc();

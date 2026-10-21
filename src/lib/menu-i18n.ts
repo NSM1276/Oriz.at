@@ -63,7 +63,6 @@ type UiStrings = {
   allergens: string;
   notAvailable: string;
   currentlyNotAvailable: string;
-  noDescription: string;
   share: string;
   map: string;
   call: string;
@@ -71,9 +70,24 @@ type UiStrings = {
   menu: string;
   close: string;
   language: string;
-  filters: { alcohol: string; vegan: string; vegetarian: string; glutenFree: string };
-  noFilterResults: string;
-  resetFilters: string;
+  search: string;
+  searchPlaceholder: string;
+  filter: string;
+  diet: string;
+  vegan: string;
+  vegetarian: string;
+  avoid: string;
+  avoidHint: string;
+  /** [one, other]; "{n}" is replaced with the count. */
+  hiddenUnknown: [string, string];
+  showUnknown: string;
+  allergenUnknown: string;
+  allergenNone: string;
+  results: [string, string];
+  noResults: string;
+  reset: string;
+  done: string;
+  from: string;
 };
 
 const UI: Record<string, UiStrings> = {
@@ -81,7 +95,6 @@ const UI: Record<string, UiStrings> = {
     allergens: "Allergene",
     notAvailable: "Nicht verfügbar",
     currentlyNotAvailable: "Derzeit nicht verfügbar",
-    noDescription: "Keine Beschreibung verfügbar.",
     share: "Teilen",
     map: "Karte",
     call: "Anrufen",
@@ -89,15 +102,28 @@ const UI: Record<string, UiStrings> = {
     menu: "Speisekarte",
     close: "Schließen",
     language: "Sprache",
-    filters: { alcohol: "Alkohol", vegan: "Vegan", vegetarian: "Vegetarisch", glutenFree: "Glutenfrei" },
-    noFilterResults: "Keine Gerichte passen zu diesem Filter.",
-    resetFilters: "Filter zurücksetzen",
+    search: "Suchen",
+    searchPlaceholder: "Gericht oder Zutat",
+    filter: "Filter",
+    diet: "Ernährung",
+    vegan: "Vegan",
+    vegetarian: "Vegetarisch",
+    avoid: "Ohne",
+    avoidHint: "Gerichte mit diesen Allergenen ausblenden.",
+    hiddenUnknown: ["1 Gericht ohne Allergenangaben ausgeblendet.", "{n} Gerichte ohne Allergenangaben ausgeblendet."],
+    showUnknown: "Trotzdem zeigen",
+    allergenUnknown: "Keine Allergenangaben — bitte beim Personal nachfragen.",
+    allergenNone: "Enthält laut Lokal keines der 14 Hauptallergene.",
+    results: ["1 Gericht", "{n} Gerichte"],
+    noResults: "Nichts gefunden.",
+    reset: "Zurücksetzen",
+    done: "Fertig",
+    from: "ab",
   },
   en: {
     allergens: "Allergens",
     notAvailable: "Not available",
     currentlyNotAvailable: "Currently not available",
-    noDescription: "No description available.",
     share: "Share",
     map: "Map",
     call: "Call",
@@ -105,15 +131,28 @@ const UI: Record<string, UiStrings> = {
     menu: "Menu",
     close: "Close",
     language: "Language",
-    filters: { alcohol: "Alcohol", vegan: "Vegan", vegetarian: "Vegetarian", glutenFree: "Gluten-free" },
-    noFilterResults: "No dishes match this filter.",
-    resetFilters: "Reset filters",
+    search: "Search",
+    searchPlaceholder: "Dish or ingredient",
+    filter: "Filter",
+    diet: "Diet",
+    vegan: "Vegan",
+    vegetarian: "Vegetarian",
+    avoid: "Without",
+    avoidHint: "Hide dishes containing these allergens.",
+    hiddenUnknown: ["1 dish without allergen information hidden.", "{n} dishes without allergen information hidden."],
+    showUnknown: "Show anyway",
+    allergenUnknown: "No allergen information — please ask the staff.",
+    allergenNone: "Contains none of the 14 major allergens, according to the restaurant.",
+    results: ["1 dish", "{n} dishes"],
+    noResults: "Nothing found.",
+    reset: "Reset",
+    done: "Done",
+    from: "from",
   },
   it: {
     allergens: "Allergeni",
     notAvailable: "Non disponibile",
     currentlyNotAvailable: "Al momento non disponibile",
-    noDescription: "Nessuna descrizione disponibile.",
     share: "Condividi",
     map: "Mappa",
     call: "Chiama",
@@ -121,15 +160,28 @@ const UI: Record<string, UiStrings> = {
     menu: "Menu",
     close: "Chiudi",
     language: "Lingua",
-    filters: { alcohol: "Alcol", vegan: "Vegano", vegetarian: "Vegetariano", glutenFree: "Senza glutine" },
-    noFilterResults: "Nessun piatto corrisponde a questo filtro.",
-    resetFilters: "Azzera filtri",
+    search: "Cerca",
+    searchPlaceholder: "Piatto o ingrediente",
+    filter: "Filtri",
+    diet: "Dieta",
+    vegan: "Vegano",
+    vegetarian: "Vegetariano",
+    avoid: "Senza",
+    avoidHint: "Nascondi i piatti con questi allergeni.",
+    hiddenUnknown: ["1 piatto senza indicazione degli allergeni nascosto.", "{n} piatti senza indicazione degli allergeni nascosti."],
+    showUnknown: "Mostra comunque",
+    allergenUnknown: "Nessuna indicazione sugli allergeni — chiedere al personale.",
+    allergenNone: "Secondo il ristorante non contiene nessuno dei 14 allergeni principali.",
+    results: ["1 piatto", "{n} piatti"],
+    noResults: "Nessun risultato.",
+    reset: "Azzera",
+    done: "Fatto",
+    from: "da",
   },
   uk: {
     allergens: "Алергени",
     notAvailable: "Немає в наявності",
     currentlyNotAvailable: "Наразі недоступно",
-    noDescription: "Опис відсутній.",
     share: "Поділитися",
     map: "Карта",
     call: "Подзвонити",
@@ -137,11 +189,30 @@ const UI: Record<string, UiStrings> = {
     menu: "Меню",
     close: "Закрити",
     language: "Мова",
-    filters: { alcohol: "Алкоголь", vegan: "Веган", vegetarian: "Вегетаріанське", glutenFree: "Без глютену" },
-    noFilterResults: "Немає страв за цим фільтром.",
-    resetFilters: "Скинути фільтри",
+    search: "Пошук",
+    searchPlaceholder: "Страва або інгредієнт",
+    filter: "Фільтри",
+    diet: "Харчування",
+    vegan: "Веган",
+    vegetarian: "Вегетаріанське",
+    avoid: "Без",
+    avoidHint: "Сховати страви з цими алергенами.",
+    hiddenUnknown: ["Сховано страв без даних про алергени: 1.", "Сховано страв без даних про алергени: {n}."],
+    showUnknown: "Показати все одно",
+    allergenUnknown: "Немає даних про алергени — запитайте в персоналу.",
+    allergenNone: "За даними закладу не містить жодного з 14 основних алергенів.",
+    results: ["Страв: 1", "Страв: {n}"],
+    noResults: "Нічого не знайдено.",
+    reset: "Скинути",
+    done: "Готово",
+    from: "від",
   },
 };
+
+/** Picks the singular or plural form and fills in the count. */
+export function count([one, other]: [string, string], n: number): string {
+  return (n === 1 ? one : other).replace("{n}", String(n));
+}
 
 export function ui(locale: string): UiStrings {
   return UI[locale] ?? UI[BASE_LOCALE];

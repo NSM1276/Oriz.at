@@ -63,6 +63,8 @@ export type Item = {
   name: string;
   description: string | null;
   price_cents: number;
+  /** [{ label, price_cents }] — sizes or portions; empty when the dish has one price. */
+  price_variants?: { label: string; price_cents: number }[] | null;
   image_url: string | null;
   ai_caption: string | null;
   allergens: string | null;
