@@ -55,6 +55,15 @@
 5. **Новое гостевое меню**: одна основа + три оформления; поиск, аллергены ЕС списком, размеры/варианты цены, честные фильтры.
 6. **Новая админка меню** в `/app`: разделы, блюда, переводы, «ausverkauft» в один тап; затем удаление старой `/admin`.
 
+## Безопасность перед этапом 2 (от сессии «Аудит безопасности», 2026-10-21)
+
+Саморегистрация делает любого незнакомца «authenticated», поэтому до открытия `/registrieren`:
+- `venues`: участник не должен менять `plan`, `ai_credits_used`, `owner_id`, `slug`, `custom_domain` (и `logo_svg` без санитизации) — запрет по колонкам или триггер; тариф берётся только из `subscriptions`.
+- Убрать INSERT в `venues` / `casa.properties` для обычных пользователей (старая политика «owner all venues» с `with check owner_id = auth.uid()`): заведение создаёт только сервер в мастере регистрации.
+- `casa leads auth read` (`using true`) — закрыть, сейчас любой вошедший видит все лиды.
+- Отозвать у `anon` прямые INSERT/UPDATE/DELETE на `subscriptions`, `billing_events`; `is_platform_admin()` / `is_venue_member()` оставить исполняемыми (их зовут RLS-политики), `find_user_id_by_email` — убрать захардкоженную почту.
+- `/api/admin/venue-profile` (весь body в update) и `/api/admin/casa/property-update` (slug/logo_svg) — белый список полей.
+
 ## Оставлено исполнителю
 
 Тексты интерфейса, точный вид страниц, разбиение на коммиты, тесты чистых модулей (`node --test`), проверка вживую на localhost против живого Supabase с тестовым аккаунтом `carta-test@oriz.at` (заведение `belvedere`).
