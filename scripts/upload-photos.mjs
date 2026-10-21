@@ -3,9 +3,18 @@ import { readdir, readFile } from 'fs/promises';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = 'https://btydsogglgrtldfiezfu.supabase.co';
-const SERVICE_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0eWRzb2dnbGdydGxkZmllemZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODY5ODUxOSwiZXhwIjoyMDk0Mjc0NTE5fQ.6oKAU6Bpv8zl06dWylEz-oIEB1nTjD5DqvTdN23v13U';
+// Credentials come from .env.local (never hardcode keys — this repo is public).
+try {
+  process.loadEnvFile(path.resolve(import.meta.dirname, '../.env.local'));
+} catch {
+  // No .env.local — fall back to variables already set in the shell.
+}
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!SUPABASE_URL || !SERVICE_KEY) {
+  console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY (set them in .env.local).');
+  process.exit(1);
+}
 const BUCKET = 'item-images';
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
