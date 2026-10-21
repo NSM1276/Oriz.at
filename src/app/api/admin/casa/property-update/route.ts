@@ -4,7 +4,7 @@ import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { isPlatformAdmin } from "@/lib/auth";
 
 const ALLOWED_FIELDS = new Set([
-  "name", "slug", "city", "about",
+  "name", "slug", "city", "about", "about_en",
   "color_bg", "color_primary",
   "website_url", "instagram_url", "facebook_url", "google_maps_url",
   "phone", "email", "cover_url",

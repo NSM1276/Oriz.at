@@ -289,6 +289,7 @@ type Property = {
   name: string;
   city: string | null;
   about: string | null;
+  about_en: string | null;
   color_bg: string | null;
   color_primary: string | null;
   casa_theme: string | null;
@@ -353,6 +354,7 @@ export function CasaGuestView({
     lang === "de"
       ? { willkommen: "Willkommen" }
       : { willkommen: "Welcome" };
+  const about = lang === "en" ? property.about_en || property.about : property.about;
 
   return (
     <main
@@ -486,7 +488,7 @@ export function CasaGuestView({
           {/* External links row */}
           <PropertyLinks property={property} accent={accent} lang={lang} />
 
-          {property.about && (
+          {about && (
             <p
               className="font-display italic mt-8 mx-auto"
               style={{
@@ -496,7 +498,7 @@ export function CasaGuestView({
                 lineHeight: 1.65,
               }}
             >
-              {property.about}
+              {about}
             </p>
           )}
         </div>

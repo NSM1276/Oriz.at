@@ -14,6 +14,7 @@ type Property = {
   name: string;
   city: string | null;
   about: string | null;
+  about_en: string | null;
   color_bg: string | null;
   color_primary: string | null;
   casa_theme: string | null;
@@ -45,7 +46,7 @@ async function fetchProperty(slug: string): Promise<Property | null> {
     .schema("casa")
     .from("properties")
     .select(
-      "id, slug, name, city, about, color_bg, color_primary, casa_theme, logo_url, logo_svg, cover_url, website_url, instagram_url, facebook_url, google_maps_url, phone, email",
+      "id, slug, name, city, about, about_en, color_bg, color_primary, casa_theme, logo_url, logo_svg, cover_url, website_url, instagram_url, facebook_url, google_maps_url, phone, email",
     )
     .eq("slug", slug)
     .maybeSingle();

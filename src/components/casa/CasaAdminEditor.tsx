@@ -12,6 +12,7 @@ type Property = {
   name: string;
   city: string | null;
   about: string | null;
+  about_en: string | null;
   color_bg: string | null;
   color_primary: string | null;
   casa_theme: string | null;
@@ -472,6 +473,13 @@ export function CasaAdminEditor({
             multiline
             placeholder="Kurzbeschreibung Ihrer Unterkunft"
             onSave={(v) => saveProperty("about", v || null)}
+          />
+          <EditableField
+            label="Über · English (optional)"
+            value={property.about_en}
+            multiline
+            placeholder="Für englischsprachige Gäste — leer = deutscher Text"
+            onSave={(v) => saveProperty("about_en", v || null)}
           />
 
           {/* Cover photo */}
