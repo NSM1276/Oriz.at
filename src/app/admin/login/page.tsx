@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { safeNextPath } from "@/lib/safe-redirect";
 
 export default function LoginPage() {
   return (
@@ -16,9 +17,8 @@ export default function LoginPage() {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextParam = searchParams.get("next");
-  // Only allow internal relative paths (defense against open-redirect).
-  const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/admin";
+  // Only paths on this site (defense against open-redirect).
+  const safeNext = safeNextPath(searchParams.get("next"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
@@ -93,6 +93,14 @@ function LoginForm() {
             className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 hover:text-onyx transition"
           >
             Passwort vergessen?
+          </Link>
+        </div>
+        <div className="mt-3 text-center">
+          <Link
+            href="/registrieren"
+            className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 hover:text-onyx transition"
+          >
+            Neues Lokal registrieren
           </Link>
         </div>
       </form>
