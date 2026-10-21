@@ -67,16 +67,25 @@ const VENUE_RESET = [
 ];
 
 // ── Events snapshots ───────────────────────────────────────────────────────
+// Dates are days from the reset, so the demo always shows upcoming events.
 const EVENTS_RESET = [
-  { id: "demo-tosca-ev1", venue_id: TOSCA, title: "Weinabend: Toskana trifft Wien", event_date: "2026-06-20", time_start: "19:00", duration_hours: 3 },
-  { id: "demo-tosca-ev2", venue_id: TOSCA, title: "Sommerliche Pasta-Masterclass", event_date: "2026-07-05", time_start: "14:00", duration_hours: 2.5 },
-  { id: "demo-tosca-ev3", venue_id: TOSCA, title: "Trüffel-Dinner — limitiert auf 20 Gäste", event_date: "2026-07-18", time_start: "19:30", duration_hours: 4 },
-  { id: "demo-lumiere-ev1", venue_id: LUMIERE, title: "Champagner-Frühstück mit Live-Jazz", event_date: "2026-06-14", time_start: "10:30", duration_hours: 2 },
-  { id: "demo-lumiere-ev2", venue_id: LUMIERE, title: "Bouillabaisse-Abend — klassische Marseiller Art", event_date: "2026-06-28", time_start: "19:00", duration_hours: 3 },
-  { id: "demo-lumiere-ev3", venue_id: LUMIERE, title: "Bastille Day Spécial — 14. Juli", event_date: "2026-07-14", time_start: "18:30", duration_hours: 5 },
-  { id: "demo-sushi-ev1", venue_id: SUSHI, title: "Omakase Dinner — Chef's Secret Menu", event_date: "2026-06-21", time_start: "19:00", duration_hours: 3 },
-  { id: "demo-sushi-ev2", venue_id: SUSHI, title: "Sake-Tasting mit 6 Gängen", event_date: "2026-07-11", time_start: "19:30", duration_hours: 2.5 },
+  { venue_id: TOSCA,   in_days: 6,  title: "Weinabend: Toskana trifft Wien", time_start: "19:00", duration_hours: 3 },
+  { venue_id: TOSCA,   in_days: 15, title: "Pasta-Masterclass mit dem Küchenchef", time_start: "14:00", duration_hours: 2.5 },
+  { venue_id: TOSCA,   in_days: 27, title: "Trüffel-Dinner — limitiert auf 20 Gäste", time_start: "19:30", duration_hours: 4 },
+  { venue_id: LUMIERE, in_days: 4,  title: "Champagner-Frühstück mit Live-Jazz", time_start: "10:30", duration_hours: 2 },
+  { venue_id: LUMIERE, in_days: 12, title: "Bouillabaisse-Abend — klassische Marseiller Art", time_start: "19:00", duration_hours: 3 },
+  { venue_id: LUMIERE, in_days: 24, title: "Soirée Française — Live-Chanson", time_start: "18:30", duration_hours: 5 },
+  { venue_id: SUSHI,   in_days: 7,  title: "Omakase Dinner — Chef's Secret Menu", time_start: "19:00", duration_hours: 3 },
+  { venue_id: SUSHI,   in_days: 20, title: "Sake-Tasting mit 6 Gängen", time_start: "19:30", duration_hours: 2.5 },
 ];
+
+function eventRows(now: Date) {
+  return EVENTS_RESET.map(({ in_days, ...e }) => {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() + in_days);
+    return { ...e, event_date: d.toISOString().slice(0, 10) };
+  });
+}
 
 // ── Items snapshots ────────────────────────────────────────────────────────
 const BELVEDERE_ITEMS = [
@@ -222,19 +231,20 @@ export async function POST() {
     if (error) errors.push(`venue ${v.id}: ${error.message}`);
   }
 
-  // 3. Reset events — delete extras, upsert originals
+  // 3. Reset events — drop everything on the demo venues, insert fresh upcoming ones
   const demoVenueIds = [TOSCA, LUMIERE, SUSHI];
   const { error: delEvError } = await supabase
     .from("venue_events")
     .delete()
-    .in("venue_id", demoVenueIds)
-    .not("id", "in", `(${EVENTS_RESET.map((e) => `'${e.id}'`).join(",")})`);
+    .in("venue_id", demoVenueIds);
   if (delEvError) errors.push(`delete events: ${delEvError.message}`);
 
-  const { error: evError } = await supabase
-    .from("venue_events")
-    .upsert(EVENTS_RESET, { onConflict: "id" });
-  if (evError) errors.push(`events: ${evError.message}`);
+  if (!delEvError) {
+    const { error: evError } = await supabase
+      .from("venue_events")
+      .insert(eventRows(new Date()));
+    if (evError) errors.push(`events: ${evError.message}`);
+  }
 
   // 4. Delete any menus created by visitors for demo venues
   const { error: menuError } = await supabase

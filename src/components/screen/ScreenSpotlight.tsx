@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/format";
 import type { SpotlightPage } from "./paginate";
 import type { ScreenPalette } from "./screen-colors";
 import { PricePill } from "./PricePill";
+import { ItemPicture } from "@/components/menu/ItemPicture";
 
 type Props = {
   venue: Venue;
@@ -22,7 +23,7 @@ export function ScreenSpotlight({ venue, page, palette }: Props) {
 
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: "#000" }}>
-      <img
+      <ItemPicture
         src={item.image_url ?? ""}
         alt=""
         style={{

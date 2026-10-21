@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/format";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import type { BoardFit, SectionWithItems } from "./board-fit";
 import type { ScreenPalette } from "./screen-colors";
+import { ItemPicture } from "@/components/menu/ItemPicture";
 
 // Tafel: the whole menu on one screen, nothing rotates. For counters, where the
 // queue must be able to find its line at any moment. Every size comes from the
@@ -56,7 +57,7 @@ function TafelRow({
     >
       {/* A missing photo simply takes no space — never an empty grey slot. */}
       {fit.showThumbs && item.image_url && (
-        <img
+        <ItemPicture
           src={item.image_url}
           alt=""
           style={{

@@ -57,7 +57,7 @@ export default async function PreviewPage({
   return (
     <CartaOwnerView
       venue={{ ...venue, ai_credits_used: venue.ai_credits_used ?? 0, ai_credits_reset: venue.ai_credits_reset ?? "" }}
-      superAdminLink="/admin"
+      demo
     />
   );
 }

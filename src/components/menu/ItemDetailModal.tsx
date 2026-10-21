@@ -4,14 +4,9 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatPrice } from "@/lib/format";
 import { ui } from "@/lib/menu-i18n";
+import { isVideoUrl } from "@/lib/media";
 import type { Item } from "@/lib/supabase/types";
 import { AllergenIcons } from "./AllergenIcons";
-
-// True for .mp4 / .webm / .mov — renders <video> instead of <img>
-function isVideoUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  return /\.(mp4|webm|mov)(\?|$)/i.test(url);
-}
 
 /** Unified image/video block. Handles both formats transparently. */
 function ItemMedia({

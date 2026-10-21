@@ -12,6 +12,8 @@ type Props = {
   slug: string;
   /** super admin only: link to the paste-a-menu importer */
   showImport?: boolean;
+  /** public demo preview: no account, so no password button */
+  demo?: boolean;
   plan: string;
   aiUsed: number;
   aiLimit: number;
@@ -29,7 +31,7 @@ const SHORTCUT_QR = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&da
 )}&bgcolor=ffffff&color=0a0a0a&margin=2`;
 
 export function OwnerToolbox({
-  slug, plan, aiUsed, aiLimit, isDark, text, dim, muted, border, accent, showImport = false,
+  slug, plan, aiUsed, aiLimit, isDark, text, dim, muted, border, accent, showImport = false, demo = false,
 }: Props) {
   const aiLow = AI_CAPTION_ENABLED && aiLimit - aiUsed <= 0;
 
@@ -136,7 +138,7 @@ export function OwnerToolbox({
               </div>
             )}
           </div>
-          <ChangePasswordButton />
+          {!demo && <ChangePasswordButton />}
         </div>
       </div>
     </details>

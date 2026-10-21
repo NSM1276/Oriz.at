@@ -72,6 +72,8 @@ type UiStrings = {
   close: string;
   language: string;
   filters: { alcohol: string; vegan: string; vegetarian: string; glutenFree: string };
+  noFilterResults: string;
+  resetFilters: string;
 };
 
 const UI: Record<string, UiStrings> = {
@@ -88,6 +90,8 @@ const UI: Record<string, UiStrings> = {
     close: "Schließen",
     language: "Sprache",
     filters: { alcohol: "Alkohol", vegan: "Vegan", vegetarian: "Vegetarisch", glutenFree: "Glutenfrei" },
+    noFilterResults: "Keine Gerichte passen zu diesem Filter.",
+    resetFilters: "Filter zurücksetzen",
   },
   en: {
     allergens: "Allergens",
@@ -102,6 +106,8 @@ const UI: Record<string, UiStrings> = {
     close: "Close",
     language: "Language",
     filters: { alcohol: "Alcohol", vegan: "Vegan", vegetarian: "Vegetarian", glutenFree: "Gluten-free" },
+    noFilterResults: "No dishes match this filter.",
+    resetFilters: "Reset filters",
   },
   it: {
     allergens: "Allergeni",
@@ -116,6 +122,8 @@ const UI: Record<string, UiStrings> = {
     close: "Chiudi",
     language: "Lingua",
     filters: { alcohol: "Alcol", vegan: "Vegano", vegetarian: "Vegetariano", glutenFree: "Senza glutine" },
+    noFilterResults: "Nessun piatto corrisponde a questo filtro.",
+    resetFilters: "Azzera filtri",
   },
   uk: {
     allergens: "Алергени",
@@ -130,6 +138,8 @@ const UI: Record<string, UiStrings> = {
     close: "Закрити",
     language: "Мова",
     filters: { alcohol: "Алкоголь", vegan: "Веган", vegetarian: "Вегетаріанське", glutenFree: "Без глютену" },
+    noFilterResults: "Немає страв за цим фільтром.",
+    resetFilters: "Скинути фільтри",
   },
 };
 

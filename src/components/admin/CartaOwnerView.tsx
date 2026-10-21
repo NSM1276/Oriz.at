@@ -45,12 +45,16 @@ function getLuminance(hex: string): number {
 //
 // `superAdminLink` is an optional href back to /admin/casa or /admin
 // to make navigation obvious when super admin lands here.
+// `demo` is the public /admin/preview playground: nobody is signed in there,
+// so account controls (sign out, password, importer) are replaced by a link back to the menu.
 export function CartaOwnerView({
   venue: initialVenue,
   superAdminLink,
+  demo = false,
 }: {
   venue: VenueWithSections | null;
   superAdminLink?: string;
+  demo?: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<"menu" | "profil" | "screen">("menu");
 
@@ -178,6 +182,15 @@ export function CartaOwnerView({
               {venue ? venue.name : "No venue yet"}
             </h1>
           </div>
+          {demo && venue ? (
+            <a
+              href={`/${venue.slug}`}
+              className="font-sans text-[10px] tracking-regal uppercase px-3 py-2 transition-opacity hover:opacity-70"
+              style={{ border: `1px solid ${border}`, color: dim }}
+            >
+              ← Zur Speisekarte
+            </a>
+          ) : (
           <div className="flex items-center gap-4">
             {superAdminLink && (
               <a
@@ -193,6 +206,7 @@ export function CartaOwnerView({
             )}
             <SignOutButton />
           </div>
+          )}
         </div>
 
         {venue && (
@@ -207,7 +221,8 @@ export function CartaOwnerView({
             muted={muted}
             border={border}
             accent={accent}
-            showImport={!!superAdminLink}
+            showImport={!!superAdminLink && !demo}
+            demo={demo}
           />
         )}
 

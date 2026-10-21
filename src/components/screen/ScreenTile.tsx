@@ -5,6 +5,7 @@ import type { Item } from "@/lib/supabase/types";
 import { formatPrice } from "@/lib/format";
 import type { ScreenPalette } from "./screen-colors";
 import { PricePill } from "./PricePill";
+import { ItemPicture } from "@/components/menu/ItemPicture";
 
 type Props = {
   item: Item;
@@ -43,7 +44,7 @@ export function ScreenTile({ item, currency, palette, index }: Props) {
     >
       {hasPhoto && (
         <>
-          <img
+          <ItemPicture
             src={item.image_url!}
             alt=""
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}

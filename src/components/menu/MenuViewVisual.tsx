@@ -8,16 +8,11 @@ import { StickyActionBar } from "./StickyActionBar";
 import { MenuItemCardVisual } from "./MenuItemCardVisual";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { FilterEmptyState } from "./FilterEmptyState";
 import { getActiveMenuId } from "@/lib/menu-schedule";
 import { localizeSection, localizeAbout, ui, BASE_LOCALE } from "@/lib/menu-i18n";
+import { availableFilterKeys, isAlcoholSection, type DietFilter } from "@/lib/menu-filters";
 import type { Item, MenuPayload } from "@/lib/supabase/types";
-
-type DietFilter = "vegan" | "vegetarisch" | "glutenfrei";
-const ALCOHOL_KEYWORDS = ["alkohol", "bier", "wein", "getränke", "drinks", "bar"];
-function isAlcoholSection(name: string): boolean {
-  const lower = name.toLowerCase();
-  return ALCOHOL_KEYWORDS.some((kw) => lower.includes(kw));
-}
 
 export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initial: MenuPayload; initialLocale?: string }) {
   const { venue, sections, menus = [] } = initial;
@@ -118,6 +113,13 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
       })
       .filter((s) => s.items.length > 0);
   }, [sectionsWithItems, hideAlcohol, dietFilters]);
+
+  const filterKeys = useMemo(() => availableFilterKeys(sectionsWithItems), [sectionsWithItems]);
+  const filtersActive = hideAlcohol || dietFilters.size > 0;
+  function resetFilters() {
+    setHideAlcohol(false);
+    setDietFilters(new Set());
+  }
 
   const localizedNavSections = useMemo(
     () => sectionsWithItems.map((s) => localizeSection(s, locale)),
@@ -284,6 +286,7 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
         )}
 
         {/* Language + filter bar — one row, one pill style */}
+        {(enabledLocales.length > 0 || filterKeys.size > 0) && (
         <div style={{ overflowX: "auto", scrollbarWidth: "none", margin: "8px -16px 0", padding: "0 16px" }}>
           <div style={{ display: "flex", gap: 8, whiteSpace: "nowrap", paddingBottom: 10, paddingTop: 2, alignItems: "center" }}>
             {enabledLocales.length > 0 && (
@@ -296,7 +299,9 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
                   text={text}
                   border={border}
                 />
-                <span aria-hidden style={{ width: 1, height: 22, margin: "0 2px", backgroundColor: border, flexShrink: 0 }} />
+                {filterKeys.size > 0 && (
+                  <span aria-hidden style={{ width: 1, height: 22, margin: "0 2px", backgroundColor: border, flexShrink: 0 }} />
+                )}
               </>
             )}
             {(
@@ -306,7 +311,7 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
                 { key: "vegetarisch" as const, label: t.filters.vegetarian },
                 { key: "glutenfrei" as const, label: t.filters.glutenFree },
               ] as const
-            ).map(({ key, label }) => {
+            ).filter(({ key }) => filterKeys.has(key)).map(({ key, label }) => {
               const isActive = key === "alcohol" ? hideAlcohol : dietFilters.has(key);
               return (
                 <button
@@ -329,6 +334,7 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
             })}
           </div>
         </div>
+        )}
 
         {/* Sections */}
         {localizedSections.map((s, sIdx) => {
@@ -385,6 +391,16 @@ export function MenuViewVisual({ initial, initialLocale = BASE_LOCALE }: { initi
             </section>
           );
         })}
+
+        {localizedSections.length === 0 && filtersActive && (
+          <FilterEmptyState
+            message={t.noFilterResults}
+            resetLabel={t.resetFilters}
+            onReset={resetFilters}
+            text={text}
+            accent={accent}
+          />
+        )}
 
         {/* Footer */}
         <footer className="mt-14 mb-8 flex flex-col items-center gap-5">

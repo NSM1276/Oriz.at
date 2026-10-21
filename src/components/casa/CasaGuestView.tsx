@@ -9,9 +9,11 @@ import { VenueLogo } from "@/components/brand/VenueLogo";
 function PropertyLinks({
   property,
   accent,
+  lang,
 }: {
   property: Property;
   accent: string;
+  lang: Lang;
 }) {
   const items: { href: string; label: string; icon: React.ReactNode }[] = [];
   if (property.website_url) {
@@ -53,7 +55,7 @@ function PropertyLinks({
   if (property.google_maps_url) {
     items.push({
       href: property.google_maps_url,
-      label: "Karte",
+      label: lang === "de" ? "Karte" : "Map",
       icon: (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
@@ -76,7 +78,7 @@ function PropertyLinks({
   if (property.email) {
     items.push({
       href: `mailto:${property.email}`,
-      label: "E-Mail",
+      label: lang === "de" ? "E-Mail" : "Email",
       icon: (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -482,7 +484,7 @@ export function CasaGuestView({
             aria-hidden
           />
           {/* External links row */}
-          <PropertyLinks property={property} accent={accent} />
+          <PropertyLinks property={property} accent={accent} lang={lang} />
 
           {property.about && (
             <p

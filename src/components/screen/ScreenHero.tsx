@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/format";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import type { ScreenPalette } from "./screen-colors";
 import { PricePill } from "./PricePill";
+import { ItemPicture } from "@/components/menu/ItemPicture";
 
 type Props = {
   venue: Venue;
@@ -35,7 +36,7 @@ export function ScreenHero({ venue, sectionName, item, palette }: Props) {
             transition={{ duration: 0.9, ease: "easeInOut" }}
             style={{ position: "absolute", inset: 0 }}
           >
-            <img
+            <ItemPicture
               src={photo}
               alt=""
               style={{

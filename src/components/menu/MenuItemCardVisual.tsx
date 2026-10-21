@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatPrice } from "@/lib/format";
 import { ui } from "@/lib/menu-i18n";
 import type { Item } from "@/lib/supabase/types";
+import { ItemPicture } from "./ItemPicture";
 
 interface Props {
   item: Item;
@@ -36,8 +37,7 @@ export function MenuItemCardVisual({ item, currency, onClick, locale = "de" }: P
         }}
       >
         {/* Photo — always visible, no opacity tricks */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <ItemPicture
           src={item.image_url!}
           alt={item.name}
           onError={() => setImgError(true)}

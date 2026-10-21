@@ -1,6 +1,7 @@
 import { formatPrice } from "@/lib/format";
 import { ui } from "@/lib/menu-i18n";
 import type { Item } from "@/lib/supabase/types";
+import { ItemPicture } from "./ItemPicture";
 
 // Every item with description (or photo / AI caption) is tappable.
 const hasDetail = (item: Item) =>
@@ -87,8 +88,7 @@ export function ItemRow({
           className="shrink-0 overflow-hidden"
           style={{ width: 72, height: 72, borderRadius: 4, opacity: dim ? 0.4 : 1 }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <ItemPicture
             src={item.image_url}
             alt={item.name}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
