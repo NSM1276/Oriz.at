@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
+import { isPlatformAdmin } from "@/lib/auth";
 
 // Menu import — super admin only, add-only.
 //
@@ -10,7 +11,6 @@ import { createClient as createServerSupabase } from "@/lib/supabase/server";
 // appended after the existing ones, so running the import twice duplicates items
 // rather than wiping a live menu. Photos and translations are never touched.
 
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const MAX_SECTIONS = 60;
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   const userSb = await createServerSupabase();
   const { data: { user } } = await userSb.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  if (user.email !== SUPER_ADMIN_EMAIL) {
+  if (!(await isPlatformAdmin(user.id))) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

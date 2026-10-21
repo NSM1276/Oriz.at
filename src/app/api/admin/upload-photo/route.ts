@@ -3,8 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
 import { normalizeLogoSvg } from "@/lib/svg-normalize";
+import { isPlatformAdmin } from "@/lib/auth";
 
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 const BUCKET = "oriz-photos";
 const MAX_BYTES = 1_500_000; // 1.5 MB — sanity cap after client resize
 
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   } = await userSb.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
+  const isSuper = await isPlatformAdmin(user.id);
 
   const form = await req.formData();
   const target = form.get("target");
@@ -203,7 +203,7 @@ export async function DELETE(req: NextRequest) {
     data: { user },
   } = await userSb.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
+  const isSuper = await isPlatformAdmin(user.id);
 
   const url = new URL(req.url);
   const target = url.searchParams.get("target");

@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
 import type { ScreenSettingsRow } from "@/lib/supabase/types";
+import { isPlatformAdmin } from "@/lib/auth";
+import { DEMO_VENUE_IDS } from "@/lib/demo";
 
 // Screen (TV board) settings — one row per venue, upserted on every change.
 //
@@ -13,15 +15,6 @@ import type { ScreenSettingsRow } from "@/lib/supabase/types";
 //
 // Auth: same pattern as venue-style — demo venues skip auth; otherwise logged in and
 // (super admin or owner of the venue).
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
-
-// Demo venues — publicly accessible without auth (nightly reset at 03:00)
-const DEMO_VENUE_IDS = new Set([
-  "5781d254-df4b-4713-bfed-41111bd75a2d", // Ristorante Tosca
-  "f039c06c-d196-4f12-8145-fb20eeab0502", // Brasserie Lumière
-  "ac0094c8-4c04-42e7-b404-a57ebbbed314", // Sushi Schönbrunn
-]);
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SELECT = "venue_id, active, mode, rotation_sec, spotlight, color_bg, color_primary, sections, hero_items, style, updated_at";
@@ -39,7 +32,7 @@ async function authorize(venueId: string): Promise<NextResponse | null> {
   const userSb = await createServerSupabase();
   const { data: { user } } = await userSb.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  if (user.email === SUPER_ADMIN_EMAIL) return null;
+  if (await isPlatformAdmin(user.id)) return null;
   const { data: venue } = await svc()
     .from("venues")
     .select("owner_id")

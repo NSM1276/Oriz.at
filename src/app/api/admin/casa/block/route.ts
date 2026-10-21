@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
+import { isPlatformAdmin } from "@/lib/auth";
 
 const ALLOWED_BLOCK_FIELDS = new Set([
   "title_de", "title_en", "body_de", "body_en",
@@ -39,7 +38,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await userSb.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
+  const isSuper = await isPlatformAdmin(user.id);
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch {
@@ -80,7 +79,7 @@ export async function PATCH(req: NextRequest) {
   const { data: { user } } = await userSb.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
+  const isSuper = await isPlatformAdmin(user.id);
 
   let body: { blockId?: unknown; updates?: unknown };
   try { body = await req.json(); } catch {
@@ -132,7 +131,7 @@ export async function DELETE(req: NextRequest) {
   const { data: { user } } = await userSb.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
+  const isSuper = await isPlatformAdmin(user.id);
 
   const blockId = new URL(req.url).searchParams.get("blockId");
   if (!blockId) return NextResponse.json({ error: "blockId required" }, { status: 400 });

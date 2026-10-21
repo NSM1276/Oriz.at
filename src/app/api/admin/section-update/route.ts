@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
+import { isPlatformAdmin } from "@/lib/auth";
 
 function svc() {
   return createClient(
@@ -30,7 +29,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "menuId must be string or null" }, { status: 400 });
   }
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
+  const isSuper = await isPlatformAdmin(user.id);
 
   // Ownership check via section → venue
   const { data: section } = await svc()

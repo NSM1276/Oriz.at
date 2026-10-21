@@ -2,10 +2,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SuperAdminCasaList } from "@/components/admin/SuperAdminCasaList";
 import type { CasaPropertySummary } from "@/components/admin/CasaPropertyEditPanel";
+import { isPlatformAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 
 export default async function AdminCasaListPage() {
   const supabase = await createClient();
@@ -15,7 +14,7 @@ export default async function AdminCasaListPage() {
   if (!user) redirect("/admin/login?next=/admin/casa");
 
   // Only super admin sees the full list. Regular Casa owners go to their property.
-  if (user.email !== SUPER_ADMIN_EMAIL) {
+  if (!(await isPlatformAdmin(user.id))) {
     const { data: mine } = await supabase
       .schema("casa")
       .from("properties")

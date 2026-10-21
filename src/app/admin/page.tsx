@@ -4,10 +4,9 @@ import { SuperAdminView } from "@/components/admin/SuperAdminView";
 import { RoleHub } from "@/components/admin/RoleHub";
 import { CartaOwnerView } from "@/components/admin/CartaOwnerView";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
+import { isPlatformAdmin } from "@/lib/auth";
 
 export const revalidate = 0;
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 
 type VenueRow = Venue & {
   plan: string;
@@ -21,7 +20,7 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/admin/login");
 
-  const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
+  const isSuperAdmin = await isPlatformAdmin(user.id);
 
   // Role hub: route the user to the right product based on what they own.
   // Super admin sees everything; everyone else gets routed by ownership.

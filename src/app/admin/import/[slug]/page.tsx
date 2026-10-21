@@ -2,11 +2,10 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { MenuImport } from "@/components/admin/MenuImport";
+import { isPlatformAdmin } from "@/lib/auth";
 
 // Super-admin only: paste a menu, review the parse, append it to a venue.
 export const revalidate = 0;
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 
 export default async function MenuImportPage({
   params,
@@ -17,7 +16,7 @@ export default async function MenuImportPage({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect(`/admin/login?next=/admin/import/${slug}`);
-  if (user.email !== SUPER_ADMIN_EMAIL) redirect("/admin");
+  if (!(await isPlatformAdmin(user.id))) redirect("/admin");
 
   const { data: venue } = await supabase
     .from("venues")

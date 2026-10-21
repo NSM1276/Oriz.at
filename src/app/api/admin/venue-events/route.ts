@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
-
-// Demo venues — publicly accessible without auth (nightly reset at 03:00)
-const DEMO_VENUE_IDS = new Set([
-  "5781d254-df4b-4713-bfed-41111bd75a2d", // Ristorante Tosca
-  "f039c06c-d196-4f12-8145-fb20eeab0502", // Brasserie Lumière
-  "ac0094c8-4c04-42e7-b404-a57ebbbed314", // Sushi Schönbrunn
-]);
+import { isPlatformAdmin } from "@/lib/auth";
+import { DEMO_VENUE_IDS } from "@/lib/demo";
 
 function svc() {
   return createClient(
@@ -32,7 +25,7 @@ export async function GET(req: NextRequest) {
     const { data: { user } } = await userSb.auth.getUser();
     if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const isSuper = user.email === SUPER_ADMIN_EMAIL;
+    const isSuper = await isPlatformAdmin(user.id);
     if (!isSuper) {
       const { data: venue } = await admin
         .from("venues")
@@ -81,7 +74,7 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await userSb.auth.getUser();
     if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const isSuper = user.email === SUPER_ADMIN_EMAIL;
+    const isSuper = await isPlatformAdmin(user.id);
     if (!isSuper) {
       const { data: venue } = await admin
         .from("venues")
@@ -133,7 +126,7 @@ export async function DELETE(req: NextRequest) {
     const { data: { user } } = await userSb.auth.getUser();
     if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const isSuper = user.email === SUPER_ADMIN_EMAIL;
+    const isSuper = await isPlatformAdmin(user.id);
     if (!isSuper) {
       if (!evTyped || evTyped.venues.owner_id !== user.id) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });

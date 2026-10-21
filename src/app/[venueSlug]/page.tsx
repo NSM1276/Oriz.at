@@ -5,8 +5,9 @@ import { MenuView } from "@/components/menu/MenuView";
 import { DemoBanner } from "@/components/menu/DemoBanner";
 import { resolveInitialLocale } from "@/lib/menu-i18n";
 import { loadMenuPayload } from "@/lib/menu-loader";
-
-const DEMO_SLUGS = ["ristorante-tosca", "brasserie-lumiere", "sushi-schonbrunn"];
+import { DEMO_SLUGS } from "@/lib/demo";
+import { currentTable } from "@/lib/table-session";
+import { TableBanner } from "@/components/menu/TableBanner";
 
 export const revalidate = 0;
 
@@ -19,13 +20,17 @@ export default async function GuestMenuPage({
   const initial = await loadMenuPayload(venueSlug);
   if (!initial) notFound();
 
-  const isDemo = DEMO_SLUGS.includes(venueSlug);
+  const isDemo = DEMO_SLUGS.has(venueSlug);
+  const table = await currentTable(venueSlug);
 
   const acceptLanguage = (await headers()).get("accept-language");
   const initialLocale = resolveInitialLocale(acceptLanguage, initial.venue.enabled_locales);
 
   return (
     <>
+      {table && (
+        <TableBanner label={table.label} bg={initial.venue.color_bg} accent={initial.venue.color_primary} />
+      )}
       {isDemo && (
         <DemoBanner
           slug={venueSlug}

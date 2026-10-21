@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { CartaOwnerView } from "@/components/admin/CartaOwnerView";
+import { DEMO_SLUGS } from "@/lib/demo";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
 
 // Public preview — no auth required. Demo venues only, data is synthetic.
@@ -39,8 +40,7 @@ export default async function PreviewPage({
 
   // Only these 3 demo venues are publicly accessible without auth.
   // Real client venues are protected via normal /admin login.
-  const DEMO_SLUGS = ["ristorante-tosca", "brasserie-lumiere", "sushi-schonbrunn"];
-  if (!DEMO_SLUGS.includes(slug)) notFound();
+  if (!DEMO_SLUGS.has(slug)) notFound();
   const admin = svc();
 
   const { data: venue } = await admin

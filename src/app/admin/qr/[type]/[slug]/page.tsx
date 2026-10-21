@@ -2,17 +2,11 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { QrCard } from "@/components/admin/QrCard";
+import { DEMO_SLUGS } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
 type Params = { type: "carta" | "casa"; slug: string };
-
-// Demo venues — QR card accessible without auth (nightly reset at 03:00)
-const DEMO_SLUGS = new Set([
-  "ristorante-tosca",
-  "brasserie-lumiere",
-  "sushi-schonbrunn",
-]);
 
 function svc() {
   return createServiceClient(

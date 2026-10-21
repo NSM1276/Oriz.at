@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
+import { isPlatformAdmin } from "@/lib/auth";
 
 // Casa property style endpoint — owners update color preset + casa theme.
 //   Super-admin → any property, any values.
@@ -9,7 +10,6 @@ import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
 //
 // Body: { propertyId: string, presetId?: string, theme?: string }
 
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 const ALLOWED_THEMES = new Set(["classic", "light", "modern"]);
 
 function svc() {
@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest) {
   const { data: { user } } = await userSb.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const isSuper = user.email === SUPER_ADMIN_EMAIL;
+  const isSuper = await isPlatformAdmin(user.id);
 
   let body: { propertyId?: unknown; presetId?: unknown; theme?: unknown };
   try { body = await req.json(); } catch {

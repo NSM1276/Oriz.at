@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
+import { isPlatformAdmin } from "@/lib/auth";
 
 // Onboarding endpoint — super-admin-only.
 //
@@ -42,7 +41,7 @@ export async function POST(req: NextRequest) {
   const {
     data: { user },
   } = await userSb.auth.getUser();
-  if (!user || user.email !== SUPER_ADMIN_EMAIL) {
+  if (!user || !(await isPlatformAdmin(user.id))) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

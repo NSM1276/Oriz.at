@@ -2,10 +2,9 @@ import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CartaOwnerView } from "@/components/admin/CartaOwnerView";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
+import { isPlatformAdmin } from "@/lib/auth";
 
 export const revalidate = 0;
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 
 type VenueRow = Venue & {
   plan: string;
@@ -32,7 +31,7 @@ export default async function CartaAdminPage({
     redirect(`/admin/login?next=/admin/carta/${slug}`);
   }
 
-  const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL;
+  const isSuperAdmin = await isPlatformAdmin(user.id);
 
   const { data: venues } = await supabase
     .from("venues")

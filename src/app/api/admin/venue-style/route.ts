@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
+import { isPlatformAdmin } from "@/lib/auth";
+import { DEMO_VENUE_IDS } from "@/lib/demo";
 
 // Venue style endpoint — owners update color preset + menu theme.
 //
@@ -11,15 +13,7 @@ import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
 //
 // Body: { venueId: string, presetId?: string, theme?: string }
 
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
 const ALLOWED_THEMES = new Set(["classic", "modern", "visual"]);
-
-// Demo venues — publicly accessible without auth (nightly reset at 03:00)
-const DEMO_VENUE_IDS = new Set([
-  "5781d254-df4b-4713-bfed-41111bd75a2d", // Ristorante Tosca
-  "f039c06c-d196-4f12-8145-fb20eeab0502", // Brasserie Lumière
-  "ac0094c8-4c04-42e7-b404-a57ebbbed314", // Sushi Schönbrunn
-]);
 
 function svc() {
   return createClient(
@@ -52,7 +46,7 @@ export async function PATCH(req: NextRequest) {
     const userSb = await createServerSupabase();
     const { data: { user } } = await userSb.auth.getUser();
     if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    isSuper = user.email === SUPER_ADMIN_EMAIL;
+    isSuper = await isPlatformAdmin(user.id);
 
     const { data: venue } = await admin
       .from("venues")

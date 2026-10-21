@@ -15,12 +15,15 @@
     "framer-motion": "^12.40.0",
     "next": "^16.2.6",
     "pg": "^8.20.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "resend": "^6.12.3"
+    "resend": "^6.12.3",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.20",

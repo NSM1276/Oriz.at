@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
-
-const SUPER_ADMIN_EMAIL = "nasim2131@gmail.com";
+import { isPlatformAdmin } from "@/lib/auth";
 
 function svc() {
   return createClient(
@@ -18,7 +17,7 @@ function svc() {
 export async function PATCH(req: NextRequest) {
   const userSb = await createServerSupabase();
   const { data: { user } } = await userSb.auth.getUser();
-  if (!user || user.email !== SUPER_ADMIN_EMAIL) {
+  if (!user || !(await isPlatformAdmin(user.id))) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
@@ -68,7 +67,7 @@ export async function PATCH(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const userSb = await createServerSupabase();
   const { data: { user } } = await userSb.auth.getUser();
-  if (!user || user.email !== SUPER_ADMIN_EMAIL) {
+  if (!user || !(await isPlatformAdmin(user.id))) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
