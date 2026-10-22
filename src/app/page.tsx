@@ -348,7 +348,7 @@ export default function NewLanding() {
           <nav aria-label="Fußzeile" className="flex flex-wrap items-center gap-x-8 gap-y-1 text-base">
             <Link href="/carta" className={`inline-flex min-h-11 items-center hover:underline ${focus}`}>Preise & Pakete</Link>
             <Link href="/admin/login" className={`inline-flex min-h-11 items-center hover:underline ${focus}`}>Restaurant-Login</Link>
-            <div className="[&_button]:min-h-11 [&_button]:!text-base [&_button]:!normal-case [&_button]:!tracking-normal [&_button]:!text-parchment [&_button:hover]:underline">
+            <div className="[&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center [&_a]:!text-base [&_a]:!normal-case [&_a]:!tracking-normal [&_a]:!text-parchment [&_a:hover]:underline">
               <LegalLinks />
             </div>
           </nav>
