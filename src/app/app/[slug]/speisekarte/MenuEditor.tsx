@@ -185,6 +185,28 @@ export function MenuEditor({
         </div>
       </section>
 
+      <section className={`${card} p-5`}>
+        <p className="font-semibold">Zum Drucken</p>
+        <p className="mt-0.5 text-sm text-stone-600">
+          Ihre Karte als PDF in A4, fertig für den Drucker — mit Datum „Stand“, Allergen-Legende und einem QR-Code zur aktuellen Online-Karte.
+          Gerichte, die gerade als ausverkauft markiert sind, stehen mit drauf.
+        </p>
+        {items.length === 0 ? (
+          <p className="mt-3 text-sm text-stone-500">Sobald Gerichte in der Karte stehen, können Sie sie hier drucken.</p>
+        ) : (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a href={`/app/${slug}/speisekarte/pdf`} target="_blank" rel="noopener" className="inline-flex min-h-11 items-center rounded-xl bg-stone-900 px-5 text-sm font-medium text-white">
+              PDF öffnen
+            </a>
+            {locales.map((l) => (
+              <a key={l} href={`/app/${slug}/speisekarte/pdf?lang=${l}`} target="_blank" rel="noopener" className="inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-medium ring-1 ring-stone-300">
+                PDF · {LOCALE_NAMES[l]}
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+
       {unknownAllergens > 0 && items.length > 0 && (
         <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
           Bei {unknownAllergens} von {items.length} Gerichten fehlen die Allergene. Gäste sehen dort „Keine Angaben — bitte nachfragen“,
