@@ -117,7 +117,7 @@ export function PhotoUploader({
             <img
               src={currentUrl}
               alt="Vorschau"
-              className="w-full h-full object-cover"
+              className={`w-full h-full ${target.endsWith("-logo") ? "object-contain p-1" : "object-cover"}`}
             />
           </div>
           <div className="flex flex-col gap-2">

@@ -69,12 +69,20 @@ export async function POST(req: NextRequest) {
         ? await admin.from("venues").select("owner_id").eq("id", id).maybeSingle<{ owner_id: string | null }>()
         : await admin.schema("casa").from("properties").select("owner_id").eq("id", id).maybeSingle<{ owner_id: string | null }>();
     if (!ownerCheck.data) return NextResponse.json({ error: "not found" }, { status: 404 });
-    // Logo management is super-admin only — owners cannot upload or replace logos.
+    // Owners set up their restaurant themselves, logo included — as a picture.
+    // SVG is inlined into the page, so SVG logos stay with platform admins.
+    const isSvg = file.type === "image/svg+xml" || /\.svg$/i.test((file as File).name ?? "");
     if (!isSuper) {
-      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      const isOwner = target === "carta-venue-logo" && (await venueRole(user.id, id)) === "owner";
+      if (!isOwner) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      if (isSvg) {
+        return NextResponse.json(
+          { error: "SVG-Logos richten wir für Sie ein. Bitte das Logo als PNG oder JPG hochladen." },
+          { status: 400 },
+        );
+      }
     }
 
-    const isSvg = file.type === "image/svg+xml" || /\.svg$/i.test((file as File).name ?? "");
     if (isSvg) {
       const text = await file.text();
       let normalized: string;
@@ -279,7 +287,8 @@ export async function DELETE(req: NextRequest) {
     if (paths.length > 0) await admin.storage.from(BUCKET).remove(paths);
     return NextResponse.json({ ok: true, removed: paths.length });
   } else if (target === "carta-venue-logo" || target === "casa-property-logo") {
-    if (!isSuper) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    const isOwner = target === "carta-venue-logo" && (await venueRole(user.id, id)) === "owner";
+    if (!isSuper && !isOwner) return NextResponse.json({ error: "forbidden" }, { status: 403 });
     const logoPath = target === "carta-venue-logo" ? `carta/${id}/logo.webp` : `casa/${id}/logo.webp`;
     if (target === "carta-venue-logo") {
       await admin.from("venues").update({ logo_svg: null, logo_url: null }).eq("id", id);
