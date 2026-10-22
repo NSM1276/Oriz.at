@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { loadMenuPayload } from "@/lib/menu-loader";
 import { loadScreenSettings } from "@/lib/screen-settings-loader";
+import { getEntitlements } from "@/lib/entitlements-server";
 import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
 import { ScreenBoard } from "@/components/screen/ScreenBoard";
 import { parseScreenParams, type SearchParams } from "@/components/screen/screen-params";
@@ -18,6 +19,20 @@ export default async function ScreenRoute({ params, searchParams }: Props) {
   const [{ venueSlug }, sp] = await Promise.all([params, searchParams]);
   const payload = await loadMenuPayload(venueSlug);
   if (!payload) notFound();
+
+  // Screen belongs to the Pro plan. A TV that is already on the wall shows a calm message
+  // instead of an error, and the venue's own team sees the way to switch it on.
+  if (!(await getEntitlements(payload.venue.id)).screen) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-[#0A0A0A] px-8 text-center text-[#F5F0EC]">
+        <p className="font-display text-5xl">{payload.venue.name}</p>
+        <p className="mt-6 max-w-xl text-2xl leading-relaxed opacity-80">
+          Die Karte auf dem Fernseher ist Teil des Pro-Tarifs von ORIZ.
+        </p>
+        <p className="mt-3 text-lg opacity-60">office@oriz.at</p>
+      </main>
+    );
+  }
 
   const settings = await loadScreenSettings(payload.venue.id);
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getEntitlements } from "@/lib/entitlements-server";
 import { requireVenue } from "../venue";
 import { AppNav } from "./AppNav";
 
@@ -11,6 +12,7 @@ export default async function VenueLayout({
 }) {
   const { slug } = await params;
   const { venue, venueCount } = await requireVenue(slug);
+  const entitlements = await getEntitlements(venue.id);
 
   return (
     <>
@@ -37,7 +39,7 @@ export default async function VenueLayout({
             </a>
           </div>
           <div className="pb-3">
-            <AppNav slug={venue.slug} />
+            <AppNav slug={venue.slug} screenLocked={!entitlements.screen} />
           </div>
         </div>
       </header>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ScreenContactForm from "@/components/screen/ScreenContactForm";
+import { PLAN_PRICE_EUR } from "@/lib/entitlements";
 import { ScreenTvFrame } from "@/components/screen/ScreenTvFrame";
 
 export const metadata: Metadata = {
@@ -111,7 +112,7 @@ const FAQ = [
   },
   {
     q: "Was kostet das?",
-    a: "Der Preis richtet sich nach Größe und Anzahl der Bildschirme. Schreiben Sie uns kurz — Sie bekommen innerhalb von 24 Stunden einen Vorschlag.",
+    a: `Screen ist Teil des Pro-Tarifs: ${PLAN_PRICE_EUR.pro} € pro Monat (netto) für Ihr Lokal, zusammen mit allem aus ORIZ Carta. In der 14-tägigen Testphase können Sie es ausprobieren.`,
   },
 ];
 

@@ -65,6 +65,15 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
             </svg>
             Aufträge
           </a>
+          <a
+            href="/admin/tarife"
+            className="flex items-center gap-3 px-3 py-2 rounded-none text-parchment/80 hover:text-parchment hover:bg-white/5 transition font-sans text-[13px] tracking-wide"
+          >
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="shrink-0 opacity-60">
+              <path d="M2.5 4.5h10v7h-10v-7zM2.5 7h10M5 10h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+            Tarife
+          </a>
 
           {/* Spacer */}
           <div className="h-4" />
@@ -100,6 +109,7 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
         <nav className="flex gap-4 overflow-x-auto border-b border-onyx/10 px-4 py-3 font-sans text-[13px] md:hidden">
           <a href="/admin" className="shrink-0 underline">Venues</a>
           <a href="/admin/auftraege" className="shrink-0 underline">Aufträge</a>
+          <a href="/admin/tarife" className="shrink-0 underline">Tarife</a>
           <a href="/admin/casa" className="shrink-0 underline">Casa</a>
           <a href="/admin/leads" className="shrink-0 underline">Leads</a>
         </nav>

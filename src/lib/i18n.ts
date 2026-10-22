@@ -79,9 +79,9 @@ export const translations = {
       sub: "Monatlich kündbar. Keine Einrichtungsgebühr.",
       disclaimer: "Alle Preise exkl. MwSt. · Monatlich kündbar · Keine Einrichtungsgebühr",
       plans: [
-        { name: "Trial", price: "14 Tage", sub: "kostenlos — alle Funktionen", badge: null as null, features: ["Alle Starter-Funktionen inklusive", "Kein Vertrag, jederzeit kündbar", "Persönlicher Onboarding-Support"], cta: "Kostenlos testen", plan: "trial" as const, accent: false },
-        { name: "Starter", price: "€ 29", sub: "pro Monat", badge: "Empfohlen" as string | null, features: ["1 Menü · unbegrenzte Gerichte", "Echtzeit-Updates", "Persönlicher Menü-Link", "Instagram & Maps Verlinkung", "Eigene Farben & Logo", "4 Sprachen: DE, EN, IT, UK"], cta: "Starter wählen", plan: "starter" as const, accent: true },
-        { name: "Pro", price: "€ 59", sub: "pro Monat", badge: null as null, features: ["Mehrere Standorte oder Karten", "Unbegrenzte Gerichte", "Echtzeit-Updates", "4 Sprachen: DE, EN, IT, UK", "Priority Support"], cta: "Pro wählen", plan: "pro" as const, accent: false },
+        { name: "Test", price: "14 Tage", sub: "kostenlos — alle Funktionen", badge: null as null, features: ["Alle Pro-Funktionen inklusive", "Kein Vertrag, jederzeit kündbar", "Persönlicher Onboarding-Support"], cta: "Kostenlos testen", plan: "trial" as const, accent: false },
+        { name: "Starter", price: "€ 19", sub: "pro Monat", badge: "Empfohlen" as string | null, features: ["1 Karte · unbegrenzte Gerichte", "Änderungen in Echtzeit", "3 Erscheinungsbilder, eigene Farben & Logo", "14 EU-Allergene mit Filter", "QR-Codes für jeden Tisch + Service-Ruf", "Druckfertiges PDF (A4)", "4 Sprachen: DE, EN, IT, UK"], cta: "Starter wählen", plan: "starter" as const, accent: true },
+        { name: "Pro", price: "€ 39", sub: "pro Monat", badge: null as null, features: ["Alles aus Starter", "Screen: Ihre Karte auf dem Fernseher", "Priority Support"], cta: "Pro wählen", plan: "pro" as const, accent: false },
       ],
     },
     contact: {
@@ -106,7 +106,7 @@ export const translations = {
       tables: ["1 – 10 Tische", "11 – 25 Tische", "26 – 50 Tische", "Mehr als 50"],
       dishes: ["Bis zu 20 Gerichte", "20 – 50 Gerichte", "50 – 100 Gerichte", "Mehr als 100"],
       languages: ["Nur Deutsch", "Deutsch & Englisch", "3 oder mehr Sprachen"],
-      plans: ["Trial (14 Tage kostenlos)", "Starter (€ 29 / Monat)", "Pro (€ 59 / Monat)", "Noch nicht sicher"],
+      plans: ["Test (14 Tage kostenlos)", "Starter (€ 19 / Monat)", "Pro (€ 39 / Monat)", "Noch nicht sicher"],
       labels: {
         venueType: "Art des Lokals",
         tables: "Anzahl der Tische",
@@ -219,9 +219,9 @@ export const translations = {
       sub: "Cancel monthly. No setup fee.",
       disclaimer: "All prices excl. VAT · Cancel monthly · No setup fee",
       plans: [
-        { name: "Trial", price: "14 days", sub: "free — all features", badge: null as null, features: ["All Starter features included", "No contract, cancel anytime", "Personal onboarding support"], cta: "Start free trial", plan: "trial" as const, accent: false },
-        { name: "Starter", price: "€ 29", sub: "per month", badge: "Recommended" as string | null, features: ["1 menu · unlimited dishes", "Real-time updates", "Personal menu link", "Instagram & Maps links", "Custom colours & logo", "4 languages: DE, EN, IT, UK"], cta: "Choose Starter", plan: "starter" as const, accent: true },
-        { name: "Pro", price: "€ 59", sub: "per month", badge: null as null, features: ["Multiple locations or menus", "Unlimited dishes", "Real-time updates", "4 languages: DE, EN, IT, UK", "Priority support"], cta: "Choose Pro", plan: "pro" as const, accent: false },
+        { name: "Trial", price: "14 days", sub: "free — all features", badge: null as null, features: ["All Pro features included", "No contract, cancel anytime", "Personal onboarding support"], cta: "Start free trial", plan: "trial" as const, accent: false },
+        { name: "Starter", price: "€ 19", sub: "per month", badge: "Recommended" as string | null, features: ["1 menu · unlimited dishes", "Changes in real time", "3 looks, your own colours & logo", "14 EU allergens with filter", "QR codes for every table + waiter call", "Print-ready PDF (A4)", "4 languages: DE, EN, IT, UK"], cta: "Choose Starter", plan: "starter" as const, accent: true },
+        { name: "Pro", price: "€ 39", sub: "per month", badge: null as null, features: ["Everything in Starter", "Screen: your menu on the TV", "Priority support"], cta: "Choose Pro", plan: "pro" as const, accent: false },
       ],
     },
     contact: {
@@ -246,7 +246,7 @@ export const translations = {
       tables: ["1 – 10 tables", "11 – 25 tables", "26 – 50 tables", "More than 50"],
       dishes: ["Up to 20 dishes", "20 – 50 dishes", "50 – 100 dishes", "More than 100"],
       languages: ["German only", "German & English", "3 or more languages"],
-      plans: ["Trial (14 days free)", "Starter (€ 29 / month)", "Pro (€ 59 / month)", "Not sure yet"],
+      plans: ["Trial (14 days free)", "Starter (€ 19 / month)", "Pro (€ 39 / month)", "Not sure yet"],
       labels: {
         venueType: "Type of venue",
         tables: "Number of tables",

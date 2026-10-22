@@ -5,6 +5,7 @@ import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
 import type { ScreenSettingsRow } from "@/lib/supabase/types";
 import { venueRole } from "@/lib/auth";
 import { DEMO_VENUE_IDS } from "@/lib/demo";
+import { getEntitlements } from "@/lib/entitlements-server";
 
 // Screen (TV board) settings — one row per venue, upserted on every change.
 //
@@ -65,6 +66,10 @@ export async function PATCH(req: NextRequest) {
   }
   const denied = await authorize(venueId);
   if (denied) return denied;
+  // Screen belongs to the Pro plan (a running trial counts as Pro).
+  if (!(await getEntitlements(venueId)).screen) {
+    return NextResponse.json({ error: "Screen ist Teil des Pro-Tarifs." }, { status: 403 });
+  }
 
   const updates: Record<string, unknown> = {};
 

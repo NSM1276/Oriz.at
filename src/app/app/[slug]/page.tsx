@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { serviceClient } from "@/lib/auth";
+import { PLAN_PRICE_EUR, entitlementsFor } from "@/lib/entitlements";
 import { requireVenue } from "../venue";
 
 export const dynamic = "force-dynamic";
@@ -19,11 +20,19 @@ function subscriptionText(sub: Subscription | null): { title: string; detail: st
   switch (sub.status) {
     case "comped":
       return { title: `${plan} · kostenlos`, detail: "Von ORIZ freigeschaltet." };
-    case "trialing":
+    case "trialing": {
+      const prices = `Danach Starter (${PLAN_PRICE_EUR.starter} €) oder Pro (${PLAN_PRICE_EUR.pro} €) pro Monat, netto.`;
+      if (entitlementsFor(sub).trialExpired) {
+        return {
+          title: "Testphase beendet",
+          detail: `Sie nutzen jetzt Starter (${PLAN_PRICE_EUR.starter} € pro Monat). Mit Pro (${PLAN_PRICE_EUR.pro} €) kommen Screen und mehr dazu. Schreiben Sie uns: office@oriz.at.`,
+        };
+      }
       return {
-        title: `${plan} · Testphase`,
-        detail: sub.trial_ends_at ? `Kostenlos bis ${dateFmt.format(new Date(sub.trial_ends_at))}.` : "Kostenlos testen.",
+        title: "Testphase · alle Funktionen",
+        detail: sub.trial_ends_at ? `Kostenlos bis ${dateFmt.format(new Date(sub.trial_ends_at))}. ${prices}` : `Kostenlos testen. ${prices}`,
       };
+    }
     case "active":
       return {
         title: `${plan} · aktiv`,
