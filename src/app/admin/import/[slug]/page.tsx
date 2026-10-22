@@ -28,7 +28,7 @@ export default async function MenuImportPage({
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 sm:pt-12 pb-20">
       <Link
-        href={`/admin/carta/${venue.slug}`}
+        href={`/app/${venue.slug}/speisekarte`}
         className="font-sans text-[10px] tracking-regal uppercase text-onyx/45 hover:text-gold"
       >
         ← Zurück zur Verwaltung

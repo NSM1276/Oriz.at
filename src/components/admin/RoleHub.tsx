@@ -32,7 +32,7 @@ export function RoleHub({ user, carta, casa }: Props) {
             {carta.map((v) => (
               <Link
                 key={v.slug}
-                href="/admin"
+                href="/app"
                 className="group block bg-onyx text-parchment p-10 transition-transform hover:-translate-y-1"
               >
                 <span className="font-sans text-[10px] tracking-regal uppercase text-gold">

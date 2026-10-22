@@ -103,7 +103,7 @@ export function VenueCard({ name, slug, colorBg, colorPrimary, plan, itemCount, 
             </svg>
           </button>
           <a
-            href={`/admin/carta/${slug}`}
+            href={`/app/${slug}/speisekarte`}
             className="font-sans text-[11px] tracking-regal uppercase transition-colors"
             style={{ color: accent }}
           >

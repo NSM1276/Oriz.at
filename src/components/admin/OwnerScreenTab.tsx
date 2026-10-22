@@ -397,12 +397,11 @@ export function OwnerScreenTab({ venueId, slug, sections, isDark, text, dim, mut
   );
 }
 
-function Title({ children, text, muted, accent }: { children: React.ReactNode; text: string; muted: string; accent: string }) {
+function Title({ children, accent }: { children: React.ReactNode; text: string; muted: string; accent: string }) {
   return (
     <header className="flex items-center gap-4">
       <span className="font-sans text-sm tracking-regal uppercase shrink-0" style={{ color: accent, fontWeight: 600 }}>{children}</span>
       <div className="flex-1 h-px" style={{ backgroundColor: accent, opacity: 0.25 }} />
-      <span className="sr-only" style={{ color: text }}>{muted}</span>
     </header>
   );
 }

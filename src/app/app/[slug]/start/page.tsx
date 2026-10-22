@@ -50,16 +50,19 @@ export default async function SetupPage({
   if (step === "stil") {
     const { data } = await db
       .from("venues")
-      .select("menu_theme, color_bg")
+      .select("menu_theme, color_bg, color_primary")
       .eq("id", venue.id)
-      .single<{ menu_theme: string | null; color_bg: string | null }>();
+      .single<{ menu_theme: string | null; color_bg: string | null; color_primary: string | null }>();
+    const preset = findPreset(data?.color_bg);
+    const custom = !preset && data?.color_bg ? { bg: data.color_bg, primary: data.color_primary ?? "#C69B3C" } : null;
     return (
       <>
         {heading(3, "Aussehen", "Wählen Sie Darstellung und Farben. Die Vorschau zeigt Ihre echte Karte.")}
         <StyleStep
           slug={venue.slug}
           initialTheme={data?.menu_theme ?? "classic"}
-          initialPreset={findPreset(data?.color_bg)?.id ?? "pergament"}
+          initialPreset={preset?.id ?? (custom ? "custom" : "pergament")}
+          custom={custom}
           nextHref={next("tische")}
         />
       </>

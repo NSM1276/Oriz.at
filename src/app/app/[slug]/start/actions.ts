@@ -71,12 +71,13 @@ export async function importMenuText(slug: string, text: string): Promise<StepRe
 export async function saveStyle(slug: string, input: { theme: string; presetId: string }): Promise<StepResult> {
   const { venue } = await requireVenue(slug);
   if (!MENU_THEMES.includes(input.theme as MenuTheme)) return { ok: false, error: "Unbekannte Darstellung." };
+  // "custom" keeps the venue's own colours and only changes the layout.
   const preset = COLOR_PRESETS.find((p) => p.id === input.presetId);
-  if (!preset) return { ok: false, error: "Unbekannte Farbe." };
+  if (!preset && input.presetId !== "custom") return { ok: false, error: "Unbekannte Farbe." };
 
   const { error } = await serviceClient()
     .from("venues")
-    .update({ menu_theme: input.theme, color_bg: preset.color_bg, color_primary: preset.color_primary })
+    .update(preset ? { menu_theme: input.theme, color_bg: preset.color_bg, color_primary: preset.color_primary } : { menu_theme: input.theme })
     .eq("id", venue.id);
   if (error) return { ok: false, error: "Stil konnte nicht gespeichert werden." };
 

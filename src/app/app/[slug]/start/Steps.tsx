@@ -132,31 +132,39 @@ export function StyleStep({
   initialTheme,
   initialPreset,
   nextHref,
+  settings = false,
+  custom = null,
 }: {
   slug: string;
   initialTheme: string;
   initialPreset: string;
   nextHref: string;
+  /** On the settings page: save in place instead of moving to the next setup step. */
+  settings?: boolean;
+  /** Colours that match no preset (set by us earlier); offered as "Aktuell" so saving keeps them. */
+  custom?: { bg: string; primary: string } | null;
 }) {
   const router = useRouter();
   const [theme, setTheme] = useState(initialTheme);
   const [presetId, setPresetId] = useState(initialPreset);
   const [previewKey, setPreviewKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function save(then?: string) {
     setError(null);
+    setSaved(false);
     startTransition(async () => {
       const res = await saveStyle(slug, { theme, presetId });
       if (!res.ok) { setError(res.error); return; }
       if (then) router.push(then);
-      else setPreviewKey((k) => k + 1);
+      else { setPreviewKey((k) => k + 1); if (settings) setSaved(true); }
     });
   }
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); save(nextHref); }}>
+    <form onSubmit={(e) => { e.preventDefault(); save(settings ? undefined : nextHref); }}>
       <fieldset>
         <legend className="text-sm font-medium">Darstellung</legend>
         <div className="mt-2 grid grid-cols-3 gap-2">
@@ -180,6 +188,20 @@ export function StyleStep({
       <fieldset className="mt-5">
         <legend className="text-sm font-medium">Farben</legend>
         <div className="mt-2 grid grid-cols-5 gap-2">
+          {custom && (
+            <button
+              type="button"
+              aria-pressed={presetId === "custom"}
+              aria-label="Aktuelle Farben"
+              onClick={() => setPresetId("custom")}
+              className={`flex flex-col items-center gap-1 rounded-xl p-1.5 ring-2 transition ${presetId === "custom" ? "ring-stone-900" : "ring-transparent"}`}
+            >
+              <span className="relative block h-10 w-full rounded-lg ring-1 ring-black/10" style={{ background: custom.bg }}>
+                <span className="absolute bottom-1.5 right-1.5 h-3 w-3 rounded-full" style={{ background: custom.primary }} />
+              </span>
+              <span className="text-[11px] text-stone-600">Aktuell</span>
+            </button>
+          )}
           {COLOR_PRESETS.map((p) => (
             <button
               key={p.id}
@@ -219,7 +241,16 @@ export function StyleStep({
       </div>
 
       {error && <p className="mt-3 text-sm text-red-700">{error}</p>}
-      <Actions primary="Speichern & weiter" pending={pending} skipHref={nextHref} />
+      {settings ? (
+        <div className="mt-6 flex items-center gap-3">
+          <button type="submit" disabled={pending} className="flex-1 rounded-xl bg-stone-900 py-3 font-medium text-white disabled:opacity-50">
+            {pending ? "Wird gespeichert…" : "Speichern"}
+          </button>
+          {saved && <span className="text-sm text-emerald-700">Gespeichert.</span>}
+        </div>
+      ) : (
+        <Actions primary="Speichern & weiter" pending={pending} skipHref={nextHref} />
+      )}
     </form>
   );
 }

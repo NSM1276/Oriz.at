@@ -8,8 +8,13 @@ export function AppNav({ slug }: { slug: string }) {
   const base = `/app/${slug}`;
   const tabs = [
     { href: base, label: "Übersicht", active: pathname === base },
+    { href: `${base}/speisekarte`, label: "Speisekarte", active: pathname.startsWith(`${base}/speisekarte`) },
     { href: `${base}/tische`, label: "Tische", active: pathname.startsWith(`${base}/tische`) },
     { href: `${base}/service`, label: "Service", active: pathname.startsWith(`${base}/service`) },
+    { href: `${base}/aussehen`, label: "Aussehen", active: pathname.startsWith(`${base}/aussehen`) },
+    { href: `${base}/profil`, label: "Profil", active: pathname.startsWith(`${base}/profil`) },
+    { href: `${base}/screen`, label: "Screen", active: pathname.startsWith(`${base}/screen`) },
+    { href: `${base}/konto`, label: "Konto", active: pathname.startsWith(`${base}/konto`) },
   ];
 
   return (
@@ -26,13 +31,6 @@ export function AppNav({ slug }: { slug: string }) {
           {t.label}
         </Link>
       ))}
-      {/* The menu editor still lives in the old admin until /app covers it. */}
-      <Link
-        href={`/admin/carta/${slug}`}
-        className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-200"
-      >
-        Speisekarte ↗
-      </Link>
     </nav>
   );
 }
