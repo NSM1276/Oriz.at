@@ -100,7 +100,7 @@ export function DishSheet({
 
             {item.imageUrl && (
               <div className="shrink-0 overflow-hidden" style={{ backgroundColor: "var(--color-bg)" }}>
-                <DishMedia src={item.imageUrl} alt={item.name} className="kenburns block w-full object-contain" style={{ maxHeight: "45dvh" }} />
+                <DishMedia src={item.imageUrl} alt={item.name} sizes="100vw" className="kenburns block w-full object-contain" style={{ maxHeight: "45dvh" }} />
               </div>
             )}
 

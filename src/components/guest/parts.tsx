@@ -3,10 +3,10 @@
 // Small pieces every look shares: price (with size variants), allergen letters,
 // diet badges, the "not available" badge and dish media.
 
-import type { CSSProperties, SyntheticEvent } from "react";
+import { useState, type CSSProperties, type SyntheticEvent } from "react";
 import { formatPrice } from "@/lib/format";
 import type { GuestItem } from "@/lib/guest-menu";
-import { isVideoUrl } from "@/lib/media";
+import { isVideoUrl, thumbUrl } from "@/lib/media";
 import { ui } from "@/lib/menu-i18n";
 
 export function Price({
@@ -96,21 +96,39 @@ export function DishMedia({
   alt,
   className,
   style,
+  sizes = "160px",
   onError,
 }: {
   src: string;
   alt: string;
   className?: string;
   style?: CSSProperties;
+  /** Shown width; list rows keep the default and get the 640 px copy. */
+  sizes?: string;
   onError?: () => void;
 }) {
+  const small = thumbUrl(src);
+  const [useSmall, setUseSmall] = useState(small !== src);
   const hide = (e: SyntheticEvent<HTMLElement>) => {
+    // Photos uploaded before the small copy existed: fall back to the full one.
+    if (useSmall) return setUseSmall(false);
     if (onError) onError();
     else (e.currentTarget.parentElement as HTMLElement).style.display = "none";
   };
   if (isVideoUrl(src)) {
     return <video src={src} aria-label={alt || undefined} autoPlay muted loop playsInline preload="metadata" className={className} style={style} onError={hide} />;
   }
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} loading="lazy" className={className} style={style} onError={hide} />;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      srcSet={useSmall ? `${small} 640w, ${src} 1600w` : undefined}
+      sizes={useSmall ? sizes : undefined}
+      alt={alt}
+      loading="lazy"
+      className={className}
+      style={style}
+      onError={hide}
+    />
+  );
 }

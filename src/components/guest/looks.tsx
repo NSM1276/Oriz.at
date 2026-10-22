@@ -189,7 +189,7 @@ function PhotoCard({ item, currency, locale, onOpen }: { item: GuestItem; curren
   if (broken) return <TextRow item={item} currency={currency} locale={locale} onOpen={onOpen} />;
   return (
     <article {...rowProps(item, onOpen, { borderRadius: 10, aspectRatio: "4/3", backgroundColor: "#111" })} className="card-shimmer group relative overflow-hidden">
-      <DishMedia src={item.imageUrl!} alt={item.name} onError={() => setBroken(true)} className="kenburns absolute inset-0 block h-full w-full object-contain transition-transform duration-700 group-active:scale-105" />
+      <DishMedia src={item.imageUrl!} alt={item.name} sizes="100vw" onError={() => setBroken(true)} className="kenburns absolute inset-0 block h-full w-full object-contain transition-transform duration-700 group-active:scale-105" />
       <div className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.05) 80%)" }} />
       <div className="absolute inset-x-0 bottom-0 px-3 pb-3">
         <div className="flex items-start gap-2">

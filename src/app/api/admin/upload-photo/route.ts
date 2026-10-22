@@ -4,9 +4,16 @@ import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
 import { normalizeLogoSvg } from "@/lib/svg-normalize";
 import { isPlatformAdmin, venueRole } from "@/lib/auth";
+import { originalPath, thumbPath } from "@/lib/media";
 
 const BUCKET = "oriz-photos";
 const MAX_BYTES = 1_500_000; // 1.5 MB — sanity cap after client resize
+const MAX_THUMB_BYTES = 300_000;
+
+// The client sends WebP, or JPEG from browsers that cannot encode WebP.
+function imageType(blob: Blob): string {
+  return blob.type === "image/jpeg" ? "image/jpeg" : "image/webp";
+}
 
 // Photo upload endpoint.
 //
@@ -93,7 +100,7 @@ export async function POST(req: NextRequest) {
     const path = target === "carta-venue-logo" ? `carta/${id}/logo.webp` : `casa/${id}/logo.webp`;
     const { error: upErr } = await admin.storage
       .from(BUCKET)
-      .upload(path, buf, { contentType: "image/webp", upsert: true, cacheControl: "3600" });
+      .upload(path, buf, { contentType: imageType(file), upsert: true, cacheControl: "3600" });
     if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
     const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(path);
     const url = `${pub.publicUrl}?v=${randomUUID().slice(0, 8)}`;
@@ -170,7 +177,7 @@ export async function POST(req: NextRequest) {
   const { error: upErr } = await admin.storage
     .from(BUCKET)
     .upload(storagePath, buf, {
-      contentType: "image/webp",
+      contentType: imageType(file),
       upsert: true,
       cacheControl: "3600",
     });
@@ -178,6 +185,21 @@ export async function POST(req: NextRequest) {
     console.error("[upload-photo] storage error:", upErr);
     return NextResponse.json({ error: upErr.message }, { status: 500 });
   }
+
+  // Small copy next to it (see thumbUrl in lib/media.ts). Optional: older
+  // clients send none, and the guest menu then falls back to the full photo.
+  const thumb = form.get("thumb");
+  if (thumb instanceof Blob && thumb.size <= MAX_THUMB_BYTES) {
+    await admin.storage.from(BUCKET).upload(thumbPath(storagePath), Buffer.from(await thumb.arrayBuffer()), {
+      contentType: imageType(thumb),
+      upsert: true,
+      cacheControl: "3600",
+    });
+  } else {
+    await admin.storage.from(BUCKET).remove([thumbPath(storagePath)]);
+  }
+  // A new photo replaces any AI-styled version and the original kept for it.
+  if (target === "carta-item") await admin.storage.from(BUCKET).remove([originalPath(storagePath)]);
 
   // Bust the CDN cache for repeat uploads by appending a version param.
   const { data: pub } = admin.storage.from(BUCKET).getPublicUrl(storagePath);
@@ -270,6 +292,6 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "unknown target" }, { status: 400 });
   }
 
-  await admin.storage.from(BUCKET).remove([storagePath]);
+  await admin.storage.from(BUCKET).remove([storagePath, thumbPath(storagePath), originalPath(storagePath)]);
   return NextResponse.json({ ok: true });
 }

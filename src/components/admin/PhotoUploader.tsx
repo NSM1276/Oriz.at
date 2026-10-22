@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { resizeToWebP } from "@/lib/image-resize";
+import { preparePhoto, resizeToWebP } from "@/lib/image-resize";
+import { DishPhotoStudio } from "@/components/photo/DishPhotoStudio";
 
 type Target =
   | "carta-item"
@@ -49,9 +50,13 @@ export function PhotoUploader({
       if (isSvg) {
         // SVG passes through untouched — server normalizes (sanitize + currentColor).
         form.append("file", file, file.name || "logo.svg");
+      } else if (target === "carta-venue-logo" || target === "casa-property-logo") {
+        form.append("file", await resizeToWebP(file), "logo");
       } else {
-        const webp = await resizeToWebP(file);
-        form.append("file", webp, "photo.webp");
+        // Photos also get a small copy, which the guest menu lists load instead.
+        const { full, thumb } = await preparePhoto(file);
+        form.append("file", full, "photo");
+        form.append("thumb", thumb, "thumb");
       }
       const res = await fetch("/api/admin/upload-photo", { method: "POST", body: form });
       if (!res.ok) {
@@ -149,6 +154,10 @@ export function PhotoUploader({
         <p className="font-sans text-[10px] text-red-700 leading-snug max-w-[220px]">
           {error}
         </p>
+      )}
+
+      {target === "carta-item" && currentUrl && !busy && (
+        <DishPhotoStudio itemId={id} onChange={onChange} />
       )}
     </div>
   );
