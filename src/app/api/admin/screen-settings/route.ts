@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
 import type { ScreenSettingsRow } from "@/lib/supabase/types";
-import { isPlatformAdmin } from "@/lib/auth";
+import { venueRole } from "@/lib/auth";
 import { DEMO_VENUE_IDS } from "@/lib/demo";
 
 // Screen (TV board) settings — one row per venue, upserted on every change.
@@ -32,14 +32,7 @@ async function authorize(venueId: string): Promise<NextResponse | null> {
   const userSb = await createServerSupabase();
   const { data: { user } } = await userSb.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  if (await isPlatformAdmin(user.id)) return null;
-  const { data: venue } = await svc()
-    .from("venues")
-    .select("owner_id")
-    .eq("id", venueId)
-    .maybeSingle<{ owner_id: string | null }>();
-  if (!venue) return NextResponse.json({ error: "venue not found" }, { status: 404 });
-  if (venue.owner_id !== user.id) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  if (!(await venueRole(user.id, venueId))) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   return null;
 }
 

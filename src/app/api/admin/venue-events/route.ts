@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
-import { isPlatformAdmin } from "@/lib/auth";
+import { venueRole } from "@/lib/auth";
 import { DEMO_VENUE_IDS } from "@/lib/demo";
 
 function svc() {
@@ -25,16 +25,8 @@ export async function GET(req: NextRequest) {
     const { data: { user } } = await userSb.auth.getUser();
     if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const isSuper = await isPlatformAdmin(user.id);
-    if (!isSuper) {
-      const { data: venue } = await admin
-        .from("venues")
-        .select("owner_id")
-        .eq("id", venueId)
-        .maybeSingle<{ owner_id: string | null }>();
-      if (!venue || venue.owner_id !== user.id) {
-        return NextResponse.json({ error: "forbidden" }, { status: 403 });
-      }
+    if (!(await venueRole(user.id, venueId))) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
   }
 
@@ -74,16 +66,8 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await userSb.auth.getUser();
     if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const isSuper = await isPlatformAdmin(user.id);
-    if (!isSuper) {
-      const { data: venue } = await admin
-        .from("venues")
-        .select("owner_id")
-        .eq("id", venueId)
-        .maybeSingle<{ owner_id: string | null }>();
-      if (!venue || venue.owner_id !== user.id) {
-        return NextResponse.json({ error: "forbidden" }, { status: 403 });
-      }
+    if (!(await venueRole(user.id, venueId))) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
   }
 
@@ -126,11 +110,8 @@ export async function DELETE(req: NextRequest) {
     const { data: { user } } = await userSb.auth.getUser();
     if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-    const isSuper = await isPlatformAdmin(user.id);
-    if (!isSuper) {
-      if (!evTyped || evTyped.venues.owner_id !== user.id) {
-        return NextResponse.json({ error: "forbidden" }, { status: 403 });
-      }
+    if (!evTyped || !(await venueRole(user.id, evTyped.venue_id))) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
   }
 

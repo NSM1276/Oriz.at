@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
 import { normalizeLogoSvg } from "@/lib/svg-normalize";
-import { isPlatformAdmin } from "@/lib/auth";
+import { isPlatformAdmin, venueRole } from "@/lib/auth";
 
 const BUCKET = "oriz-photos";
 const MAX_BYTES = 1_500_000; // 1.5 MB — sanity cap after client resize
@@ -115,7 +115,8 @@ export async function POST(req: NextRequest) {
       .eq("id", id)
       .maybeSingle<{ id: string; venue_id: string; venues: { owner_id: string | null } }>();
     if (!item) return NextResponse.json({ error: "item not found" }, { status: 404 });
-    if (!isSuper && item.venues.owner_id !== user.id) {
+    // Any member of the venue (owner or manager) may change dish photos.
+    if (!(await venueRole(user.id, item.venue_id))) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     storagePath = `carta/${item.venue_id}/items/${id}.webp`;
@@ -138,7 +139,7 @@ export async function POST(req: NextRequest) {
       .eq("id", id)
       .maybeSingle<{ id: string; owner_id: string | null }>();
     if (!venue) return NextResponse.json({ error: "venue not found" }, { status: 404 });
-    if (!isSuper && venue.owner_id !== user.id) {
+    if (!(await venueRole(user.id, venue.id))) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     storagePath = `carta/${id}/cover.webp`;
@@ -220,7 +221,7 @@ export async function DELETE(req: NextRequest) {
       .eq("id", id)
       .maybeSingle<{ venue_id: string; venues: { owner_id: string | null } }>();
     if (!item) return NextResponse.json({ error: "not found" }, { status: 404 });
-    if (!isSuper && item.venues.owner_id !== user.id) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    if (!(await venueRole(user.id, item.venue_id))) return NextResponse.json({ error: "forbidden" }, { status: 403 });
     storagePath = `carta/${item.venue_id}/items/${id}.webp`;
     await admin.from("items").update({ image_url: null }).eq("id", id);
   } else if (target === "casa-cover") {
@@ -229,9 +230,9 @@ export async function DELETE(req: NextRequest) {
     storagePath = `casa/${id}/cover.webp`;
     await admin.schema("casa").from("properties").update({ cover_url: null }).eq("id", id);
   } else if (target === "carta-venue-cover") {
-    const { data: venue } = await admin.from("venues").select("owner_id").eq("id", id).maybeSingle<{ owner_id: string | null }>();
+    const { data: venue } = await admin.from("venues").select("id").eq("id", id).maybeSingle<{ id: string }>();
     if (!venue) return NextResponse.json({ error: "not found" }, { status: 404 });
-    if (!isSuper && venue.owner_id !== user.id) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    if (!(await venueRole(user.id, venue.id))) return NextResponse.json({ error: "forbidden" }, { status: 403 });
     storagePath = `carta/${id}/cover.webp`;
     await admin.from("venues").update({ cover_url: null }).eq("id", id);
   } else if (target === "casa-block") {
