@@ -4,6 +4,7 @@ import { createClient as createServerSupabase } from "@/lib/supabase/server";
 import { isPlatformAdmin } from "@/lib/auth";
 import { DEMO_VENUE_IDS } from "@/lib/demo";
 import { getEntitlements } from "@/lib/entitlements-server";
+import { menuLimitProblem } from "@/lib/entitlements";
 
 function svc() {
   return createClient(
@@ -86,14 +87,9 @@ export async function POST(req: NextRequest) {
   // get next position
   const { count } = await svc().from("menus").select("*", { count: "exact", head: true }).eq("venue_id", venueId);
 
-  // Starter has one menu, Pro up to five.
-  const { maxMenus } = await getEntitlements(venueId);
-  if ((count ?? 0) >= maxMenus) {
-    return NextResponse.json(
-      { error: maxMenus === 1 ? "Mit Starter ist eine Karte enthalten. Mehrere Karten gibt es mit Pro." : `Mehr als ${maxMenus} Karten sind nicht möglich.` },
-      { status: 403 },
-    );
-  }
+  // Starter has one menu (no extra menu rows), Pro up to five.
+  const problem = menuLimitProblem(count ?? 0, (await getEntitlements(venueId)).maxMenus);
+  if (problem) return NextResponse.json({ error: problem }, { status: 403 });
 
   const { data, error } = await svc()
     .from("menus")

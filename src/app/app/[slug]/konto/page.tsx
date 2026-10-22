@@ -16,7 +16,7 @@ export default async function AccountPage({ params }: { params: Promise<{ slug: 
   const current = ent.tier === "pro" || ent.tier === "trial" ? "pro" : "starter";
   const plans = [
     { id: "starter", name: "Starter", body: "Alles für ein Lokal: Karte mit unbegrenzten Gerichten, Aussehen, Allergene, QR-Codes für die Tische, Service-Ruf und Druck-PDF." },
-    { id: "pro", name: "Pro", body: "Alles aus Starter, dazu Druck-Design (Ihre Farben, Ihr Logo, Blatt für Blatt nachdrucken), Screen (Ihre Karte auf dem Fernseher) und Priority Support." },
+    { id: "pro", name: "Pro", body: "Alles aus Starter, dazu bis zu fünf Karten (z. B. Mittag, Abend, Getränke), Druck-Design (Ihre Farben, Ihr Logo, Blatt für Blatt nachdrucken), Screen (Ihre Karte auf dem Fernseher) und Priority Support." },
   ] as const;
 
   return (

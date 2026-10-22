@@ -7,8 +7,9 @@ import { formatPrice } from "@/lib/format";
 import { parseAllergens, parseDiet, parseVariants } from "@/lib/guest-menu";
 import { LOCALE_NAMES, MENU_LOCALES, type MenuLocale } from "@/lib/menu-edit";
 import { createSection, deleteSection, moveSection, saveSection, setAvailable, setLocales } from "./actions";
+import { setSectionMenu } from "./menus-actions";
 
-export type EditorSection = { id: string; name: string; position: number; translations: Record<string, { name?: string }> | null };
+export type EditorSection = { id: string; name: string; position: number; translations: Record<string, { name?: string }> | null; menu_id: string | null };
 export type EditorItem = {
   id: string;
   section_id: string;
@@ -121,12 +122,18 @@ export function MenuEditor({
   locales,
   sections,
   items,
+  menus,
+  menusSlot,
 }: {
   slug: string;
   currency: string;
   locales: MenuLocale[];
   sections: EditorSection[];
   items: EditorItem[];
+  /** The venue's separate menus (lunch, dinner…); empty = one menu for everything. */
+  menus: { id: string; name: string }[];
+  /** The "Karten" card, rendered on the server page. */
+  menusSlot: React.ReactNode;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -211,6 +218,8 @@ export function MenuEditor({
         </p>
       </section>
 
+      {menusSlot}
+
       {unknownAllergens > 0 && items.length > 0 && (
         <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
           Bei {unknownAllergens} von {items.length} Gerichten fehlen die Allergene. Gäste sehen dort „Keine Angaben — bitte nachfragen“,
@@ -228,6 +237,20 @@ export function MenuEditor({
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{s.name}</p>
                 <p className="text-xs text-stone-500">{list.length} {list.length === 1 ? "Gericht" : "Gerichte"}</p>
+                {menus.length > 0 && (
+                  <select
+                    aria-label={`Karte für ${s.name}`}
+                    disabled={pending}
+                    value={s.menu_id ?? ""}
+                    onChange={(e) => run(() => setSectionMenu(slug, s.id, e.target.value || null))}
+                    className="mt-1.5 max-w-full rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm"
+                  >
+                    <option value="">In allen Karten</option>
+                    {menus.map((m) => (
+                      <option key={m.id} value={m.id}>Nur: {m.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
               <button type="button" aria-label="Bereich nach oben" disabled={pending || si === 0} onClick={() => run(() => moveSection(slug, s.id, -1))} className="h-9 w-9 rounded-lg text-stone-500 hover:bg-stone-100 disabled:opacity-30">↑</button>
               <button type="button" aria-label="Bereich nach unten" disabled={pending || si === sections.length - 1} onClick={() => run(() => moveSection(slug, s.id, 1))} className="h-9 w-9 rounded-lg text-stone-500 hover:bg-stone-100 disabled:opacity-30">↓</button>

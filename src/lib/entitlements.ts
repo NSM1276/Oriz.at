@@ -25,9 +25,11 @@ type Features = {
   printDesign: boolean;
 };
 
+export const PRO_MAX_MENUS = 5;
+
 const FEATURES: Record<PlanId, Features> = {
   starter: { screen: false, maxMenus: 1, printDesign: false },
-  pro: { screen: true, maxMenus: 5, printDesign: true },
+  pro: { screen: true, maxMenus: PRO_MAX_MENUS, printDesign: true },
 };
 
 export type Entitlements = Features & {
@@ -54,6 +56,16 @@ export function entitlementsFor(sub: Subscription | null | undefined, now: Date 
   // A cancelled subscription falls back to Starter; "past_due" keeps its plan until it is cancelled.
   const plan: PlanId = sub.status === "canceled" ? "starter" : sub.plan;
   return { ...FEATURES[plan], tier: plan, label: PLAN_NAME[plan], trialEndsAt: trialEnd, trialExpired: false };
+}
+
+/**
+ * Why another menu may not be created, or null when it may. Starter has one menu, which means no
+ * separate menu rows at all (guests then see the whole menu); Pro has up to five rows.
+ */
+export function menuLimitProblem(existing: number, maxMenus: number): string | null {
+  if (maxMenus <= 1) return "Mehrere Karten gibt es mit Pro.";
+  if (existing >= maxMenus) return `Mehr als ${maxMenus} Karten sind nicht möglich.`;
+  return null;
 }
 
 export const UPGRADE_MAIL = "office@oriz.at";

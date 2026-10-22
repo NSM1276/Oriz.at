@@ -73,3 +73,12 @@ test("locked texts and the upgrade mail", () => {
   assert.match(lockedText("screen").title, /Pro/);
   assert.match(upgradeMailto("Café Müller"), /^mailto:office@oriz\.at\?subject=Tarif%20Pro%20f%C3%BCr%20Caf%C3%A9%20M%C3%BCller$/);
 });
+
+import { PRO_MAX_MENUS } from "../src/lib/entitlements.ts";
+
+test("the Pro plan on the website names the same number of menus as the code allows", () => {
+  const de = translations.de.pricing.plans.find((p) => p.plan === "pro").features.join(" | ");
+  const en = translations.en.pricing.plans.find((p) => p.plan === "pro").features.join(" | ");
+  assert.match(de, new RegExp(`Bis zu ${PRO_MAX_MENUS} Karten`));
+  assert.match(en, new RegExp(`Up to ${PRO_MAX_MENUS} menus`));
+});
