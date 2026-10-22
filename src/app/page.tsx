@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalLinks } from "@/components/landing/LegalLinks";
+import { SITE_URL } from "@/lib/site";
 
 // Main page: Carta only, large type, claims that match the product.
 // The earlier three-product page is kept in src/legacy/home-umbrella-page.tsx
@@ -10,7 +11,6 @@ export const metadata: Metadata = {
   title: "Digitale Speisekarte per QR-Code für Wien | ORIZ Carta",
   description:
     "Digitale Speisekarte für Restaurants & Cafés in Wien: QR-Code am Tisch, Allergene, Fotos, mehrere Sprachen. Preise in Sekunden ändern. 14 Tage kostenlos testen.",
-  alternates: { canonical: "https://oriz.at" },
   openGraph: {
     title: "Digitale Speisekarte per QR-Code — ORIZ Carta, Wien",
     description:
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     siteName: "ORIZ",
     locale: "de_AT",
     type: "website",
-    url: "https://oriz.at",
+    url: SITE_URL,
   },
 };
 
@@ -100,9 +100,9 @@ const JSON_LD = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://oriz.at/#org",
+      "@id": `${SITE_URL}/#org`,
       name: "ORIZ",
-      url: "https://oriz.at",
+      url: SITE_URL,
       email: "office@oriz.at",
       telephone: "+43 677 64292055",
       address: { "@type": "PostalAddress", streetAddress: "Tscherttegasse 39", postalCode: "1120", addressLocality: "Wien", addressCountry: "AT" },
@@ -114,7 +114,7 @@ const JSON_LD = {
       operatingSystem: "Web",
       inLanguage: ["de", "en", "it", "uk"],
       description: "Digitale Speisekarte per QR-Code für Restaurants, Cafés und Bars: Fotos, EU-Allergene, mehrere Sprachen, Preise in Sekunden ändern.",
-      publisher: { "@id": "https://oriz.at/#org" },
+      publisher: { "@id": `${SITE_URL}/#org` },
     },
     {
       "@type": "FAQPage",

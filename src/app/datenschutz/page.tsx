@@ -4,7 +4,6 @@ import { LegalPage } from "@/components/landing/LegalPage";
 export const metadata: Metadata = {
   title: "Datenschutzerklärung | ORIZ",
   description: "Welche Daten ORIZ Carta verarbeitet, wofür und welche Rechte Sie haben.",
-  alternates: { canonical: "https://oriz.at/datenschutz" },
 };
 
 // Draft written from what the code actually does on 2026-10-22. It is not legal advice:

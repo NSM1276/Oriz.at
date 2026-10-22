@@ -3,7 +3,7 @@ export type Locale = "de" | "en";
 export const translations = {
   de: {
     hero: {
-      eyebrow: "Digitale Speisekarten · Wien",
+      eyebrow: "Digitale Speisekarte für Restaurants in Wien",
       slogan: "Immer aktuell. In jeder Sprache.",
       ctaDemo: "Live-Demo ansehen",
       ctaContact: "Anfrage stellen",
@@ -143,7 +143,7 @@ export const translations = {
   },
   en: {
     hero: {
-      eyebrow: "Digital Menus · Vienna",
+      eyebrow: "Digital menus for restaurants in Vienna",
       slogan: "Always up to date. In every language.",
       ctaDemo: "View live demo",
       ctaContact: "Get in touch",

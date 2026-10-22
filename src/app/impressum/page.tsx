@@ -4,7 +4,6 @@ import { LegalPage } from "@/components/landing/LegalPage";
 export const metadata: Metadata = {
   title: "Impressum | ORIZ",
   description: "Impressum und Anbieterkennzeichnung von ORIZ, Nasim Nuridinov e.U., Wien.",
-  alternates: { canonical: "https://oriz.at/impressum" },
 };
 
 // Data below is the owner's existing published Impressum, moved here unchanged.

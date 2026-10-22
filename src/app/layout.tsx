@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { MarketingAnalytics } from "@/components/MarketingAnalytics";
+import { SITE_URL } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,9 +21,11 @@ export const metadata: Metadata = {
   title: "ORIZ — Digitale Speisekarte & Hospitality Software aus Wien",
   description:
     "ORIZ ersetzt die Papierkarte durch eine ruhige, lebendige Speisekarte per QR-Code. Carta · Casa · Screen — für Restaurants, Hotels & Pensionen. Aus Wien.",
-  metadataBase: new URL("https://oriz.at"),
+  metadataBase: new URL(SITE_URL),
+  // "./" = the address of the page itself. A fixed address here would be inherited by every page
+  // that sets none, telling search engines that each of them is a copy of the home page.
   alternates: {
-    canonical: "https://oriz.at",
+    canonical: "./",
   },
   openGraph: {
     title: "ORIZ — Digitale Speisekarte für Restaurants & Hotels",
@@ -31,7 +34,6 @@ export const metadata: Metadata = {
     siteName: "ORIZ",
     locale: "de_AT",
     type: "website",
-    url: "https://oriz.at",
   },
   twitter: {
     card: "summary_large_image",

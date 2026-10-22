@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   title: "ORIZ Screen — Digitale Menütafel für Ihren Fernseher",
   description:
     "Der Bildschirm, der schon bei Ihnen hängt, zeigt Ihre Speisekarte. Preise in Echtzeit, Wechsel nach Tageszeit, ohne Zusatzgerät und ohne Installation.",
-  alternates: { canonical: "https://oriz.at/screen" },
 };
 
 // ── content ────────────────────────────────────────────────────────────────

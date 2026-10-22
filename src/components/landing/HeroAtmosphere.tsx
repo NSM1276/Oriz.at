@@ -121,20 +121,21 @@ export function HeroAtmosphere() {
       {/* ── centered content ── */}
       <div className="relative z-20 flex flex-col items-center justify-center h-full text-center px-6 select-none">
 
-        {/* eyebrow */}
-        <span
-          className="font-sans uppercase tracking-regal mb-8 md:mb-12 opacity-75"
+        {/* the page's heading (H1) — what the page is about */}
+        <h1
+          className="font-sans uppercase tracking-regal mb-8 md:mb-12 font-normal max-w-md md:max-w-none leading-relaxed"
           style={{
-            fontSize:      "clamp(8px, 1.1vw, 10px)",
+            fontSize:      "clamp(11px, 1.3vw, 14px)",
             color:         "#C69B3C",
-            letterSpacing: "0.32em",
+            letterSpacing: "0.26em",
           }}
         >
           {t.hero.eyebrow}
-        </span>
+        </h1>
 
         {/* wordmark */}
-        <h1
+        <p
+          aria-hidden="true"
           className="font-display font-light leading-none tracking-widest"
           style={{
             fontSize:   "clamp(5.5rem, 19vw, 14rem)",
@@ -143,7 +144,7 @@ export function HeroAtmosphere() {
           }}
         >
           ORIZ
-        </h1>
+        </p>
 
         {/* gold hairline */}
         <div
