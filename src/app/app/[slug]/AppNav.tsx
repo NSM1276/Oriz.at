@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function AppNav({ slug, screenLocked = false }: { slug: string; screenLocked?: boolean }) {
+export function AppNav({ slug, screenLocked = false, printLocked = false }: { slug: string; screenLocked?: boolean; printLocked?: boolean }) {
   const pathname = usePathname();
   const base = `/app/${slug}`;
   const tabs: { href: string; label: string; active: boolean; pro?: boolean }[] = [
     { href: base, label: "Übersicht", active: pathname === base },
     { href: `${base}/speisekarte`, label: "Speisekarte", active: pathname.startsWith(`${base}/speisekarte`) },
+    { href: `${base}/druck`, label: "Druck", active: pathname.startsWith(`${base}/druck`), pro: printLocked },
     { href: `${base}/tische`, label: "Tische", active: pathname.startsWith(`${base}/tische`) },
     { href: `${base}/service`, label: "Service", active: pathname.startsWith(`${base}/service`) },
     { href: `${base}/aussehen`, label: "Aussehen", active: pathname.startsWith(`${base}/aussehen`) },

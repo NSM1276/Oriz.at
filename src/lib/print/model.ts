@@ -23,7 +23,7 @@ export type PrintItem = {
   diet: string | null;
   prices: PrintPrice[];
 };
-export type PrintSection = { name: string; items: PrintItem[] };
+export type PrintSection = { id: string; name: string; items: PrintItem[] };
 
 export type PrintUi = {
   stand: string;
@@ -55,6 +55,11 @@ export function printLocale(requested: string | null | undefined, enabled: strin
   return want && want !== "de" && (enabled ?? []).includes(want) && UI[want] ? want : "de";
 }
 
+/** The locale tag used to write dates ("de-AT", "en-GB", …). */
+export function dateTagFor(locale: string): string {
+  return (UI[locale] ?? UI.de).dateTag;
+}
+
 export function standDate(now: Date, locale: string): string {
   const tag = (UI[locale] ?? UI.de).dateTag;
   return new Intl.DateTimeFormat(tag, { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Vienna" }).format(now);
@@ -64,6 +69,15 @@ function priceLines(item: GuestItem, currency: string): PrintPrice[] {
   if (item.variants.length > 0) return item.variants.map((v) => ({ label: v.label, price: formatPrice(v.priceCents, currency) }));
   if (item.priceCents > 0) return [{ label: null, price: formatPrice(item.priceCents, currency) }];
   return [];
+}
+
+/** The allergen legend for just these sections (a sheet taken out of a folder lists only what is on it). */
+export function legendFor(sections: PrintSection[], locale: string): { code: string; name: string }[] {
+  const used = new Set<string>();
+  for (const s of sections) for (const it of s.items) for (const c of (it.allergens ?? "").split(",")) if (c.trim()) used.add(c.trim());
+  return (Object.keys(ALLERGEN_LABELS) as string[])
+    .filter((code) => used.has(code))
+    .map((code) => ({ code, name: allergenName(code, locale, ALLERGEN_LABELS[code]) }));
 }
 
 export type PrintSource = {
@@ -88,6 +102,7 @@ export function buildPrintModel(source: PrintSource, requestedLocale: string | n
     venueName: source.venue.name,
     about: about?.trim() || null,
     sections: sections.map((s) => ({
+      id: s.id,
       name: s.name,
       items: s.items.map((it) => ({
         name: it.name,

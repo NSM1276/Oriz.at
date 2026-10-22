@@ -28,6 +28,12 @@ function configure() {
   configured = true;
 }
 
+/** pdfmake with fonts and access limits set up (shared by the free PDF and the print design). */
+export function getPdfmake() {
+  configure();
+  return pdfmake;
+}
+
 /** The finished PDF for one venue's menu. */
 export async function renderMenuPdf(model: PrintModel): Promise<Buffer> {
   configure();

@@ -13,17 +13,17 @@ import type { PrintModel } from "./model.ts";
 
 export type PdfDoc = Record<string, unknown>;
 
-const INK = "#0A0A0A";
-const GRAY = "#555555";
-const LIGHT = "#8A8A8A";
-const RULE = "#D9D9D9";
+export const INK = "#0A0A0A";
+export const GRAY = "#555555";
+export const LIGHT = "#8A8A8A";
+export const RULE = "#D9D9D9";
 
 export const PAGE = { width: 595.28, height: 841.89 };
 export const MARGINS = { left: 57, top: 52, right: 45, bottom: 98 }; // pt: 20 mm left, 16 mm right
-const CONTENT_WIDTH = PAGE.width - MARGINS.left - MARGINS.right;
+export const CONTENT_WIDTH = PAGE.width - MARGINS.left - MARGINS.right;
 
 /** Sizes like "0,3 l" must not break between the number and the unit. */
-function nbsp(s: string): string {
+export function nbsp(s: string): string {
   return s.replace(/ /g, " ");
 }
 
@@ -45,8 +45,13 @@ export function estimateSectionHeight(section: PrintModel["sections"][number]): 
   return h;
 }
 
-function itemRow(item: PrintItem) {
-  const nameLine: Record<string, unknown>[] = [{ text: item.name, bold: true, fontSize: 11 }];
+/** How a dish row looks; the free PDF uses the defaults. */
+export type ItemStyle = { nameFont?: string; nameSize?: number };
+
+export function itemRow(item: PrintItem, style: ItemStyle = {}) {
+  const nameLine: Record<string, unknown>[] = [
+    { text: item.name, bold: true, fontSize: style.nameSize ?? 11, ...(style.nameFont ? { font: style.nameFont } : {}) },
+  ];
   if (item.allergens) nameLine.push({ text: `  ${item.allergens}`, fontSize: 8, color: LIGHT });
   if (item.diet) nameLine.push({ text: `  ${item.diet}`, fontSize: 8, color: LIGHT, italics: true });
 
@@ -120,7 +125,7 @@ export function buildPrintDoc(model: PrintModel, qrSvg: string): PdfDoc {
       margin: [0, 20, 0, 4],
       headlineLevel: 1,
     };
-    const rows = section.items.map(itemRow);
+    const rows = section.items.map((it) => itemRow(it));
     // A section that fits on one page stays together: it moves to the next page as a whole,
     // so a page pulled out of a folder never starts in the middle of a section.
     // Longer sections flow over the pages (the heading rule below still applies).

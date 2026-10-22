@@ -39,7 +39,7 @@ export default async function VenueLayout({
             </a>
           </div>
           <div className="pb-3">
-            <AppNav slug={venue.slug} screenLocked={!entitlements.screen} />
+            <AppNav slug={venue.slug} screenLocked={!entitlements.screen} printLocked={!entitlements.printDesign} />
           </div>
         </div>
       </header>

@@ -205,6 +205,10 @@ export function MenuEditor({
             ))}
           </div>
         )}
+        <p className="mt-3 text-sm text-stone-600">
+          Ihre Farben, Ihr Logo und Blatt für Blatt nachdrucken?{" "}
+          <Link href={`/app/${slug}/druck`} className="font-medium underline">Zum Druck-Design (Pro)</Link>
+        </p>
       </section>
 
       {unknownAllergens > 0 && items.length > 0 && (
