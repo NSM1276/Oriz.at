@@ -18,6 +18,7 @@ type State = {
   name: string;
   email: string;
   phone: string;
+  website: string;
 };
 
 function ChipGroup({ options, value, onChange }: { options: readonly string[]; value: string; onChange: (v: string) => void }) {
@@ -77,7 +78,7 @@ export function ContactForm() {
   const searchParams = useSearchParams();
   const { t } = useT();
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [honeypot, setHoneypot] = useState("");
   const [state, setState] = useState<State>({
     step: 0,
     venueType: "",
@@ -89,6 +90,7 @@ export function ContactForm() {
     name: "",
     email: "",
     phone: "",
+    website: "",
   });
 
   // Reset plan default when locale changes
@@ -123,28 +125,25 @@ export function ContactForm() {
     if (!canNext) return;
     setStatus("sending");
 
-    const fd = new FormData();
-    fd.append("_captcha", "false");
-    fd.append("_template", "table");
-    fd.append("_subject", `ORIZ Anfrage — ${state.restaurant} · ${state.plan}`);
-    fd.append("Paket", state.plan);
-    fd.append("Art des Lokals", state.venueType);
-    fd.append("Anzahl Tische", state.tables);
-    fd.append("Anzahl Gerichte", state.dishes);
-    fd.append("Sprachen", state.languages);
-    fd.append("Restaurant", state.restaurant);
-    if (state.name) fd.append("Name", state.name);
-    fd.append("E-Mail", state.email);
-    if (state.phone) fd.append("Telefon", state.phone);
-
     try {
-      const res = await fetch("https://formsubmit.co/ajax/office@na-max.com", {
+      const res = await fetch("/api/contact", {
         method: "POST",
-        headers: { Accept: "application/json" },
-        body: fd,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          plan: state.plan,
+          venueType: state.venueType,
+          tables: state.tables,
+          dishes: state.dishes,
+          languages: state.languages,
+          restaurant: state.restaurant,
+          name: state.name,
+          email: state.email,
+          phone: state.phone,
+          website: state.website,
+          _gotcha: honeypot,
+        }),
       });
-      const json = await res.json();
-      setStatus(json.success === "true" || json.success === true ? "sent" : "error");
+      setStatus(res.ok ? "sent" : "error");
     } catch {
       setStatus("error");
     }
@@ -164,6 +163,17 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="text-left">
+      {/* Honeypot: invisible to people, bots fill it. */}
+      <input
+        type="text"
+        name="company_url"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        className="absolute -left-[9999px] h-0 w-0 opacity-0"
+      />
       <StepIndicator current={state.step} steps={t.form.steps} />
 
       {/* Step 1 */}
@@ -239,37 +249,13 @@ export function ContactForm() {
               </label>
               <input
                 type="url"
-                name="Website"
+                value={state.website}
+                onChange={(e) => set("website", e.target.value)}
                 placeholder={t.form.placeholders.website}
                 className="border-b border-parchment/15 bg-transparent py-3 font-sans text-sm text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold transition-colors"
               />
               <span className="font-sans text-[10px] text-parchment/20 mt-1">
                 {t.form.labels.websiteHint}
-              </span>
-            </div>
-
-            {/* PDF upload */}
-            <div className="flex flex-col gap-2">
-              <label className="font-sans text-[10px] tracking-regal uppercase text-parchment/30">
-                {t.form.labels.pdf}
-              </label>
-              <label className="flex items-center gap-4 border border-dashed border-parchment/15 px-5 py-4 cursor-pointer hover:border-parchment/30 transition-colors group">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-parchment/30 group-hover:text-parchment/50 transition-colors">
-                  <path d="M8 1v9M4 6l4-4 4 4M2 13h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span className={`font-sans text-xs transition-colors ${fileName ? "text-gold" : "text-parchment/30 group-hover:text-parchment/50"}`}>
-                  {fileName ?? t.form.labels.pdfPlaceholder}
-                </span>
-                <input
-                  type="file"
-                  name="attachment"
-                  accept=".pdf"
-                  className="sr-only"
-                  onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
-                />
-              </label>
-              <span className="font-sans text-[10px] text-parchment/20">
-                {t.form.labels.pdfHint}
               </span>
             </div>
           </div>

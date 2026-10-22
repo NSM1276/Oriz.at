@@ -87,3 +87,36 @@ export function orderStatusChanged(o: OrderFacts, status: "bezahlt" | "in_arbeit
     html: html(lines, { href: o.appUrl, label: status === "fertig" ? "Speisekarte öffnen" : "Auftrag ansehen" }),
   };
 }
+
+/** To us, for every request from the form on /carta. Reply goes to the sender (reply-to is set by the caller). */
+export function contactRequestForAdmin(c: {
+  plan: string;
+  venueType: string;
+  tables: string;
+  dishes: string;
+  languages: string;
+  restaurant: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  website: string | null;
+}, leadsUrl: string): Email {
+  const lines = [
+    `Neue Anfrage über die Website: ${c.restaurant}`,
+    `Kontakt: ${[c.name, c.email, c.phone].filter(Boolean).join(" · ")}`,
+    [
+      c.plan && `Paket: ${c.plan}`,
+      c.venueType && `Art des Lokals: ${c.venueType}`,
+      c.tables && `Tische: ${c.tables}`,
+      c.dishes && `Gerichte: ${c.dishes}`,
+      c.languages && `Sprachen: ${c.languages}`,
+      c.website && `Website: ${c.website}`,
+    ].filter(Boolean).join("\n"),
+    "Antworten Sie direkt auf diese E-Mail, die Antwort geht an den Absender.",
+  ].filter(Boolean);
+  return {
+    subject: `Anfrage: ${c.restaurant}${c.plan ? ` · ${c.plan}` : ""}`,
+    text: [...lines, leadsUrl].join("\n\n"),
+    html: html(lines, { href: leadsUrl, label: "Lead-Inbox öffnen" }),
+  };
+}

@@ -56,7 +56,8 @@ export default function DatenschutzPage() {
           heading: "Kontakt und Anfragen",
           paragraphs: [
             "Wenn Sie uns per E-Mail, Telefon oder über ein Kontaktformular schreiben, verwenden wir Ihre Angaben, um Ihre Anfrage zu beantworten (Art. 6 Abs. 1 lit. b oder f DSGVO). Wir geben sie nicht zu Werbezwecken weiter.",
-            "Formulare auf unserer Website leiten die Nachricht über den Dienst formsubmit.co an unser E-Mail-Postfach weiter. Dieser Dienst verarbeitet den Inhalt der Nachricht dafür vorübergehend.",
+            "Das Kontaktformular auf der Seite Carta speichern wir in unserer Datenbank (Supabase, Frankfurt) und melden uns dann per E-Mail bei Ihnen.",
+            "Die Formulare zu Casa und Screen leiten die Nachricht zusätzlich über den Dienst formsubmit.co an unser E-Mail-Postfach weiter. Dieser Dienst verarbeitet den Inhalt der Nachricht dafür vorübergehend.",
           ],
         },
         {
