@@ -31,6 +31,13 @@ export default function DatenschutzPage() {
           ],
         },
         {
+          heading: "Besucherstatistik",
+          paragraphs: [
+            "Auf unseren Informationsseiten (Startseite, Carta, Registrierung, Impressum, Datenschutz) messen wir mit Vercel Web Analytics, welche Seiten aufgerufen werden und woher Besucher kommen (zum Beispiel Instagram, Google). Der Dienst setzt keine Cookies und legt keine Profile einzelner Personen an. Erfasst werden die aufgerufene Seite, die Herkunftsseite, Land, Browser und Gerätetyp. Auch das Abschließen einer Registrierung wird als Zahl gezählt, ohne E-Mail-Adresse oder andere Angaben.",
+            "Rechtsgrundlage ist unser berechtigtes Interesse, unser Angebot zu verbessern (Art. 6 Abs. 1 lit. f DSGVO). Anbieter ist Vercel Inc., USA. Speisekarten für Gäste, der Bereich für Betriebe und die Service-Ansicht werden nicht gemessen.",
+          ],
+        },
+        {
           heading: "Speisekarte für Gäste",
           paragraphs: [
             "Wenn Gäste eine Speisekarte über einen QR-Code öffnen, legen wir keine Nutzerprofile an und fragen keine persönlichen Daten ab. Die gewählte Sprache wird im Browser des Geräts gespeichert (localStorage), damit sie beim nächsten Besuch erhalten bleibt. Diese Speicherung ist technisch erforderlich und braucht keine Einwilligung.",

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import { MarketingAnalytics } from "@/components/MarketingAnalytics";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -60,7 +61,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de" className={`${inter.variable} ${garamond.variable}`}>
-      <body className="font-sans bg-parchment text-onyx">{children}</body>
+      <body className="font-sans bg-parchment text-onyx">
+        {children}
+        <MarketingAnalytics />
+      </body>
     </html>
   );
 }

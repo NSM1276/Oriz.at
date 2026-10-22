@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { track } from "@vercel/analytics";
 import { createClient } from "@/lib/supabase/client";
 
 const PASSWORD_MIN = 8;
@@ -40,6 +41,8 @@ export function SignupForm() {
       );
       return;
     }
+    // Counts completed sign-ups per source page; the event carries no email or other data.
+    track("signup");
     // Without email confirmation Supabase signs the user in right away.
     if (data.session) {
       router.push("/app/neu");
