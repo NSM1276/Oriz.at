@@ -20,15 +20,17 @@ function toRows(lines: ParsedLine[]): Row[] {
   );
 }
 
+// Every row is its own block: the operator has already decided what each line
+// is, so nothing gets folded into a heading behind their back.
 function rowsToLines(rows: Row[]): ParsedLine[] {
-  return rows.flatMap((r): ParsedLine[] => {
+  return rows.flatMap((r, block): ParsedLine[] => {
     if (r.kind === "item") {
       const cents = Math.round(Number(r.price.replace(",", ".")) * 100);
       if (!Number.isFinite(cents) || cents < 0) return [];
-      return [{ kind: "item", name: r.text, priceCents: cents, raw: r.raw }];
+      return [{ kind: "item", name: r.text, priceCents: cents, raw: r.raw, block }];
     }
-    if (r.kind === "section") return [{ kind: "section", name: r.text, raw: r.raw }];
-    return [{ kind: "description", text: r.text, raw: r.raw }];
+    if (r.kind === "section") return [{ kind: "section", name: r.text, raw: r.raw, block }];
+    return [{ kind: "description", text: r.text, raw: r.raw, block }];
   });
 }
 

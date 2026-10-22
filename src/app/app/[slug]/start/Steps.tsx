@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { COLOR_PRESETS } from "@/lib/colorPresets";
-import { linesToSections, parseMenuText } from "@/lib/menu-parser";
+import { linesToImport, parseMenuText } from "@/lib/menu-parser";
 import { addTables } from "../tische/actions";
 import { importMenuText, saveStyle } from "./actions";
 
@@ -53,7 +53,7 @@ export function MenuStep({ slug, existingItems, nextHref }: { slug: string; exis
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const sections = useMemo(() => linesToSections(parseMenuText(text)), [text]);
+  const { sections, skipped } = useMemo(() => linesToImport(parseMenuText(text)), [text]);
   const itemCount = sections.reduce((n, s) => n + s.items.length, 0);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -68,6 +68,15 @@ export function MenuStep({ slug, existingItems, nextHref }: { slug: string; exis
 
   return (
     <form onSubmit={onSubmit}>
+      <Link
+        href={`/app/${slug}/leistungen/neu?art=menu_setup`}
+        className="mb-4 block rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200"
+      >
+        <span className="block font-medium">Lieber machen lassen?</span>
+        <span className="mt-0.5 block text-sm text-stone-600">
+          Schicken Sie uns Ihre Karte als Foto, PDF oder Link — wir tragen alles für Sie ein, meist bis zum nächsten Werktag. ›
+        </span>
+      </Link>
       {existingItems > 0 && (
         <p className="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-900 ring-1 ring-emerald-200">
           Ihre Karte hat schon {existingItems} Gerichte. Neu eingefügte werden ergänzt.
@@ -97,15 +106,42 @@ export function MenuStep({ slug, existingItems, nextHref }: { slug: string; exis
                       <span className="min-w-0">
                         <span className="block truncate">{it.name}</span>
                         {it.description && <span className="block truncate text-xs text-stone-500">{it.description}</span>}
+                        {(it.allergens || it.diet.length > 0) && (
+                          <span className="block text-xs text-stone-500">
+                            {it.allergens && `Allergene ${it.allergens}`}
+                            {it.allergens && it.diet.length > 0 && " · "}
+                            {it.diet[0]}
+                          </span>
+                        )}
                       </span>
-                      <span className="shrink-0 tabular-nums">{euro.format(it.price_cents / 100)}</span>
+                      <span className="shrink-0 text-right tabular-nums">
+                        {it.variants.length > 0
+                          ? it.variants.map((v) => (
+                              <span key={v.label} className="block">
+                                <span className="text-xs text-stone-500">{v.label}</span> {euro.format(v.price_cents / 100)}
+                              </span>
+                            ))
+                          : it.priceless
+                            ? <span className="text-xs text-stone-500">ohne Preis</span>
+                            : euro.format(it.price_cents / 100)}
+                      </span>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
-          <p className="mt-3 text-xs text-stone-500">Fotos, Allergene und Übersetzungen ergänzen Sie danach in der Speisekarte.</p>
+          <p className="mt-3 text-xs text-stone-500">Fotos, fehlende Allergene und Übersetzungen ergänzen Sie danach in der Speisekarte.</p>
+        </div>
+      )}
+
+      {skipped.length > 0 && (
+        <div className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+          <p className="font-medium">Diese Zeilen werden nicht übernommen:</p>
+          <ul className="mt-1 list-disc pl-5">
+            {skipped.map((line, i) => <li key={i}>{line}</li>)}
+          </ul>
+          <p className="mt-1 text-xs">Tipp: Geben Sie einen Preis dazu oder tragen Sie sie danach in der Speisekarte ein.</p>
         </div>
       )}
 

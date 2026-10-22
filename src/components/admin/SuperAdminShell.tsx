@@ -56,6 +56,15 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
             </svg>
             Leads
           </a>
+          <a
+            href="/admin/auftraege"
+            className="flex items-center gap-3 px-3 py-2 rounded-none text-parchment/80 hover:text-parchment hover:bg-white/5 transition font-sans text-[13px] tracking-wide"
+          >
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="shrink-0 opacity-60">
+              <path d="M3 2.5h9v10H3v-10zM5.5 5.5h4M5.5 8h4M5.5 10.5h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+            Aufträge
+          </a>
 
           {/* Spacer */}
           <div className="h-4" />
@@ -87,6 +96,13 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
+        {/* The sidebar is hidden on phones; these are the same links. */}
+        <nav className="flex gap-4 overflow-x-auto border-b border-onyx/10 px-4 py-3 font-sans text-[13px] md:hidden">
+          <a href="/admin" className="shrink-0 underline">Venues</a>
+          <a href="/admin/auftraege" className="shrink-0 underline">Aufträge</a>
+          <a href="/admin/casa" className="shrink-0 underline">Casa</a>
+          <a href="/admin/leads" className="shrink-0 underline">Leads</a>
+        </nav>
         {children}
       </main>
 

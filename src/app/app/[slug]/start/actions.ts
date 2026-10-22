@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { serviceClient } from "@/lib/auth";
 import { COLOR_PRESETS } from "@/lib/colorPresets";
-import { linesToSections, parseMenuText } from "@/lib/menu-parser";
+import { linesToImport, parseMenuText } from "@/lib/menu-parser";
 import { requireVenue } from "../../venue";
 
 export type StepResult = { ok: true } | { ok: false; error: string };
@@ -23,9 +23,9 @@ export async function importMenuText(slug: string, text: string): Promise<StepRe
   if (typeof text !== "string" || !text.trim()) return { ok: false, error: "Bitte die Speisekarte einfügen." };
   if (text.length > MAX_TEXT) return { ok: false, error: "Der Text ist zu lang. Bitte in Teilen einfügen." };
 
-  const sections = linesToSections(parseMenuText(text));
+  const { sections } = linesToImport(parseMenuText(text));
   const itemCount = sections.reduce((n, s) => n + s.items.length, 0);
-  if (itemCount === 0) return { ok: false, error: "Keine Gerichte mit Preis erkannt." };
+  if (itemCount === 0) return { ok: false, error: "Keine Gerichte erkannt." };
   if (sections.length > MAX_SECTIONS || itemCount > MAX_ITEMS) {
     return { ok: false, error: `Höchstens ${MAX_SECTIONS} Bereiche und ${MAX_ITEMS} Gerichte auf einmal.` };
   }
@@ -56,6 +56,10 @@ export async function importMenuText(slug: string, text: string): Promise<StepRe
         // sheet falls back to it when there is no ai_caption.
         description: it.description,
         price_cents: Math.min(it.price_cents, MAX_PRICE_CENTS),
+        price_variants: it.variants.map((v) => ({ label: v.label.slice(0, 30), price_cents: Math.min(v.price_cents, MAX_PRICE_CENTS) })).slice(0, 6),
+        // Only what the owner's own text says; the guest menu reads these columns as-is.
+        allergens: it.allergens,
+        diet_tags: it.diet.length ? JSON.stringify(it.diet) : null,
         is_active: true,
         position: i,
       })),

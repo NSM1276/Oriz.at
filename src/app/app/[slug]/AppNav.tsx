@@ -14,6 +14,7 @@ export function AppNav({ slug }: { slug: string }) {
     { href: `${base}/aussehen`, label: "Aussehen", active: pathname.startsWith(`${base}/aussehen`) },
     { href: `${base}/profil`, label: "Profil", active: pathname.startsWith(`${base}/profil`) },
     { href: `${base}/screen`, label: "Screen", active: pathname.startsWith(`${base}/screen`) },
+    { href: `${base}/leistungen`, label: "Leistungen", active: pathname.startsWith(`${base}/leistungen`) },
     { href: `${base}/konto`, label: "Konto", active: pathname.startsWith(`${base}/konto`) },
   ];
 
