@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import React from "react";
 import { createClient } from "@supabase/supabase-js";
 import { DemoItemEditor } from "@/components/demo/DemoItemEditor";
 import { QRCodeBlock } from "@/components/admin/QRCodeBlock";
 import { SectionNav } from "@/components/admin/SectionNav";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
+
+export const metadata: Metadata = {
+  title: "Admin-Demo — ORIZ Carta",
+  description: "Probieren Sie den ORIZ-Editor aus: Preise und Gerichte ändern, ohne Anmeldung. Demo-Daten, täglich zurückgesetzt.",
+  robots: { index: false, follow: true },
+};
 
 export const revalidate = 0;
 

@@ -11,7 +11,8 @@ import { TableBanner } from "@/components/menu/TableBanner";
 import { CallButton } from "@/components/menu/CallButton";
 import { serviceClient } from "@/lib/auth";
 import { tableDisplayName } from "@/lib/tables";
-import { isListedVenue } from "@/lib/seo";
+import { isListedVenue, jsonLdScript, restaurantJsonLd } from "@/lib/seo";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 0;
 
@@ -40,8 +41,15 @@ export default async function GuestMenuPage({
   const acceptLanguage = (await headers()).get("accept-language");
   const initialLocale = resolveInitialLocale(acceptLanguage, initial.venue.enabled_locales);
 
+  // Structured data only for real customers, same rule as the sitemap: a demo must not read as a real place.
+  const { data: sub } = await serviceClient().from("subscriptions").select("status").eq("venue_id", initial.venue.id).maybeSingle<{ status: string }>();
+  const listed = isListedVenue({ slug: venueSlug, status: sub?.status ?? null });
+
   return (
     <>
+      {listed && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(restaurantJsonLd(initial.venue, SITE_URL)) }} />
+      )}
       {table && (
         <TableBanner label={table.label} bg={initial.venue.color_bg} accent={initial.venue.color_primary} />
       )}

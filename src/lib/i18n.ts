@@ -59,7 +59,7 @@ export const translations = {
       eyebrow: "In 3 Schritten",
       heading: "Heute bestellt — morgen live",
       items: [
-        { n: "01", title: "Zugang erhalten", body: "Schreiben Sie uns — wir richten Ihr persönliches Restaurant-Konto ein und senden Ihnen die Zugangsdaten." },
+        { n: "01", title: "Konto anlegen", body: "Registrieren Sie sich in wenigen Minuten — 14 Tage kostenlos, alle Funktionen inklusive. Auf Wunsch tragen wir Ihre Karte für Sie ein." },
         { n: "02", title: "Menü befüllen", body: "Gerichte, Preise, Kategorien — alles in wenigen Minuten direkt im Browser. Kein Techniker, keine Agentur." },
         { n: "03", title: "Link teilen & fertig", body: "Ihren persönlichen Menü-Link auf den Tisch, ins Fenster oder in die Instagram-Bio — ab sofort immer aktuell." },
       ],
@@ -81,7 +81,7 @@ export const translations = {
       plans: [
         { name: "Test", price: "14 Tage", sub: "kostenlos — alle Funktionen", badge: null as null, features: ["Alle Pro-Funktionen inklusive", "Kein Vertrag, jederzeit kündbar", "Persönlicher Onboarding-Support"], cta: "Kostenlos testen", plan: "trial" as const, accent: false },
         { name: "Starter", price: "€ 19", sub: "pro Monat", badge: "Empfohlen" as string | null, features: ["1 Karte · unbegrenzte Gerichte", "Änderungen in Echtzeit", "3 Erscheinungsbilder, eigene Farben & Logo", "14 EU-Allergene mit Filter", "QR-Codes für jeden Tisch + Service-Ruf", "Druckfertiges PDF (A4)", "4 Sprachen: DE, EN, IT, UK"], cta: "Starter wählen", plan: "starter" as const, accent: true },
-        { name: "Pro", price: "€ 39", sub: "pro Monat", badge: null as null, features: ["Alles aus Starter", "Bis zu 5 Karten (z. B. Mittag, Abend, Getränke)", "Druck-Design: Ihre Farben und Ihr Logo, Blatt für Blatt nachdrucken", "Screen: Ihre Karte auf dem Fernseher", "Priority Support"], cta: "Pro wählen", plan: "pro" as const, accent: false },
+        { name: "Pro", price: "€ 39", sub: "pro Monat", badge: null as null, features: ["Alles aus Starter", "Bis zu 5 Karten (z. B. Mittag, Abend, Getränke)", "Druck-Design: Ihre Farben und Ihr Logo, Blatt für Blatt nachdrucken", "Screen: Ihre Karte auf dem Fernseher"], cta: "Pro wählen", plan: "pro" as const, accent: false },
       ],
     },
     contact: {
@@ -199,7 +199,7 @@ export const translations = {
       eyebrow: "In 3 steps",
       heading: "Ordered today — live tomorrow",
       items: [
-        { n: "01", title: "Get access", body: "Write to us — we set up your personal restaurant account and send you your login details." },
+        { n: "01", title: "Create your account", body: "Sign up in a few minutes — 14 days free, all features included. If you like, we enter your menu for you." },
         { n: "02", title: "Fill your menu", body: "Dishes, prices, categories — all in a few minutes directly in the browser. No technician, no agency." },
         { n: "03", title: "Share the link — done", body: "Your personal menu link on the table, in the window or in your Instagram bio — always up to date from now on." },
       ],
@@ -221,7 +221,7 @@ export const translations = {
       plans: [
         { name: "Trial", price: "14 days", sub: "free — all features", badge: null as null, features: ["All Pro features included", "No contract, cancel anytime", "Personal onboarding support"], cta: "Start free trial", plan: "trial" as const, accent: false },
         { name: "Starter", price: "€ 19", sub: "per month", badge: "Recommended" as string | null, features: ["1 menu · unlimited dishes", "Changes in real time", "3 looks, your own colours & logo", "14 EU allergens with filter", "QR codes for every table + waiter call", "Print-ready PDF (A4)", "4 languages: DE, EN, IT, UK"], cta: "Choose Starter", plan: "starter" as const, accent: true },
-        { name: "Pro", price: "€ 39", sub: "per month", badge: null as null, features: ["Everything in Starter", "Up to 5 menus (e.g. lunch, dinner, drinks)", "Print design: your colours and logo, reprint sheet by sheet", "Screen: your menu on the TV", "Priority support"], cta: "Choose Pro", plan: "pro" as const, accent: false },
+        { name: "Pro", price: "€ 39", sub: "per month", badge: null as null, features: ["Everything in Starter", "Up to 5 menus (e.g. lunch, dinner, drinks)", "Print design: your colours and logo, reprint sheet by sheet", "Screen: your menu on the TV"], cta: "Choose Pro", plan: "pro" as const, accent: false },
       ],
     },
     contact: {
