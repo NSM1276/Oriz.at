@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import sharp from "sharp";
-import { getUser, serviceClient, venueRole } from "@/lib/auth";
+import { getUser, isPlatformAdmin, serviceClient, venueRole } from "@/lib/auth";
 import { originalPath, thumbPath } from "@/lib/media";
-import { limitForPlan } from "@/lib/plans";
 import { composeDish, maskCoverage, maskFromCutout, toThumb } from "@/lib/dish-photo/compose";
 import { STYLES, cutOut, modelsMode, paintBackground, type StyleId } from "@/lib/dish-photo/models";
 
@@ -15,7 +14,7 @@ export const maxDuration = 60;
 
 const BUCKET = "oriz-photos";
 
-type Item = { id: string; venue_id: string; image_url: string | null; venues: { plan: string | null } };
+type Item = { id: string; venue_id: string; image_url: string | null };
 
 function bad(status: number, error: string) {
   return NextResponse.json({ error }, { status });
@@ -28,14 +27,23 @@ async function loadItem(itemId: unknown) {
   const db = serviceClient();
   const { data: item } = await db
     .from("items")
-    .select("id, venue_id, image_url, venues!inner(plan)")
+    .select("id, venue_id, image_url")
     .eq("id", itemId)
     .maybeSingle<Item>();
   if (!item) return { error: bad(404, "Gericht nicht gefunden.") };
   if (!(await venueRole(user.id, item.venue_id))) return { error: bad(403, "Kein Zugriff.") };
   if (!item.image_url) return { error: bad(400, "Das Gericht hat noch kein Foto.") };
   const path = `carta/${item.venue_id}/items/${item.id}.webp`;
-  return { db, item, path };
+  return { db, item, path, mode: await modeFor(user.id) };
+}
+
+// No paid model call without paid credits — not even a free trial quota.
+// Until the prepaid credit ledger exists, the paid models are for platform
+// admins only; owners see no button.
+async function modeFor(userId: string): Promise<"fal" | "test" | "off"> {
+  const mode = modelsMode();
+  if (mode === "fal" && !(await isPlatformAdmin(userId))) return "off";
+  return mode;
 }
 
 async function exists(db: ReturnType<typeof serviceClient>, path: string): Promise<boolean> {
@@ -60,7 +68,7 @@ export async function GET(req: NextRequest) {
   const r = await loadItem(req.nextUrl.searchParams.get("itemId"));
   if ("error" in r) return r.error;
   return NextResponse.json({
-    mode: modelsMode(),
+    mode: r.mode,
     styles: Object.entries(STYLES).map(([id, s]) => ({ id, label: s.label })),
     hasOriginal: await exists(r.db, originalPath(r.path)),
   });
@@ -70,10 +78,9 @@ export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => ({}))) as { itemId?: unknown; style?: unknown };
   const r = await loadItem(body.itemId);
   if ("error" in r) return r.error;
-  const { db, item, path } = r;
+  const { db, item, path, mode } = r;
   const style = body.style as StyleId;
   if (!(typeof style === "string" && style in STYLES)) return bad(400, "Unbekannter Stil.");
-  const mode = modelsMode();
   if (mode === "off") return bad(503, "Diese Funktion ist noch nicht eingerichtet.");
 
   // Always start from the owner's photo, never from an earlier AI version.
@@ -88,20 +95,8 @@ export async function POST(req: NextRequest) {
   const height = meta.height ?? 0;
   if (!width || !height) return bad(400, "Foto konnte nicht gelesen werden.");
 
-  // Paid calls count against the venue's monthly AI allowance; the test
-  // stand-in costs nothing and counts nothing.
-  let refund: null | (() => Promise<unknown>) = null;
-  if (mode === "fal") {
-    const limit = limitForPlan(item.venues.plan);
-    const { data: credit, error } = await db
-      .rpc("increment_ai_credits", { p_venue_id: item.venue_id, p_limit: limit })
-      .maybeSingle<{ used: number }>();
-    if (error) return bad(500, "Kreditprüfung fehlgeschlagen.");
-    if (!credit) return bad(429, `Monatslimit erreicht (${limit} KI-Aktionen).`);
-    refund = () =>
-      Promise.resolve(db.from("venues").update({ ai_credits_used: Math.max(0, credit.used - 1) }).eq("id", item.venue_id));
-  }
-
+  // TODO(credits): once the prepaid credit ledger lands, owners with a balance
+  // get mode "fal" too and the spend + refund go here, before the model calls.
   try {
     const { data: pub } = db.storage.from(BUCKET).getPublicUrl(sourcePath);
     const [cutout, background] = await Promise.all([
@@ -113,7 +108,6 @@ export async function POST(req: NextRequest) {
     // Nothing found, or the "dish" is the whole frame: a new background would
     // either replace the food or change nothing.
     if (coverage < 0.04 || coverage > 0.92) {
-      await refund?.();
       return bad(422, "Das Gericht wurde auf dem Foto nicht klar erkannt. Bitte ein Foto mit sichtbarem Teller wählen.");
     }
 
@@ -128,7 +122,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url, mode });
   } catch (err) {
     console.error("[dish-photo]", err);
-    await refund?.();
     return bad(502, "Das Bild konnte gerade nicht erstellt werden. Bitte später noch einmal versuchen.");
   }
 }
