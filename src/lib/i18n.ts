@@ -23,7 +23,7 @@ export const translations = {
       heading: "Was Ihre Gäste verdienen",
       items: [
         { stat: "< 1 s", label: "Sofort live", body: "Preis ändern, Gericht ausverkauft markieren — Ihre Gäste sehen es in Echtzeit. Kein Drucker, kein Laminator." },
-        { stat: "20+", label: "Sprachen", body: "Deutsch, Englisch, Russisch, Arabisch, Türkisch und mehr. Das Menü erkennt die Sprache des Gastes automatisch." },
+        { stat: "4", label: "Sprachen", body: "Deutsch, Englisch, Italienisch und Ukrainisch. Das Menü zeigt die Sprache des Handys, sobald Sie sie eingetragen haben." },
         { stat: "0", label: "Apps nötig", body: "Gäste öffnen das Menü direkt im Browser — ohne Download, ohne Anmeldung, ohne Wartezeit." },
         { stat: "100%", label: "Ihre Marke", body: "Ihre Farben, Ihr Logo, Ihre Schrift. Kein fremdes Branding auf Ihrer Karte — nur Ihr Restaurant." },
       ],
@@ -41,18 +41,9 @@ export const translations = {
     languages: {
       eyebrow: "Mehrsprachigkeit",
       heading: "Jeder Gast liest in seiner Sprache",
-      body1: "Wien ist international. Ihre Gäste kommen aus aller Welt — aus Russland, aus der Türkei, aus dem arabischen Raum, aus Japan.",
-      body2: "ORIZ erkennt automatisch die Sprache des Geräts und zeigt das Menü entsprechend an. Kein Aufwand für Sie. Kein Rätselraten für den Gast.",
-      more: "+ weitere Sprachen auf Anfrage",
-    },
-    testimonials: {
-      eyebrow: "Stimmen",
-      heading: "Was Gastronomen sagen",
-      items: [
-        { quote: "Endlich kein Drucker mehr. Preis geändert, und zwei Sekunden später war es auf dem Tisch.", name: "M. H.", role: "Gastronom, Wien" },
-        { quote: "Unsere russischen Gäste haben das Menü sofort auf Russisch gelesen — ohne dass wir etwas tun mussten.", name: "A. K.", role: "Restaurant-Inhaberin, Wien" },
-        { quote: "Das sieht hochwertiger aus als jede gedruckte Karte, die wir je hatten.", name: "T. B.", role: "Café-Betreiber, Wien" },
-      ],
+      body1: "Wien ist international. Ihre Gäste lesen die Karte auf Deutsch, Englisch, Italienisch oder Ukrainisch.",
+      body2: "ORIZ erkennt die Sprache des Handys und zeigt die Karte passend an. Die Übersetzungen tragen Sie selbst ein — oder wir übernehmen das für Sie.",
+      more: "Übersetzungen: von Ihnen oder von uns",
     },
     philosophy: {
       eyebrow: "Philosophie",
@@ -74,13 +65,12 @@ export const translations = {
       ],
     },
     soon: {
-      eyebrow: "Bald verfügbar",
-      heading: "Mehr als eine Speisekarte",
-      sub: "ORIZ wächst mit Ihrem Restaurant — kleine, nützliche Erweiterungen, die echten Aufwand sparen.",
+      eyebrow: "Auf Wunsch",
+      heading: "Keine Zeit? Wir übernehmen das.",
+      sub: "Von Hand gemacht, zum Festpreis — Sie bekommen, was auf Ihrer Karte steht.",
       items: [
-        { title: "Post-Assistent", body: "Foto ins System laden — ORIZ formuliert einen fertigen Instagram-Text auf Basis Ihres Tagesgerichts. Sie posten, wann Sie möchten." },
-        { title: "Erweiterte Seiten", body: "Neben dem Menü: eine Seite über Ihr Restaurant, Öffnungszeiten, Team, saisonale Angebote. Ein kleiner Auftritt, der für Sie arbeitet." },
-        { title: "Foto-Aufwertung", body: "Handyfoto eines Gerichts hochladen — ORIZ liefert eine aufgewertete Version für Ihre digitale Karte. Kein Fotograf nötig." },
+        { title: "Karte einrichten", body: "Schicken Sie Fotos, PDF oder einen Link. Wir tragen alle Gerichte mit Preisen, Größen und Allergenen für Sie ein — auf Wunsch mit Übersetzungen." },
+        { title: "Gerichtsfotos bearbeiten", body: "Handyfotos Ihrer Gerichte, ruhig und einheitlich bearbeitet. Das Gericht selbst bleibt unverändert." },
       ],
     },
     pricing: {
@@ -89,9 +79,9 @@ export const translations = {
       sub: "Monatlich kündbar. Keine Einrichtungsgebühr.",
       disclaimer: "Alle Preise exkl. MwSt. · Monatlich kündbar · Keine Einrichtungsgebühr",
       plans: [
-        { name: "Trial", price: "14 Tage", sub: "kostenlos — alle Funktionen", badge: null as null, features: ["Alle Starter-Funktionen inklusive", "Keine Kreditkarte nötig", "Kein Vertrag, jederzeit kündbar", "Persönlicher Onboarding-Support"], cta: "Kostenlos testen", plan: "trial" as const, accent: false },
-        { name: "Starter", price: "€ 29", sub: "pro Monat", badge: "Empfohlen" as string | null, features: ["1 Menü · unbegrenzte Gerichte", "Echtzeit-Updates", "Persönlicher Menü-Link", "Instagram & Maps Verlinkung", "Eigene Farben & Logo", "20+ Sprachen automatisch"], cta: "Starter wählen", plan: "starter" as const, accent: true },
-        { name: "Pro", price: "€ 59", sub: "pro Monat", badge: null as null, features: ["Mehrere Standorte oder Karten", "Unbegrenzte Gerichte", "Echtzeit-Updates", "20+ Sprachen automatisch", "Erweiterte Seiten (bald)", "Post-Assistent (bald)", "Priority Support"], cta: "Pro wählen", plan: "pro" as const, accent: false },
+        { name: "Trial", price: "14 Tage", sub: "kostenlos — alle Funktionen", badge: null as null, features: ["Alle Starter-Funktionen inklusive", "Kein Vertrag, jederzeit kündbar", "Persönlicher Onboarding-Support"], cta: "Kostenlos testen", plan: "trial" as const, accent: false },
+        { name: "Starter", price: "€ 29", sub: "pro Monat", badge: "Empfohlen" as string | null, features: ["1 Menü · unbegrenzte Gerichte", "Echtzeit-Updates", "Persönlicher Menü-Link", "Instagram & Maps Verlinkung", "Eigene Farben & Logo", "4 Sprachen: DE, EN, IT, UK"], cta: "Starter wählen", plan: "starter" as const, accent: true },
+        { name: "Pro", price: "€ 59", sub: "pro Monat", badge: null as null, features: ["Mehrere Standorte oder Karten", "Unbegrenzte Gerichte", "Echtzeit-Updates", "4 Sprachen: DE, EN, IT, UK", "Priority Support"], cta: "Pro wählen", plan: "pro" as const, accent: false },
       ],
     },
     contact: {
@@ -173,7 +163,7 @@ export const translations = {
       heading: "What your guests deserve",
       items: [
         { stat: "< 1 s", label: "Instant live", body: "Change a price, mark a dish as sold out — your guests see it in real time. No printer, no laminator." },
-        { stat: "20+", label: "Languages", body: "German, English, Russian, Arabic, Turkish and more. The menu detects the guest's language automatically." },
+        { stat: "4", label: "Languages", body: "German, English, Italian and Ukrainian. The menu shows the phone's language once you have added it." },
         { stat: "0", label: "Apps needed", body: "Guests open the menu directly in the browser — no download, no sign-up, no waiting." },
         { stat: "100%", label: "Your brand", body: "Your colours, your logo, your font. No foreign branding on your menu — just your restaurant." },
       ],
@@ -191,18 +181,9 @@ export const translations = {
     languages: {
       eyebrow: "Multilingual",
       heading: "Every guest reads in their language",
-      body1: "Vienna is international. Your guests come from all over the world — from Russia, Turkey, the Arab world, Japan.",
-      body2: "ORIZ automatically detects the device language and displays the menu accordingly. No effort for you. No guessing for your guests.",
-      more: "+ more languages on request",
-    },
-    testimonials: {
-      eyebrow: "Voices",
-      heading: "What restaurateurs say",
-      items: [
-        { quote: "Finally no more printer. Changed a price, and two seconds later it was on the table.", name: "M. H.", role: "Restaurateur, Vienna" },
-        { quote: "Our Russian guests instantly read the menu in Russian — without us having to do anything.", name: "A. K.", role: "Restaurant owner, Vienna" },
-        { quote: "This looks more premium than any printed menu we've ever had.", name: "T. B.", role: "Café operator, Vienna" },
-      ],
+      body1: "Vienna is international. Your guests read the menu in German, English, Italian or Ukrainian.",
+      body2: "ORIZ detects the phone's language and shows the menu accordingly. You enter the translations yourself — or we do it for you.",
+      more: "Translations: by you or by us",
     },
     philosophy: {
       eyebrow: "Philosophy",
@@ -224,13 +205,12 @@ export const translations = {
       ],
     },
     soon: {
-      eyebrow: "Coming soon",
-      heading: "More than a menu",
-      sub: "ORIZ grows with your restaurant — small, useful additions that save real effort.",
+      eyebrow: "On request",
+      heading: "No time? We take care of it.",
+      sub: "Made by hand, at a fixed price — you get exactly what is on your menu.",
       items: [
-        { title: "Post assistant", body: "Upload a photo — ORIZ writes a ready-to-post Instagram caption based on your dish of the day. You post when you like." },
-        { title: "Extended pages", body: "Alongside the menu: a page about your restaurant, opening hours, team, seasonal offers. A small presence that works for you." },
-        { title: "Photo enhancement", body: "Upload a phone photo of a dish — ORIZ delivers an enhanced version for your digital menu. No photographer needed." },
+        { title: "Menu setup", body: "Send photos, a PDF or a link. We enter every dish with prices, sizes and allergens for you — with translations on request." },
+        { title: "Dish photo editing", body: "Phone photos of your dishes, edited to look calm and consistent. The dish itself stays unchanged." },
       ],
     },
     pricing: {
@@ -239,9 +219,9 @@ export const translations = {
       sub: "Cancel monthly. No setup fee.",
       disclaimer: "All prices excl. VAT · Cancel monthly · No setup fee",
       plans: [
-        { name: "Trial", price: "14 days", sub: "free — all features", badge: null as null, features: ["All Starter features included", "No credit card required", "No contract, cancel anytime", "Personal onboarding support"], cta: "Start free trial", plan: "trial" as const, accent: false },
-        { name: "Starter", price: "€ 29", sub: "per month", badge: "Recommended" as string | null, features: ["1 menu · unlimited dishes", "Real-time updates", "Personal menu link", "Instagram & Maps links", "Custom colours & logo", "20+ languages automatic"], cta: "Choose Starter", plan: "starter" as const, accent: true },
-        { name: "Pro", price: "€ 59", sub: "per month", badge: null as null, features: ["Multiple locations or menus", "Unlimited dishes", "Real-time updates", "20+ languages automatic", "Extended pages (soon)", "Post assistant (soon)", "Priority support"], cta: "Choose Pro", plan: "pro" as const, accent: false },
+        { name: "Trial", price: "14 days", sub: "free — all features", badge: null as null, features: ["All Starter features included", "No contract, cancel anytime", "Personal onboarding support"], cta: "Start free trial", plan: "trial" as const, accent: false },
+        { name: "Starter", price: "€ 29", sub: "per month", badge: "Recommended" as string | null, features: ["1 menu · unlimited dishes", "Real-time updates", "Personal menu link", "Instagram & Maps links", "Custom colours & logo", "4 languages: DE, EN, IT, UK"], cta: "Choose Starter", plan: "starter" as const, accent: true },
+        { name: "Pro", price: "€ 59", sub: "per month", badge: null as null, features: ["Multiple locations or menus", "Unlimited dishes", "Real-time updates", "4 languages: DE, EN, IT, UK", "Priority support"], cta: "Choose Pro", plan: "pro" as const, accent: false },
       ],
     },
     contact: {

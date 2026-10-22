@@ -5,7 +5,7 @@ import { SignupForm } from "./SignupForm";
 
 export const metadata: Metadata = {
   title: "Registrieren — ORIZ",
-  description: "Digitale Speisekarte mit QR-Codes für jeden Tisch. 14 Tage kostenlos testen, ohne Kreditkarte.",
+  description: "Digitale Speisekarte mit QR-Codes für jeden Tisch. 14 Tage kostenlos testen.",
 };
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export default async function SignupPage() {
         <p className="text-xs font-medium uppercase tracking-widest text-stone-500">ORIZ</p>
         <h1 className="mt-1 text-2xl font-semibold">Speisekarte erstellen</h1>
         <p className="mt-2 text-sm text-stone-600">
-          14 Tage kostenlos testen. Keine Kreditkarte nötig, endet automatisch.
+          14 Tage kostenlos testen, alle Funktionen inklusive.
         </p>
         <SignupForm />
       </main>

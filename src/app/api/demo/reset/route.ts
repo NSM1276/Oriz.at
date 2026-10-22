@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { bearerMatches } from "@/lib/secrets";
 
 // ── Venue IDs ──────────────────────────────────────────────────────────────
 const BELVEDERE     = "9019d1cf-f1af-482f-9673-2a78846fa405";
@@ -210,7 +211,12 @@ function serviceClient() {
   );
 }
 
-export async function POST() {
+// Only the Vercel cron (see vercel.json) may call this: it sends
+// "Authorization: Bearer $CRON_SECRET". With CRON_SECRET unset nobody gets in.
+export async function POST(req: Request) {
+  if (!bearerMatches(req.headers.get("authorization"), process.env.CRON_SECRET)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const supabase = serviceClient();
   const errors: string[] = [];
   const ts = new Date().toISOString();
@@ -272,5 +278,5 @@ export async function POST() {
   });
 }
 
-// Allow GET so the Vercel dashboard "trigger" button works
+// Vercel cron jobs call GET.
 export const GET = POST;

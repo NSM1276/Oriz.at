@@ -23,15 +23,7 @@ const PLAN_META = [
 const LANG_GRID = [
   { lang: "DE", name: "Deutsch" },
   { lang: "EN", name: "English" },
-  { lang: "RU", name: "Русский" },
-  { lang: "AR", name: "العربية" },
-  { lang: "TR", name: "Türkçe" },
-  { lang: "FR", name: "Français" },
   { lang: "IT", name: "Italiano" },
-  { lang: "ES", name: "Español" },
-  { lang: "JA", name: "日本語" },
-  { lang: "ZH", name: "中文" },
-  { lang: "PL", name: "Polski" },
   { lang: "UK", name: "Українська" },
 ];
 
@@ -191,7 +183,7 @@ function LandingContent() {
         </div>
       </section>
 
-      {/* ── 20+ Sprachen ── */}
+      {/* ── Sprachen ── */}
       <section className="py-28 px-6 bg-onyx text-parchment overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -208,42 +200,19 @@ function LandingContent() {
                 {t.languages.body2}
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {LANG_GRID.map(({ lang, name }) => (
                 <div key={lang} className="border border-parchment/8 p-3 text-center">
                   <div className="font-sans text-[10px] tracking-regal uppercase text-gold mb-1">{lang}</div>
                   <div className="font-display text-xs text-parchment/40">{name}</div>
                 </div>
               ))}
-              <div className="col-span-3 border border-parchment/8 p-3 text-center">
+              <div className="col-span-2 border border-parchment/8 p-3 text-center">
                 <div className="font-sans text-[10px] tracking-regal uppercase text-parchment/25">
                   {t.languages.more}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Testimonials ── */}
-      <section className="py-28 px-6 border-t border-onyx/6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">{t.testimonials.eyebrow}</span>
-            <h2 className="font-display text-4xl md:text-5xl mt-6 font-light">{t.testimonials.heading}</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {t.testimonials.items.map(({ quote, name, role }) => (
-              <div key={name} className="border-t border-gold/20 pt-6">
-                <p className="font-display text-base text-onyx/65 italic leading-relaxed mb-6">
-                  &ldquo;{quote}&rdquo;
-                </p>
-                <div>
-                  <div className="font-sans text-[10px] tracking-regal uppercase text-onyx/50">{name}</div>
-                  <div className="font-sans text-[10px] text-onyx/30 mt-0.5">{role}</div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -291,7 +260,7 @@ function LandingContent() {
         </div>
       </section>
 
-      {/* ── Bald: Fotos & Social ── */}
+      {/* ── Auf Wunsch: Einrichtung & Fotos von Hand ── */}
       <section className="py-28 px-6 bg-onyx text-parchment">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
@@ -303,7 +272,7 @@ function LandingContent() {
               {t.soon.sub}
             </p>
           </div>
-          <div className="grid sm:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 gap-5">
             {t.soon.items.map(({ title, body }) => (
               <div key={title} className="border border-parchment/10 p-7">
                 <div className="w-4 h-px bg-gold/50 mb-5" />

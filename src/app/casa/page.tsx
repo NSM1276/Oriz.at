@@ -66,7 +66,7 @@ const FAQ = [
   },
   {
     q: "In welchen Sprachen funktioniert das?",
-    a: "Standard: Deutsch und Englisch — Sie pflegen beide Versionen selbst. Auf Wunsch erkennt die Seite die Sprache des Gastgeräts und zeigt Inhalte in über 20 Sprachen automatisch.",
+    a: "Deutsch und Englisch — Sie pflegen beide Versionen selbst.",
   },
   {
     q: "Wie schnell bin ich live?",
