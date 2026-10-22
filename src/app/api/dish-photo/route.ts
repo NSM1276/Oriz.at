@@ -37,9 +37,9 @@ async function loadItem(itemId: unknown) {
   return { db, item, path, mode: await modeFor(user.id) };
 }
 
-// No paid model call without paid credits — not even a free trial quota.
-// Until the prepaid credit ledger exists, the paid models are for platform
-// admins only; owners see no button.
+// The paid models are a tool for us, not a button for owners: owners order
+// photo editing as a paid service (/app/<slug>/leistungen) and we do it here.
+// Owners see no button, so free users never cost anything.
 async function modeFor(userId: string): Promise<"fal" | "test" | "off"> {
   const mode = modelsMode();
   if (mode === "fal" && !(await isPlatformAdmin(userId))) return "off";
@@ -95,8 +95,6 @@ export async function POST(req: NextRequest) {
   const height = meta.height ?? 0;
   if (!width || !height) return bad(400, "Foto konnte nicht gelesen werden.");
 
-  // TODO(credits): once the prepaid credit ledger lands, owners with a balance
-  // get mode "fal" too and the spend + refund go here, before the model calls.
   try {
     const { data: pub } = db.storage.from(BUCKET).getPublicUrl(sourcePath);
     const [cutout, background] = await Promise.all([
