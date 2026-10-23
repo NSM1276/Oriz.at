@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getUser, isPlatformAdmin, serviceClient } from "@/lib/auth";
 import { emailConfigured } from "@/lib/email";
 import { SERVICE_INFO, STATUS_LABEL, euro, type OrderStatus, type ServiceKind } from "@/lib/services";
+import { InvoiceBox } from "./InvoiceBox";
 import { OrderControls } from "./OrderControls";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +15,7 @@ type Order = {
   contact_name: string | null; contact_email: string | null; contact_phone: string | null;
   files: StoredFile[]; admin_note: string | null;
   submitted_at: string | null; paid_at: string | null; done_at: string | null;
-  venues: { name: string; slug: string };
+  venues: { name: string; slug: string; address: string | null };
 };
 
 const GROUPS: { title: string; statuses: OrderStatus[] }[] = [
@@ -36,12 +37,18 @@ export default async function OrdersPage() {
   const db = serviceClient();
   const { data } = await db
     .from("service_orders")
-    .select("id, kind, status, quantity, price_cents, link_url, languages, notes, contact_name, contact_email, contact_phone, files, admin_note, submitted_at, paid_at, done_at, venues(name, slug)")
+    .select("id, kind, status, quantity, price_cents, link_url, languages, notes, contact_name, contact_email, contact_phone, files, admin_note, submitted_at, paid_at, done_at, venues(name, slug, address)")
     .neq("status", "entwurf")
     .order("submitted_at", { ascending: false })
     .limit(200)
     .returns<Order[]>();
   const orders = data ?? [];
+
+  const invoiceNumbers = new Map<string, string>();
+  if (orders.length) {
+    const { data: inv } = await db.from("invoices").select("order_id, number").in("order_id", orders.map((o) => o.id)).returns<{ order_id: string; number: string }[]>();
+    for (const i of inv ?? []) invoiceNumbers.set(i.order_id, i.number);
+  }
 
   const paths = orders.filter((o) => o.status !== "storniert").flatMap((o) => o.files.map((f) => f.path));
   const links = new Map<string, string>();
@@ -117,6 +124,13 @@ export default async function OrdersPage() {
                     </div>
 
                     <OrderControls orderId={o.id} status={o.status} note={o.admin_note ?? ""} hasEmail={!!o.contact_email} />
+                    <InvoiceBox
+                      orderId={o.id}
+                      number={invoiceNumbers.get(o.id) ?? null}
+                      canCreate={["bezahlt", "in_arbeit", "fertig"].includes(o.status)}
+                      defaultName={o.venues.name}
+                      defaultAddress={o.venues.address ?? ""}
+                    />
                   </article>
                 ))}
               </div>

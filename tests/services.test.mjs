@@ -14,7 +14,13 @@ import {
 } from "../src/lib/services.ts";
 
 test("menu setup has one fixed price", () => {
-  assert.deepEqual(orderPrice("menu_setup", 0), { ok: true, quantity: 1, priceCents: MENU_SETUP_PRICE_CENTS });
+  assert.equal(orderPrice("menu_setup", 0).ok, false); // the number of dishes is needed
+  assert.deepEqual(orderPrice("menu_setup", 1), { ok: true, quantity: 1, priceCents: MENU_SETUP_PRICE_CENTS });
+  assert.deepEqual(orderPrice("menu_setup", 80), { ok: true, quantity: 80, priceCents: MENU_SETUP_PRICE_CENTS });
+  assert.deepEqual(orderPrice("menu_setup", 81), { ok: true, quantity: 81, priceCents: MENU_SETUP_PRICE_CENTS + 1_50 });
+  assert.deepEqual(orderPrice("menu_setup", 120), { ok: true, quantity: 120, priceCents: 149_00 + 40 * 1_50 }); // 209 EUR
+  assert.equal(orderPrice("menu_setup", 501).ok, false);
+  assert.equal(orderPrice("menu_setup", Number.NaN).ok, false);
 });
 
 test("photos are paid per photo with a minimum order", () => {
@@ -84,4 +90,34 @@ test("emails: venue names and notes are escaped in HTML", () => {
 
 test("emails: done for a menu reminds about allergens", () => {
   assert.match(orderStatusChanged(facts, "fertig").text, /Allergene/);
+});
+
+import { buildInvoiceDoc, dateDe, euroPlain, invoiceDescription, isInvoiceNumber, SMALL_BUSINESS_NOTE } from "../src/lib/invoice.ts";
+
+test("invoice texts: description, amounts, dates, number format", () => {
+  assert.equal(invoiceDescription("menu_setup", 1), "Einrichtung Ihrer digitalen Speisekarte (bis zu 80 Gerichte)");
+  assert.equal(invoiceDescription("menu_setup", 80), "Einrichtung Ihrer digitalen Speisekarte (bis zu 80 Gerichte)");
+  assert.match(invoiceDescription("menu_setup", 120), /120 Gerichte: 80 inklusive, 40 × 1,50 € Aufpreis/);
+  assert.match(invoiceDescription("photo_edit", 12), /12 Gerichtsfotos \(5,00 € pro Foto\)/);
+  assert.equal(euroPlain(14900), "149,00 €");
+  assert.equal(euroPlain(20900), "209,00 €");
+  assert.equal(dateDe("2026-10-23"), "23.10.2026");
+  assert.ok(isInvoiceNumber("2026-0001"));
+  assert.ok(!isInvoiceNumber("../etc/passwd"));
+  assert.ok(!isInvoiceNumber("2026-1"));
+});
+
+test("invoice document: small-business note, no VAT line, paid or payable text", () => {
+  const base = {
+    number: "2026-0001", issuedOn: "2026-10-23", serviceDate: "2026-10-23", recipientName: "Gasthaus Mayer GmbH",
+    recipientAddress: "Hauptstraße 1\n1010 Wien", description: invoiceDescription("menu_setup", 60), quantity: 60, amountCents: 14900, paidOn: null,
+  };
+  const text = (d) => JSON.stringify(d);
+  const open = text(buildInvoiceDoc(base));
+  assert.ok(open.includes(SMALL_BUSINESS_NOTE));
+  assert.ok(open.includes("2026-0001") && open.includes("Gasthaus Mayer GmbH") && open.includes("149,00 €"));
+  assert.ok(open.includes("ATU80802758"));
+  assert.ok(!/USt-Betrag|MwSt|20 ?%/.test(open)); // no VAT is shown
+  assert.ok(open.includes("Zahlbar sofort"));
+  assert.ok(text(buildInvoiceDoc({ ...base, paidOn: "2026-10-22" })).includes("am 22.10.2026 beglichen"));
 });

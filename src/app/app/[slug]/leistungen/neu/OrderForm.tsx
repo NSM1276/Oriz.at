@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LOCALE_NAMES, MENU_LOCALES } from "@/lib/menu-edit";
 import {
+  MENU_SETUP_EXTRA_DISH_CENTS,
+  MENU_SETUP_INCLUDED_DISHES,
   PHOTO_MIN,
   SERVICE_INFO,
   allowedTypes,
@@ -29,6 +31,7 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
   const [linkUrl, setLinkUrl] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+  const [dishes, setDishes] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState(email);
   const [contactPhone, setContactPhone] = useState("");
@@ -37,7 +40,7 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
 
   const meta = files.map((f) => ({ name: f.name, size: f.size, type: f.type }));
   const check = checkFiles(kind, meta, !!linkUrl.trim());
-  const price = useMemo(() => orderPrice(kind, files.length), [kind, files.length]);
+  const price = useMemo(() => orderPrice(kind, kind === "menu_setup" ? Number(dishes) : files.length), [kind, files.length, dishes]);
   const busy = progress !== null;
   const accept = allowedTypes(kind).join(",") + (kind === "photo_edit" ? ",.heic,.heif" : ",.heic,.heif,.doc,.docx,.xls,.xlsx");
 
@@ -60,7 +63,7 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
     if (!price.ok) { setError(price.error); return; }
     setProgress({ done: 0, total: files.length });
     try {
-      const started = await startOrder(slug, { kind, files: meta, linkUrl, languages, notes, contactName, contactEmail, contactPhone });
+      const started = await startOrder(slug, { kind, files: meta, linkUrl, languages, notes, dishes: Number(dishes), contactName, contactEmail, contactPhone });
       if (!started.ok) { setError(started.error); setProgress(null); return; }
 
       const storage = createClient().storage.from("service-uploads");
@@ -123,6 +126,18 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
           </label>
         )}
       </section>
+
+      {kind === "menu_setup" && (
+        <section className={card}>
+          <label className="block">
+            <span className="text-sm font-medium">Wie viele Gerichte hat Ihre Karte ungefähr?</span>
+            <input required value={dishes} onChange={(e) => setDishes(e.target.value.replace(/\D/g, "").slice(0, 3))} inputMode="numeric" placeholder="z. B. 60" className={input} />
+          </label>
+          <p className="mt-1.5 text-sm text-stone-600">
+            Bis {MENU_SETUP_INCLUDED_DISHES} Gerichte sind im Preis enthalten, jedes weitere kostet {euro(MENU_SETUP_EXTRA_DISH_CENTS)}. Getränke zählen mit.
+          </p>
+        </section>
+      )}
 
       {kind === "menu_setup" && (
         <section className={card}>

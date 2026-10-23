@@ -5,8 +5,14 @@
 export type ServiceKind = "menu_setup" | "photo_edit";
 export type OrderStatus = "entwurf" | "neu" | "bezahlt" | "in_arbeit" | "fertig" | "storniert";
 
-/** One-time price for "Wir richten Ihre Karte ein". */
+/** One-time price for "Wir richten Ihre Karte ein": covers up to MENU_SETUP_INCLUDED_DISHES dishes. */
 export const MENU_SETUP_PRICE_CENTS = 149_00;
+export const MENU_SETUP_INCLUDED_DISHES = 80;
+/** Every dish above that costs this much more. */
+export const MENU_SETUP_EXTRA_DISH_CENTS = 1_50;
+export const MENU_SETUP_MAX_DISHES = 500;
+/** What we promise: done within this many working days after payment and complete material. */
+export const TURNAROUND_WORKDAYS = 2;
 /** Price per edited photo, and the smallest order. */
 export const PHOTO_PRICE_CENTS = 5_00;
 export const PHOTO_MIN = 10;
@@ -43,8 +49,18 @@ export function isServiceKind(v: unknown): v is ServiceKind {
 
 export type PriceResult = { ok: true; quantity: number; priceCents: number } | { ok: false; error: string };
 
-export function orderPrice(kind: ServiceKind, photoCount: number): PriceResult {
-  if (kind === "menu_setup") return { ok: true, quantity: 1, priceCents: MENU_SETUP_PRICE_CENTS };
+/**
+ * `count` is the number of photos for photo_edit and the (estimated) number of dishes for menu_setup.
+ * For menu_setup it is stored as the order's quantity; orders placed before dishes were counted hold 1.
+ */
+export function orderPrice(kind: ServiceKind, count: number): PriceResult {
+  if (kind === "menu_setup") {
+    const dishes = Number.isFinite(count) ? Math.floor(count) : 0;
+    if (dishes < 1) return { ok: false, error: "Bitte die ungefähre Zahl der Gerichte angeben." };
+    if (dishes > MENU_SETUP_MAX_DISHES) return { ok: false, error: `Ab ${MENU_SETUP_MAX_DISHES} Gerichten machen wir Ihnen gern ein persönliches Angebot.` };
+    return { ok: true, quantity: dishes, priceCents: MENU_SETUP_PRICE_CENTS + Math.max(0, dishes - MENU_SETUP_INCLUDED_DISHES) * MENU_SETUP_EXTRA_DISH_CENTS };
+  }
+  const photoCount = count;
   const n = Math.floor(photoCount);
   if (!(n >= PHOTO_MIN)) return { ok: false, error: `Mindestens ${PHOTO_MIN} Fotos pro Auftrag.` };
   if (n > PHOTO_MAX) return { ok: false, error: `Höchstens ${PHOTO_MAX} Fotos pro Auftrag.` };

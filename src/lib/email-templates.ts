@@ -43,8 +43,8 @@ export function orderReceived(o: OrderFacts, paymentLink: string | null): Email 
     `Guten Tag${o.contactName ? ` ${o.contactName}` : ""},`,
     `danke für Ihren Auftrag für ${o.venueName}.\n${what(o)}`,
     paymentLink
-      ? "Sobald die Zahlung eingegangen ist, beginnen wir. In der Regel ist alles am nächsten Werktag fertig."
-      : "Wir melden uns innerhalb eines Werktags bei Ihnen, um die Zahlung abzustimmen. Danach ist alles in der Regel am nächsten Werktag fertig.",
+      ? "Sobald die Zahlung eingegangen ist, beginnen wir. Fertig ist alles innerhalb von 2 Werktagen nach Zahlung und vollständigen Unterlagen."
+      : "Wir melden uns innerhalb eines Werktags bei Ihnen, um die Zahlung abzustimmen. Fertig ist alles innerhalb von 2 Werktagen nach Zahlung und vollständigen Unterlagen.",
     "Fragen? Antworten Sie einfach auf diese E-Mail.",
   ];
   return {

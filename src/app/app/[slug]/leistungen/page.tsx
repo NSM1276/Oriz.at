@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { serviceClient } from "@/lib/auth";
 import {
+  MENU_SETUP_INCLUDED_DISHES,
   MENU_SETUP_PRICE_CENTS,
   PHOTO_MIN,
   PHOTO_PRICE_CENTS,
@@ -59,9 +60,14 @@ export default async function ServicesPage({ params }: { params: Promise<{ slug:
     .returns<Order[]>();
   const orders = data ?? [];
   const contact = contactInfo();
+  const invoiceNumbers = new Map<string, string>();
+  if (orders.length) {
+    const { data: inv } = await serviceClient().from("invoices").select("order_id, number").eq("venue_id", venue.id).in("order_id", orders.map((o) => o.id)).returns<{ order_id: string; number: string }[]>();
+    for (const i of inv ?? []) invoiceNumbers.set(i.order_id, i.number);
+  }
 
   const offers: { kind: ServiceKind; price: string }[] = [
-    { kind: "menu_setup", price: `${euro(MENU_SETUP_PRICE_CENTS)} einmalig` },
+    { kind: "menu_setup", price: `${euro(MENU_SETUP_PRICE_CENTS)} einmalig · bis ${MENU_SETUP_INCLUDED_DISHES} Gerichte` },
     { kind: "photo_edit", price: `${euro(PHOTO_PRICE_CENTS)} pro Foto · ab ${PHOTO_MIN} Fotos` },
   ];
 
@@ -69,7 +75,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ slug:
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-semibold">Leistungen</h1>
-        <p className="mt-1 text-sm text-stone-600">Keine Zeit? Wir erledigen das für Sie — von Hand, meist bis zum nächsten Werktag.</p>
+        <p className="mt-1 text-sm text-stone-600">Keine Zeit? Wir erledigen das für Sie — von Hand, innerhalb von 2 Werktagen nach Zahlung.</p>
       </div>
 
       {offers.map((o) => (
@@ -117,6 +123,11 @@ export default async function ServicesPage({ params }: { params: Promise<{ slug:
                       </p>
                       <CancelButton slug={venue.slug} orderId={o.id} />
                     </div>
+                  )}
+                  {invoiceNumbers.get(o.id) && (
+                    <a href={`/api/invoice/${invoiceNumbers.get(o.id)}`} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-medium underline">
+                      Rechnung {invoiceNumbers.get(o.id)} (PDF)
+                    </a>
                   )}
                   {o.status === "fertig" && o.kind === "menu_setup" && (
                     <Link href={`/app/${venue.slug}/speisekarte`} className="mt-2 inline-block text-sm font-medium underline">

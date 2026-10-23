@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { getUser, isPlatformAdmin, serviceClient } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { orderStatusChanged } from "@/lib/email-templates";
+import { issueInvoiceForOrder } from "@/lib/invoice-server";
 import { canMove, type OrderStatus, type ServiceKind } from "@/lib/services";
 
 export type AdminResult = { ok: true; emailed?: boolean } | { ok: false; error: string };
@@ -88,4 +89,16 @@ export async function saveAdminNote(orderId: string, note: string): Promise<Admi
   if (error) return { ok: false, error: "Notiz konnte nicht gespeichert werden." };
   revalidatePath("/admin/auftraege");
   return { ok: true };
+}
+
+export type InvoiceResult = { ok: true; number: string } | { ok: false; error: string };
+
+/** Invoice for a paid order. The number is final: a wrong invoice is answered with a new one, never edited. */
+export async function createInvoice(orderId: string, recipientName: string, recipientAddress: string): Promise<InvoiceResult> {
+  const user = await getUser();
+  if (!user || !(await isPlatformAdmin(user.id))) throw new Error("forbidden");
+  if (!UUID.test(orderId)) return { ok: false, error: "Ungültig." };
+  const res = await issueInvoiceForOrder(orderId, user.id, recipientName, recipientAddress);
+  revalidatePath("/admin/auftraege");
+  return res;
 }

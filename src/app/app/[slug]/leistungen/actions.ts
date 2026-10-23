@@ -28,6 +28,8 @@ export type StartInput = {
   linkUrl: string;
   languages: string[];
   notes: string;
+  /** Estimated number of dishes (menu_setup only). */
+  dishes?: number;
   contactName: string;
   contactEmail: string;
   contactPhone: string;
@@ -62,7 +64,7 @@ export async function startOrder(slug: string, input: StartInput): Promise<Start
 
   const fileCheck = checkFiles(input.kind, files, !!linkUrl);
   if (!fileCheck.ok) return fileCheck;
-  const price = orderPrice(input.kind, files.length);
+  const price = orderPrice(input.kind, input.kind === "menu_setup" ? Number(input.dishes) : files.length);
   if (!price.ok) return price;
 
   const contactPhone = clean(input.contactPhone, 40);

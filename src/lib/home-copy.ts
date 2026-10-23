@@ -1,9 +1,11 @@
 // Texts of the main page, German and English. The layout lives in components/landing/HomePage.tsx.
-// Prices are deliberately NOT on this page (owner decision: no public pricing here). SETUP_PRICE is
-// null until the service price is confirmed; set it to e.g. "ab € 149" / "from € 149" and the
-// service band shows it.
+// Plan prices are deliberately NOT on this page (owner decision: no public pricing here); the plans
+// are on /carta. Only the one-off setup service shows its price (SETUP_PRICE, set from lib/services.ts).
 
-export const SETUP_PRICE: { de: string; en: string } | null = null;
+export const SETUP_PRICE: { de: string; en: string } | null = {
+  de: "ab € 149 für bis zu 80 Gerichte",
+  en: "from € 149 for up to 80 dishes",
+};
 
 export type Pair = { title: string; body: string };
 
