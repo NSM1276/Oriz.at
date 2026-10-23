@@ -7,6 +7,7 @@ import {
   SERVICE_INFO,
   STATUS_LABEL,
   euro,
+  euroNet,
   paymentUrl,
   type OrderStatus,
   type ServiceKind,
@@ -61,8 +62,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ slug:
   const contact = contactInfo();
 
   const offers: { kind: ServiceKind; price: string }[] = [
-    { kind: "menu_setup", price: `${euro(MENU_SETUP_PRICE_CENTS)} einmalig` },
-    { kind: "photo_edit", price: `${euro(PHOTO_PRICE_CENTS)} pro Foto · ab ${PHOTO_MIN} Fotos` },
+    { kind: "menu_setup", price: `${euroNet(MENU_SETUP_PRICE_CENTS)} einmalig` },
+    { kind: "photo_edit", price: `${euroNet(PHOTO_PRICE_CENTS)} pro Foto · ab ${PHOTO_MIN} Fotos` },
   ];
 
   return (
@@ -99,7 +100,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ slug:
                     <div className="min-w-0">
                       <p className="font-medium">{SERVICE_INFO[o.kind].title}</p>
                       <p className="text-sm text-stone-500">
-                        {dateFmt.format(new Date(o.submitted_at ?? o.created_at))} · {o.kind === "photo_edit" ? `${o.quantity} Fotos · ` : ""}{euro(o.price_cents)}
+                        {dateFmt.format(new Date(o.submitted_at ?? o.created_at))} · {o.kind === "photo_edit" ? `${o.quantity} Fotos · ` : ""}{euroNet(o.price_cents)}
                       </p>
                     </div>
                     <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLE[o.status]}`}>{STATUS_LABEL[o.status]}</span>

@@ -325,6 +325,7 @@ function Sheet({
             <div style={{ marginBottom: 24 }}>
               <label style={{ fontFamily: "var(--font-inter, sans-serif)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: mutedColor, display: "block", marginBottom: 8 }}>Allergene</label>
               <input type="text" value={allergensInput} onChange={(e) => setAllergensInput(e.target.value)} onFocus={() => setAllergensFocused(true)} onBlur={() => { setAllergensFocused(false); commitAllergens(); }} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }} placeholder="z.B. Gluten, Milch, Ei" style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${allergensFocused ? accent : borderColor}`, outline: "none", fontFamily: "var(--font-inter, sans-serif)", fontSize: 14, color: dimColor, padding: "6px 0", boxSizing: "border-box" }} />
+              <p style={{ fontFamily: "var(--font-inter, sans-serif)", fontSize: 11, color: mutedColor, margin: "6px 0 0" }}>Sie als Betrieb sind für die Richtigkeit der Allergenangaben verantwortlich.</p>
             </div>
 
             {/* Diet tags */}

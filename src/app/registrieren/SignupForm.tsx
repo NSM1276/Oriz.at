@@ -10,6 +10,8 @@ const PASSWORD_MIN = 8;
 
 export function SignupForm() {
   const router = useRouter();
+  const [company, setCompany] = useState("");
+  const [isBusiness, setIsBusiness] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -22,12 +24,20 @@ export function SignupForm() {
       setError(`Das Passwort braucht mindestens ${PASSWORD_MIN} Zeichen.`);
       return;
     }
+    if (!company.trim() || !isBusiness) {
+      setError("Bitte Firmenname angeben und bestätigen, dass Sie als Unternehmer handeln.");
+      return;
+    }
     setBusy(true);
     setError(null);
     const { data, error: err } = await createClient().auth.signUp({
       email: email.trim(),
       password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/app/neu` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/app/neu`,
+        // Record that the sign-up was made as a business (ORIZ sells to businesses only).
+        data: { company_name: company.trim().slice(0, 200), business_confirmed_at: new Date().toISOString() },
+      },
     });
     setBusy(false);
 
@@ -71,6 +81,18 @@ export function SignupForm() {
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
       <label className="block">
+        <span className="text-sm font-medium">Firmenname</span>
+        <input
+          type="text"
+          required
+          autoComplete="organization"
+          maxLength={200}
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          className="mt-1 w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-base outline-none focus:border-stone-900"
+        />
+      </label>
+      <label className="block">
         <span className="text-sm font-medium">E-Mail</span>
         <input
           type="email"
@@ -94,6 +116,19 @@ export function SignupForm() {
           className="mt-1 w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-base outline-none focus:border-stone-900"
         />
         <span className="mt-1 block text-xs text-stone-500">Mindestens {PASSWORD_MIN} Zeichen.</span>
+      </label>
+
+      <label className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          required
+          checked={isBusiness}
+          onChange={(e) => setIsBusiness(e.target.checked)}
+          className="mt-1 h-5 w-5 shrink-0"
+        />
+        <span className="text-sm text-stone-700">
+          Ich bin Unternehmer und schließe den Vertrag im Rahmen meiner gewerblichen Tätigkeit.
+        </span>
       </label>
 
       {error && <p className="text-sm text-red-700">{error}</p>}

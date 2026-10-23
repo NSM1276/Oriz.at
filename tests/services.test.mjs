@@ -85,3 +85,16 @@ test("emails: venue names and notes are escaped in HTML", () => {
 test("emails: done for a menu reminds about allergens", () => {
   assert.match(orderStatusChanged(facts, "fertig").text, /Allergene/);
 });
+
+import { euroNet } from "../src/lib/services.ts";
+import { orderForAdmin as orderForAdminNet, orderReceived as orderReceivedNet } from "../src/lib/email-templates.ts";
+
+test("prices for businesses say they are without VAT", () => {
+  assert.match(euroNet(149_00), /^€\s149,00 zzgl\. USt$/);
+  const facts = {
+    id: "x", kind: "menu_setup", quantity: 1, priceCents: 149_00, venueName: "V", contactName: null, contactEmail: null,
+    contactPhone: null, fileCount: 0, linkUrl: null, notes: null, appUrl: "https://x",
+  };
+  assert.match(orderReceivedNet(facts, null).text, /zzgl\. USt/);
+  assert.match(orderForAdminNet(facts, "https://x/admin").text, /zzgl\. USt/);
+});

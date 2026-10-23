@@ -174,6 +174,9 @@ export function DishEditor({
             Enthält keines davon
           </button>
         )}
+        <p className="mt-3 text-xs text-stone-500">
+          Sie als Betrieb sind für die Richtigkeit der Allergenangaben verantwortlich. ORIZ zeigt Ihren Gästen an, was Sie eintragen.
+        </p>
       </section>
 
       <section className={card}>
