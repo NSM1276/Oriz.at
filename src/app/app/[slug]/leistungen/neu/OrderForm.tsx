@@ -10,7 +10,7 @@ import {
   SERVICE_INFO,
   allowedTypes,
   checkFiles,
-  euroNet,
+  euro,
   fileType,
   orderPrice,
   type ServiceKind,
@@ -169,7 +169,7 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
           {error && <p className="mb-2 text-sm text-red-700">{error}</p>}
           <div className="flex items-center gap-3">
             <span className="min-w-0 flex-1 text-sm">
-              {price.ok ? <><span className="font-semibold">{euroNet(price.priceCents)}</span>{kind === "photo_edit" && <span className="text-stone-500"> · {price.quantity} Fotos</span>}</> : <span className="text-stone-500">{price.error}</span>}
+              {price.ok ? <><span className="font-semibold">{euro(price.priceCents)}</span>{kind === "photo_edit" && <span className="text-stone-500"> · {price.quantity} Fotos</span>}</> : <span className="text-stone-500">{price.error}</span>}
             </span>
             <button type="submit" disabled={busy || !check.ok || !price.ok} className="rounded-xl bg-stone-900 px-6 py-3 font-medium text-white disabled:opacity-40">
               {progress ? `Wird gesendet… ${progress.done}/${progress.total}` : "Auftrag senden"}

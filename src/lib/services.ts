@@ -125,8 +125,5 @@ export function paymentUrl(base: string | undefined, orderId: string, email: str
   return url.toString();
 }
 
-/** Prices for businesses are shown without VAT: "149,00 € zzgl. USt". */
-export const euroNet = (cents: number) => `${euro(cents)} zzgl. USt`;
-
 export const euro = (cents: number) =>
   new Intl.NumberFormat("de-AT", { style: "currency", currency: "EUR" }).format(cents / 100);

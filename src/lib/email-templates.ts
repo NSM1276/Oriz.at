@@ -1,7 +1,7 @@
 // Texts of the emails we send around service orders. No runtime imports — unit-tested.
 // German, short, plain: restaurant owners read these on the phone.
 
-import { STATUS_LABEL, SERVICE_INFO, euroNet, type ServiceKind } from "./services.ts";
+import { STATUS_LABEL, SERVICE_INFO, euro, type ServiceKind } from "./services.ts";
 
 export type Email = { subject: string; text: string; html: string };
 
@@ -33,8 +33,8 @@ function html(paragraphs: string[], link?: { href: string; label: string }): str
 
 function what(o: OrderFacts): string {
   return o.kind === "photo_edit"
-    ? `${SERVICE_INFO.photo_edit.title}: ${o.quantity} Fotos, ${euroNet(o.priceCents)}`
-    : `${SERVICE_INFO.menu_setup.title}: ${euroNet(o.priceCents)}`;
+    ? `${SERVICE_INFO.photo_edit.title}: ${o.quantity} Fotos, ${euro(o.priceCents)}`
+    : `${SERVICE_INFO.menu_setup.title}: ${euro(o.priceCents)}`;
 }
 
 /** To the owner, right after they sent the order. */

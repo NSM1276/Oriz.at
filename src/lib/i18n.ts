@@ -77,7 +77,7 @@ export const translations = {
       eyebrow: "Preise",
       heading: "Transparent. Ohne Überraschungen.",
       sub: "Monatlich kündbar. Keine Einrichtungsgebühr.",
-      disclaimer: "Alle Preise exkl. MwSt. · Monatlich kündbar · Keine Einrichtungsgebühr",
+      disclaimer: "Endpreise, keine Umsatzsteuer (Kleinunternehmerregelung) · Monatlich kündbar · Keine Einrichtungsgebühr",
       plans: [
         { name: "Test", price: "14 Tage", sub: "kostenlos — alle Funktionen", badge: null as null, features: ["Alle Pro-Funktionen inklusive", "Kein Vertrag, jederzeit kündbar", "Persönlicher Onboarding-Support"], cta: "Kostenlos testen", plan: "trial" as const, accent: false },
         { name: "Starter", price: "€ 19", sub: "pro Monat", badge: "Empfohlen" as string | null, features: ["1 Karte · unbegrenzte Gerichte", "Änderungen in Echtzeit", "3 Erscheinungsbilder, eigene Farben & Logo", "14 EU-Allergene mit Filter", "QR-Codes für jeden Tisch + Service-Ruf", "Druckfertiges PDF (A4)", "4 Sprachen: DE, EN, IT, UK"], cta: "Starter wählen", plan: "starter" as const, accent: true },
@@ -217,7 +217,7 @@ export const translations = {
       eyebrow: "Pricing",
       heading: "Transparent. No surprises.",
       sub: "Cancel monthly. No setup fee.",
-      disclaimer: "All prices excl. VAT · Cancel monthly · No setup fee",
+      disclaimer: "Final prices, no VAT charged (small-business exemption) · Cancel monthly · No setup fee",
       plans: [
         { name: "Trial", price: "14 days", sub: "free — all features", badge: null as null, features: ["All Pro features included", "No contract, cancel anytime", "Personal onboarding support"], cta: "Start free trial", plan: "trial" as const, accent: false },
         { name: "Starter", price: "€ 19", sub: "per month", badge: "Recommended" as string | null, features: ["1 menu · unlimited dishes", "Changes in real time", "3 looks, your own colours & logo", "14 EU allergens with filter", "QR codes for every table + waiter call", "Print-ready PDF (A4)", "4 languages: DE, EN, IT, UK"], cta: "Choose Starter", plan: "starter" as const, accent: true },

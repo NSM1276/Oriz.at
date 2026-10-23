@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getUser, isPlatformAdmin, serviceClient } from "@/lib/auth";
 import { emailConfigured } from "@/lib/email";
-import { SERVICE_INFO, STATUS_LABEL, euroNet, type OrderStatus, type ServiceKind } from "@/lib/services";
+import { SERVICE_INFO, STATUS_LABEL, euro, type OrderStatus, type ServiceKind } from "@/lib/services";
 import { OrderControls } from "./OrderControls";
 
 export const dynamic = "force-dynamic";
@@ -77,7 +77,7 @@ export default async function OrdersPage() {
                       <div className="min-w-0">
                         <p className="font-semibold">{o.venues.name}</p>
                         <p className="text-sm text-stone-600">
-                          {SERVICE_INFO[o.kind].title} · {o.kind === "photo_edit" ? `${o.quantity} Fotos · ` : ""}{euroNet(o.price_cents)}
+                          {SERVICE_INFO[o.kind].title} · {o.kind === "photo_edit" ? `${o.quantity} Fotos · ` : ""}{euro(o.price_cents)}
                         </p>
                       </div>
                       <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium">{STATUS_LABEL[o.status]}</span>

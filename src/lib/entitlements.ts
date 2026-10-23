@@ -1,6 +1,6 @@
 // What a venue may use, derived from its subscription row. Pure — unit-tested.
 //
-// Plans (prices excl. VAT, per month; also written in the website copy, a test keeps both in step):
+// Plans (prices per month, no VAT charged (small-business exemption); also written in the website copy, a test keeps both in step):
 //   Starter 19 € — one menu, everything a single venue needs.
 //   Pro     39 € — Screen (TV board), several menus, print design.
 // A trial gives the Pro features for 14 days, so owners meet them before they pay.
