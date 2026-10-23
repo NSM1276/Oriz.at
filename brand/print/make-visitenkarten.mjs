@@ -21,27 +21,15 @@ const MM = 72 / 25.4;
 const W = 85 * MM, H = 55 * MM, M = 14, QR = 74;
 const logo = fs.readFileSync(path.join(process.cwd(), "brand/svg/oriz-horizontal.svg"), "utf8");
 
+const TAGLINE = "Digitale Speisekarten\naus Wien";
+// Plain business cards: logo, one line, contact, one QR with a short caption. No sales copy.
 const CARDS = [
+  { file: "karte-a-starten", caption: "Kostenlos testen", url: "https://www.oriz.at/registrieren?ref=markt-start" },
+  { file: "karte-b-ansehen", caption: "Demo ansehen", url: "https://www.oriz.at/belvedere" },
   {
-    file: "karte-a-starten",
-    headline: "Ihre Speisekarte auf jedem Handy.",
-    sub: "Gäste scannen den QR-Code am Tisch: Fotos, Allergene, vier Sprachen. 14 Tage kostenlos testen.",
-    caption: "Jetzt kostenlos starten",
-    url: "https://www.oriz.at/registrieren?ref=markt-start",
-  },
-  {
-    file: "karte-b-ansehen",
-    headline: "So sehen Gäste Ihre Karte.",
-    sub: "Scannen und die Demo-Karte ansehen: so sehen Ihre Gäste die Karte, mit Fotos, Allergenen und vier Sprachen.",
-    caption: "Demo-Karte ansehen",
-    url: "https://www.oriz.at/belvedere",
-  },
-  {
-    file: "karte-c-wir-machen-es",
-    headline: "Keine Zeit für die Karte?",
-    sub: "Foto Ihrer Karte schicken, wir tragen alles ein. Ab € 149 bis 80 Gerichte, fertig in 2 Werktagen.",
-    caption: "Foto per WhatsApp senden",
-    url: "https://wa.me/4367764292055?text=" + encodeURIComponent("Hallo, bitte tragen Sie meine Speisekarte bei ORIZ ein."),
+    file: "karte-c-whatsapp",
+    caption: "WhatsApp schreiben",
+    url: "https://wa.me/4367764292055?text=" + encodeURIComponent("Hallo, ich interessiere mich für ORIZ."),
   },
 ];
 
@@ -54,21 +42,21 @@ function card(c, ox, oy) {
   return [
     { svg: logo, width: 62, absolutePosition: { x: left, y: oy + M } },
     {
-      absolutePosition: { x: left, y: oy + 38 },
+      absolutePosition: { x: left, y: oy + 42 },
       columns: [{ width: textW, stack: [
-        { text: c.headline, font: "Cormorant", bold: true, fontSize: 14, lineHeight: 0.98, color: ONYX },
-        { canvas: [{ type: "line", x1: 0, y1: 0, x2: 22, y2: 0, lineWidth: 1.2, lineColor: GOLD }], margin: [0, 4, 0, 3] },
-        { text: c.sub, fontSize: 6.3, lineHeight: 1.22, color: ONYX },
+        { text: TAGLINE, font: "Cormorant", bold: true, fontSize: 13, lineHeight: 1.0, color: ONYX },
+        { canvas: [{ type: "line", x1: 0, y1: 0, x2: 22, y2: 0, lineWidth: 1.2, lineColor: GOLD }], margin: [0, 6, 0, 0] },
       ] }],
     },
     { svg: c.qr, width: QR, absolutePosition: { x: ox + W - M - QR, y: oy + M } },
     { absolutePosition: { x: ox + W - M - QR - 6, y: oy + M + QR + 6 }, columns: [{ width: QR + 12, text: c.caption, bold: true, fontSize: 7, alignment: "center", color: ONYX }] },
     {
-      absolutePosition: { x: left, y: oy + H - M - 16 },
+      absolutePosition: { x: left, y: oy + H - M - 35 },
       columns: [{ width: textW + 8, stack: [
-        { text: "Nasim Nuridinov", bold: true, fontSize: 7, color: ONYX },
-        { text: "+43 677 64292055 · office@oriz.at", fontSize: 6.4, color: GREY, margin: [0, 1, 0, 0] },
-        { text: "www.oriz.at", fontSize: 6.4, color: GREY },
+        { text: "Nasim Nuridinov", bold: true, fontSize: 8, color: ONYX },
+        { text: "+43 677 64292055", fontSize: 7.2, color: ONYX, margin: [0, 2, 0, 0] },
+        { text: "office@oriz.at", fontSize: 7.2, color: ONYX },
+        { text: "www.oriz.at", fontSize: 7.2, color: ONYX },
       ] }],
     },
   ];
