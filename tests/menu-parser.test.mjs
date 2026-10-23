@@ -161,3 +161,25 @@ test("several sizes on one line become one dish with sizes", () => {
   assert.equal(items.at(-1).name, "Hauswein");
   assert.deepEqual(items.at(-1).variants, [{ label: "0,125 l", price_cents: 350 }, { label: "0,25 l", price_cents: 650 }]);
 });
+
+import { looksLikeHeading as lookH } from "../src/lib/menu-parser.ts";
+
+test("headings directly after a dish (no blank lines) stay headings", () => {
+  const text = "Vorspeisen\nTomatensuppe 6,50\nGemischter Salat 7,90\nHauptspeisen\nWiener Schnitzel mit Kartoffelsalat 16,90\nGulasch mit Semmelknödel 14,50\nGetränke\nCola 0,33 l 3,80\nBier 0,3 l 3,60 0,5 l 4,50";
+  const sections = linesToSections(parseMenuText(text));
+  assert.deepEqual(sections.map((s) => s.name), ["Vorspeisen", "Hauptspeisen", "Getränke"]);
+  assert.deepEqual(sections.map((s) => s.items.length), [2, 2, 2]);
+  assert.ok(sections.every((s) => s.items.every((i) => !i.description)));
+});
+
+test("a description under a dish is still a description", () => {
+  const sections = linesToSections(parseMenuText("Hauptspeisen\nSchnitzel 16,90\nvom Kalb, mit Preiselbeeren\nGulasch 14,50\nmit Knödel"));
+  assert.equal(sections.length, 1);
+  assert.equal(sections[0].items[0].description, "vom Kalb, mit Preiselbeeren");
+  assert.equal(sections[0].items[1].description, "mit Knödel");
+});
+
+test("what looks like a heading", () => {
+  for (const h of ["Hauptspeisen", "Alkoholfreie Getränke:", "SUPPEN", "Warme Vorspeisen", "— Desserts —"]) assert.equal(lookH(h), true, h);
+  for (const d of ["mit Kartoffelsalat", "Fisch, Gemüse", "Tomaten und Mozzarella", "Hausgemachte Knödel 2 Stück", "vom Kalb"]) assert.equal(lookH(d), false, d);
+});

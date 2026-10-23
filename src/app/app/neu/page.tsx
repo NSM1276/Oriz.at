@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { isPlatformAdmin, memberVenues } from "@/lib/auth";
 import { requireUser } from "../venue";
 import { NewVenueForm } from "./NewVenueForm";
+import { WhatsAppHelp } from "@/components/WhatsAppHelp";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function NewVenuePage() {
         Name und Adresse der Speisekarte. Den Namen können Sie später jederzeit ändern.
       </p>
       <NewVenueForm />
+      <WhatsAppHelp message="Hallo, ich brauche Hilfe beim Einrichten meines Lokals bei ORIZ." className="mt-8 text-center" />
     </main>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { SignupForm } from "./SignupForm";
+import { WhatsAppHelp } from "@/components/WhatsAppHelp";
 
 export const metadata: Metadata = {
   title: "Registrieren — ORIZ",
@@ -22,6 +23,7 @@ export default async function SignupPage() {
           14 Tage kostenlos testen, alle Funktionen inklusive.
         </p>
         <SignupForm />
+        <WhatsAppHelp message="Hallo, ich habe eine Frage zur Registrierung bei ORIZ." className="mt-6 text-center" />
       </main>
     </div>
   );

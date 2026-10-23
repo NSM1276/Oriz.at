@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
 import { createClient } from "@/lib/supabase/client";
+import { cleanRef } from "@/lib/contact-info";
 
 const PASSWORD_MIN = 8;
 
@@ -30,13 +31,15 @@ export function SignupForm() {
     }
     setBusy(true);
     setError(null);
+    // Where the visitor came from (a QR code on a card says ?ref=markt).
+    const ref = cleanRef(new URLSearchParams(window.location.search).get("ref"));
     const { data, error: err } = await createClient().auth.signUp({
       email: email.trim(),
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/app/neu`,
         // Record that the sign-up was made as a business (ORIZ sells to businesses only).
-        data: { company_name: company.trim().slice(0, 200), business_confirmed_at: new Date().toISOString() },
+        data: { company_name: company.trim().slice(0, 200), business_confirmed_at: new Date().toISOString(), ...(ref && { signup_ref: ref }) },
       },
     });
     setBusy(false);
@@ -52,7 +55,7 @@ export function SignupForm() {
       return;
     }
     // Counts completed sign-ups per source page; the event carries no email or other data.
-    track("signup");
+    track("signup", ref ? { ref } : undefined);
     // Without email confirmation Supabase signs the user in right away.
     if (data.session) {
       router.push("/app/neu");

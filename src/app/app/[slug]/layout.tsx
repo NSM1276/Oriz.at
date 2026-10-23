@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getEntitlements } from "@/lib/entitlements-server";
 import { requireVenue } from "../venue";
 import { AppNav } from "./AppNav";
+import { WhatsAppHelp } from "@/components/WhatsAppHelp";
 
 export default async function VenueLayout({
   children,
@@ -43,7 +44,10 @@ export default async function VenueLayout({
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">{children}</main>
+      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
+        {children}
+        <WhatsAppHelp message={`Hallo, ich brauche Hilfe bei ORIZ (${venue.name}).`} className="mt-10 text-center print:hidden" />
+      </main>
     </>
   );
 }

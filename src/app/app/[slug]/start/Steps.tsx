@@ -74,7 +74,7 @@ export function MenuStep({ slug, existingItems, nextHref }: { slug: string; exis
       >
         <span className="block font-medium">Lieber machen lassen?</span>
         <span className="mt-0.5 block text-sm text-stone-600">
-          Schicken Sie uns Ihre Karte als Foto, PDF oder Link — wir tragen alles für Sie ein, meist bis zum nächsten Werktag. ›
+          Schicken Sie uns Ihre Karte als Foto, PDF oder Link — wir tragen alles für Sie ein, innerhalb von 2 Werktagen nach Zahlung. ›
         </span>
       </Link>
       {existingItems > 0 && (

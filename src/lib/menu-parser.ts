@@ -46,6 +46,29 @@ function multiSizeLine(raw: string): { name: string; variants: Variant[] } | nul
   return { name, variants };
 }
 
+// Words that make a short plain line a section heading even when it follows a dish directly
+// (pasted text often has no blank lines between sections).
+const HEADING_WORDS = new Set(
+  ("vorspeisen vorspeise suppen salate hauptspeisen hauptgerichte nachspeisen nachtisch desserts mehlspeisen süßspeisen " +
+    "getränke biere weine weißweine rotweine schaumweine spirituosen cocktails aperitifs aperitif kaffee tee heißgetränke " +
+    "beilagen snacks frühstück mittagsmenü tagesmenü menüs menü kindermenü kindergerichte kinderkarte pizzen pizze pasta " +
+    "antipasti primi secondi contorni dolci bevande starters mains sides drinks beers wines tapas fisch fleisch vegetarisch " +
+    "vegan steaks burger sushi " +
+    "alkoholfreie alkoholische warme kalte heiße süße hausgemachte kleine große speisen und & vom von der des").split(" "),
+);
+
+/** "Hauptspeisen", "Alkoholfreie Getränke:", "SUPPEN" — short, no digits, made of section words (or all capitals). */
+export function looksLikeHeading(line: string): boolean {
+  const t = line.replace(/[:\-–—*~=_.·•]+$/u, "").replace(/^[\-–—*~=_.·•\s]+/u, "").trim();
+  if (t === "" || t.length > 40 || /[\d,;]/.test(t)) return false;
+  const words = t.split(/\s+/);
+  if (words.length > 4) return false;
+  const allCaps = t === t.toUpperCase() && /\p{L}{3}/u.test(t);
+  if (allCaps) return true;
+  const lower = words.map((w) => w.toLowerCase());
+  return lower.every((w) => HEADING_WORDS.has(w)) && lower.some((w) => w.length > 3 && w !== "speisen" && w !== "und");
+}
+
 /** Parses pasted menu text into sections, items and descriptions. */
 export function parseMenuText(text: string): ParsedLine[] {
   const out: ParsedLine[] = [];
@@ -82,7 +105,7 @@ export function parseMenuText(text: string): ParsedLine[] {
 
     // No price on this line. Right after an item it is that item's description;
     // otherwise it introduces a new section.
-    if (lastWasItem) {
+    if (lastWasItem && !looksLikeHeading(raw)) {
       out.push({ kind: "description", text: raw, raw, block });
     } else {
       out.push({ kind: "section", name: raw, raw, block });

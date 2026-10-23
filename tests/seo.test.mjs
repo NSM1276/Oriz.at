@@ -83,3 +83,36 @@ test("both language versions of the main page have the same shape and no empty t
   assert.equal(HOME_EN.switcher.href, "/");
   assert.equal(HOME_DE.switcher.href, "/en");
 });
+
+import { cleanRef, whatsappUrl } from "../src/lib/contact-info.ts";
+
+test("source tags from QR links are short and plain, anything else is dropped", () => {
+  assert.equal(cleanRef("markt"), "markt");
+  assert.equal(cleanRef(" Markt-2026 "), "markt-2026");
+  assert.equal(cleanRef("<script>"), null);
+  assert.equal(cleanRef("a".repeat(41)), null);
+  assert.equal(cleanRef(""), null);
+  assert.equal(cleanRef(null), null);
+});
+
+test("whatsapp link carries the prefilled text, encoded", () => {
+  assert.equal(whatsappUrl(), "https://wa.me/4367764292055");
+  assert.equal(whatsappUrl("Hallo, Hilfe & Fragen"), "https://wa.me/4367764292055?text=Hallo%2C%20Hilfe%20%26%20Fragen");
+});
+
+import { waLink, isLeadStatus } from "../src/lib/contact-info.ts";
+
+test("whatsapp link from a phone number as people say it", () => {
+  assert.equal(waLink("0660 1234567"), "https://wa.me/436601234567");
+  assert.equal(waLink("+43 660 1234567"), "https://wa.me/436601234567");
+  assert.equal(waLink("0043 660 1234567"), "https://wa.me/436601234567");
+  assert.equal(waLink("+49 171 2345678"), "https://wa.me/491712345678");
+  assert.equal(waLink("12"), null);
+  assert.equal(waLink(null), null);
+  assert.equal(waLink("abc"), null);
+});
+
+test("lead statuses", () => {
+  assert.ok(isLeadStatus("testet"));
+  assert.ok(!isLeadStatus("hacked"));
+});
