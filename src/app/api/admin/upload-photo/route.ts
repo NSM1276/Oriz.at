@@ -6,7 +6,7 @@ import { isPlatformAdmin, venueRole } from "@/lib/auth";
 import { isBlobUrl, putPublic, removePrefix, removeUrls, stampedPath } from "@/lib/blob";
 import { maxPhotos, TRIAL_MAX_PHOTOS } from "@/lib/entitlements";
 import { getEntitlements } from "@/lib/entitlements-server";
-import { originalUrl, thumbPath, thumbUrl } from "@/lib/media";
+import { originalPath, thumbPath } from "@/lib/media";
 
 const MAX_BYTES = 1_500_000; // 1.5 MB — sanity cap after client resize
 const MAX_THUMB_BYTES = 300_000;
@@ -39,11 +39,17 @@ function svc() {
 
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status });
 
-/** Removes a photo and its small copy / kept original, if they are ours. */
+/** Removes a photo and its small copy / kept original, if they are ours (covers get a small copy too). */
 async function removePhoto(url: string | null | undefined) {
   if (!isBlobUrl(url)) return;
-  await removeUrls([url, thumbUrl(url), originalUrl(url)]);
+  await removeUrls([url, thumbPath(url), originalPath(url)]);
 }
+
+/** After the trial without a plan the venue is read-only — no new files on our storage either. */
+async function venueLocked(venueId: string): Promise<boolean> {
+  return (await getEntitlements(venueId)).locked;
+}
+const LOCKED = { error: "Die Testphase ist beendet. Zum Bearbeiten bitte einen Tarif wählen." };
 
 export async function POST(req: NextRequest) {
   const userSb = await createServerSupabase();
@@ -83,6 +89,7 @@ export async function POST(req: NextRequest) {
       const isOwner = target === "carta-venue-logo" && (await venueRole(user.id, id)) === "owner";
       if (!isOwner) return json({ error: "forbidden" }, 403);
       if (isSvg) return json({ error: "SVG-Logos richten wir für Sie ein. Bitte das Logo als PNG oder JPG hochladen." }, 400);
+      if (await venueLocked(id)) return json(LOCKED, 403);
     }
 
     if (isSvg) {
@@ -129,9 +136,10 @@ export async function POST(req: NextRequest) {
     if (!item) return json({ error: "item not found" }, 404);
     // Any member of the venue (owner or manager) may change dish photos.
     if (!(await venueRole(user.id, item.venue_id))) return json({ error: "forbidden" }, 403);
+    const ent = await getEntitlements(item.venue_id);
+    if (ent.locked && !isSuper) return json(LOCKED, 403);
     // The free trial holds a real menu's worth of photos, not an unlimited store.
     if (!item.image_url) {
-      const ent = await getEntitlements(item.venue_id);
       const limit = maxPhotos(ent);
       if (Number.isFinite(limit)) {
         const { count } = await admin.from("items").select("id", { count: "exact", head: true }).eq("venue_id", item.venue_id).not("image_url", "is", null);
@@ -163,6 +171,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle<{ id: string; cover_url: string | null }>();
     if (!venue) return json({ error: "venue not found" }, 404);
     if (!(await venueRole(user.id, venue.id))) return json({ error: "forbidden" }, 403);
+    if (!isSuper && (await venueLocked(venue.id))) return json(LOCKED, 403);
     dir = `carta/${id}`;
     base = "cover";
     previous = venue.cover_url;

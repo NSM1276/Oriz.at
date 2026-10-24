@@ -48,6 +48,8 @@ export default async function GuestMenuPage({
   // traffic) but stay stored for PHOTO_GRACE_DAYS, so paying later brings them straight back.
   if (entitlements.locked) {
     for (const s of initial.sections) for (const it of s.items) it.image_url = null;
+    // The waiter call is part of the paid service, not of the menu that stays online.
+    callsEnabled = false;
   }
 
   const acceptLanguage = (await headers()).get("accept-language");

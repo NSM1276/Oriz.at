@@ -131,7 +131,10 @@ export async function saveDish(
   const existing = input.itemId ? await itemOfVenue(db, venue.id, input.itemId) : null;
   if (input.itemId && !existing) return { ok: false, error: "Gericht nicht gefunden." };
 
-  const result = dishFromForm(input.form, locales, existing?.translations ?? {});
+  // Only languages the plan includes are on the form; the others (e.g. after the trial or the
+  // "20+" add-on ended) must survive the save untouched, so they are not passed as editable.
+  const editable = cleanLocales(locales, allowedLocales(await getEntitlements(venue.id)));
+  const result = dishFromForm(input.form, editable, existing?.translations ?? {});
   if (!result.ok) return result;
 
   if (existing) {

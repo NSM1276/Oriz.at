@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { loadMenuPayload } from "@/lib/menu-loader";
 import { loadScreenSettings } from "@/lib/screen-settings-loader";
 import { getEntitlements } from "@/lib/entitlements-server";
+import { allowedLocales } from "@/lib/entitlements";
+import { cleanLocales } from "@/lib/menu-edit";
 import { COLOR_PRESETS, PRESET_IDS } from "@/lib/colorPresets";
 import { ScreenBoard } from "@/components/screen/ScreenBoard";
 import { parseScreenParams, type SearchParams } from "@/components/screen/screen-params";
@@ -22,7 +24,8 @@ export default async function ScreenRoute({ params, searchParams }: Props) {
 
   // Screen belongs to the Pro plan. A TV that is already on the wall shows a calm message
   // instead of an error, and the venue's own team sees the way to switch it on.
-  if (!(await getEntitlements(payload.venue.id)).screen) {
+  const ent = await getEntitlements(payload.venue.id);
+  if (!ent.screen) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-[#0A0A0A] px-8 text-center text-[#F5F0EC]">
         <p className="font-display text-5xl">{payload.venue.name}</p>
@@ -37,7 +40,8 @@ export default async function ScreenRoute({ params, searchParams }: Props) {
   const settings = await loadScreenSettings(payload.venue.id);
 
   const parsed = parseScreenParams(sp, {
-    enabledLocales: payload.venue.enabled_locales ?? [],
+    // Same languages as the guest menu: the plan's package, or all with "20+ Sprachen".
+    enabledLocales: cleanLocales(payload.venue.enabled_locales ?? [], allowedLocales(ent)),
     presetIds: PRESET_IDS,
   });
   const preset = parsed.presetId

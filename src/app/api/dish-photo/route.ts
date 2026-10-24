@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import { getUser, isPlatformAdmin, serviceClient, venueRole } from "@/lib/auth";
 import { blobExists, fetchBlob, isBlobUrl, putPublic, removeUrls, stampedPath } from "@/lib/blob";
-import { originalUrl, thumbPath, thumbUrl } from "@/lib/media";
+import { originalPath, originalUrl, thumbPath, thumbUrl } from "@/lib/media";
 import { composeDish, maskCoverage, maskFromCutout, toThumb } from "@/lib/dish-photo/compose";
 import { STYLES, cutOut, modelsMode, paintBackground, type StyleId } from "@/lib/dish-photo/models";
 
@@ -53,7 +53,7 @@ async function save(db: ReturnType<typeof serviceClient>, item: Item, currentUrl
   await db.from("items").update({ image_url: url }).eq("id", item.id);
   // The previous version and its small copy go; the kept original is handled by the caller.
   await removeUrls([currentUrl, thumbUrl(currentUrl)]);
-  return url;
+  return { url, path };
 }
 
 export async function GET(req: NextRequest) {
@@ -101,10 +101,10 @@ export async function POST(req: NextRequest) {
 
     const styled = await composeDish({ original, mask, background, width, height });
     const next = await save(db, item, url, styled);
-    // The owner's photo stays next to the styled one, under the new name.
-    await putPublic(originalUrl(next), original, source.type.startsWith("image/") ? source.type : "image/webp");
+    // The owner's photo stays next to the styled one, under the new name (a store path, not the URL).
+    await putPublic(originalPath(next.path), original, source.type.startsWith("image/") ? source.type : "image/webp");
     if (hadOriginal) await removeUrls([origUrl]);
-    return NextResponse.json({ url: next, mode });
+    return NextResponse.json({ url: next.url, mode });
   } catch (err) {
     console.error("[dish-photo]", err);
     return bad(502, "Das Bild konnte gerade nicht erstellt werden. Bitte später noch einmal versuchen.");
@@ -122,5 +122,5 @@ export async function DELETE(req: NextRequest) {
   const webp = source.type === "image/webp" ? source.bytes : await sharp(source.bytes).webp({ quality: 84 }).toBuffer();
   const next = await save(db, item, url, webp);
   await removeUrls([origUrl]);
-  return NextResponse.json({ url: next });
+  return NextResponse.json({ url: next.url });
 }

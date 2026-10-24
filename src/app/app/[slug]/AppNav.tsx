@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -66,26 +67,16 @@ export function AppNav({ slug, screenLocked = false, printLocked = false }: { sl
   const moreActive = more.some((t) => t.active);
   const [open, setOpen] = useState(false);
   useEffect(() => { setOpen(false); }, [pathname]);
+  // The header around this nav has backdrop-blur, which makes it the containing block of any
+  // position:fixed child — the bottom bar would stick to the header, not the screen. So the
+  // phone bar and its sheet go straight into <body>.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   const pro = (t: Tab) => t.pro && <span className="ml-1.5 rounded bg-amber-200 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900">Pro</span>;
 
-  return (
+  const phoneNav = (
     <>
-      {/* Wide screens: one row of pills. */}
-      <nav className="-mx-4 hidden gap-1 overflow-x-auto px-4 sm:flex" style={{ scrollbarWidth: "none" }}>
-        {[...main, ...more].map((t) => (
-          <Link
-            key={t.href}
-            href={t.href}
-            aria-current={t.active ? "page" : undefined}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${t.active ? "bg-stone-900 text-white" : "text-stone-600 hover:bg-stone-200"}`}
-          >
-            {t.label}
-            {pro(t)}
-          </Link>
-        ))}
-      </nav>
-
       {/* Phones: bottom bar. */}
       <nav
         aria-label="Bereiche"
@@ -117,7 +108,7 @@ export function AppNav({ slug, screenLocked = false, printLocked = false }: { sl
       </nav>
 
       {open && (
-        <div className="fixed inset-0 z-40 sm:hidden" role="dialog" aria-modal="true" aria-label="Mehr">
+        <div className="fixed inset-0 z-50 sm:hidden" role="dialog" aria-modal="true" aria-label="Mehr">
           <button type="button" aria-label="Schließen" className="absolute inset-0 bg-black/30" onClick={() => setOpen(false)} />
           <div
             className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-white p-3 shadow-xl"
@@ -141,6 +132,27 @@ export function AppNav({ slug, screenLocked = false, printLocked = false }: { sl
           </div>
         </div>
       )}
+    </>
+  );
+
+  return (
+    <>
+      {/* Wide screens: one row of pills. */}
+      <nav className="-mx-4 hidden gap-1 overflow-x-auto px-4 sm:flex" style={{ scrollbarWidth: "none" }}>
+        {[...main, ...more].map((t) => (
+          <Link
+            key={t.href}
+            href={t.href}
+            aria-current={t.active ? "page" : undefined}
+            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${t.active ? "bg-stone-900 text-white" : "text-stone-600 hover:bg-stone-200"}`}
+          >
+            {t.label}
+            {pro(t)}
+          </Link>
+        ))}
+      </nav>
+
+      {mounted && createPortal(phoneNav, document.body)}
     </>
   );
 }

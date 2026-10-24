@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { LOCALE_NATIVE, localeShort } from "@/lib/locales";
 import { ui } from "@/lib/menu-i18n";
 
@@ -77,7 +78,8 @@ export function LanguageSwitcher({
         <span style={{ letterSpacing: "0.02em", fontSize: 12 }}>{LOCALE_NATIVE[locale] ?? localeShort(locale)}</span>
       </button>
 
-      {open && (
+      {/* Into <body>: the menu around the button can be zoomed (larger text), which would scale the sheet too. */}
+      {open && createPortal(
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:px-4" role="dialog" aria-modal="true" aria-label={t.language}>
           <button type="button" aria-label={t.close} className="absolute inset-0 cursor-default" style={{ backgroundColor: "rgba(10,10,10,0.5)" }} onClick={() => setOpen(false)} />
           <div
@@ -110,7 +112,8 @@ export function LanguageSwitcher({
               </ul>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getEntitlements } from "@/lib/entitlements-server";
+import { allowedLocales } from "@/lib/entitlements";
 import { COLOR_PRESETS } from "@/lib/colorPresets";
 import { accentChoices } from "@/lib/print/design";
 import { loadDesignContext, sheetPageCounts } from "@/lib/print/design-server";
@@ -16,7 +17,8 @@ export const dynamic = "force-dynamic";
 export default async function DruckPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ lang?: string }> }) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const { venue } = await requireVenue(slug);
-  if (!(await getEntitlements(venue.id)).printDesign) return <UpgradeCard feature="printDesign" venueName={venue.name} />;
+  const ent = await getEntitlements(venue.id);
+  if (!ent.printDesign) return <UpgradeCard feature="printDesign" venueName={venue.name} />;
 
   const ctx = await loadDesignContext(venue.slug, sp.lang ?? null);
   if (!ctx) notFound();
@@ -45,7 +47,7 @@ export default async function DruckPage({ params, searchParams }: { params: Prom
     sections: s.sections.map((sec) => ({ id: sec.id, name: sec.name, items: sec.items.length })),
   }));
 
-  const locales = cleanLocales(v?.enabled_locales ?? []);
+  const locales = cleanLocales(v?.enabled_locales ?? [], allowedLocales(ent));
   return (
     <DruckEditor
       slug={venue.slug}
