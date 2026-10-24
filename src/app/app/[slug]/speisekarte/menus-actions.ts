@@ -5,7 +5,7 @@ import { serviceClient } from "@/lib/auth";
 import { getEntitlements } from "@/lib/entitlements-server";
 import { menuLimitProblem } from "@/lib/entitlements";
 import { cleanMenuInput, reorder } from "@/lib/menus-edit";
-import { requireVenue } from "../../venue";
+import { requireOpenVenue } from "../../venue";
 
 export type MenuActionResult = { ok: true } | { ok: false; error: string };
 
@@ -16,7 +16,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type Db = ReturnType<typeof serviceClient>;
 
 async function context(slug: string) {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   return { venue, db: serviceClient() };
 }
 

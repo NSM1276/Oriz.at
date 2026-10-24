@@ -50,18 +50,26 @@ export default async function VenueOverview({ params }: { params: Promise<{ slug
   const { venue } = await requireVenue(slug);
   const svc = serviceClient();
 
-  const [{ data: sub }, { count: itemCount }, { count: sectionCount }, { count: tableCount }] = await Promise.all([
+  const [{ data: sub }, { count: itemCount }, { count: sectionCount }, { count: tableCount }, { count: soldOutCount }] = await Promise.all([
     svc.from("subscriptions").select("plan, status, trial_ends_at, current_period_end").eq("venue_id", venue.id).maybeSingle<Subscription>(),
     svc.from("items").select("id", { count: "exact", head: true }).eq("venue_id", venue.id),
     svc.from("sections").select("id", { count: "exact", head: true }).eq("venue_id", venue.id),
     svc.from("venue_tables").select("id", { count: "exact", head: true }).eq("venue_id", venue.id),
+    svc.from("items").select("id", { count: "exact", head: true }).eq("venue_id", venue.id).eq("is_active", false),
   ]);
 
   const subText = subscriptionText(sub ?? null);
   const stats = [
-    { label: "Bereiche", value: sectionCount ?? 0 },
-    { label: "Gerichte", value: itemCount ?? 0 },
-    { label: "Tische", value: tableCount ?? 0 },
+    { label: "Bereiche", value: sectionCount ?? 0, href: `/app/${venue.slug}/speisekarte` },
+    { label: "Gerichte", value: itemCount ?? 0, href: `/app/${venue.slug}/speisekarte` },
+    { label: "Tische", value: tableCount ?? 0, href: `/app/${venue.slug}/tische` },
+  ];
+  // The things an owner reaches for during a shift, one tap from the start page.
+  const quick = [
+    { label: "Gericht ausverkauft melden", hint: soldOutCount ? `${soldOutCount} gerade aus` : "Schalter neben jedem Gericht", href: `/app/${venue.slug}/speisekarte` },
+    { label: "QR-Codes drucken", hint: "Ein Aufkleber je Tisch", href: `/app/${venue.slug}/tische` },
+    { label: "Service-Ruf", hint: "Gerät des Personals verbinden", href: `/app/${venue.slug}/service` },
+    { label: "Karte als Gast ansehen", hint: `oriz.at/${venue.slug}`, href: `/${venue.slug}`, external: true },
   ];
 
   return (
@@ -74,12 +82,30 @@ export default async function VenueOverview({ params }: { params: Promise<{ slug
 
       <section className="grid grid-cols-3 gap-3">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-stone-200">
+          <Link key={s.label} href={s.href} className="rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-stone-200">
             <p className="text-2xl font-semibold tabular-nums">{s.value}</p>
             <p className="text-xs text-stone-500">{s.label}</p>
-          </div>
+          </Link>
         ))}
       </section>
+
+      {(itemCount ?? 0) > 0 && (
+        <section className="grid gap-2 sm:grid-cols-2">
+          {quick.map((q) =>
+            q.external ? (
+              <a key={q.label} href={q.href} target="_blank" rel="noreferrer" className="flex min-h-16 items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-stone-200">
+                <span><span className="block font-medium">{q.label}</span><span className="block text-sm text-stone-500">{q.hint}</span></span>
+                <span aria-hidden className="text-stone-400">↗</span>
+              </a>
+            ) : (
+              <Link key={q.label} href={q.href} className="flex min-h-16 items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-stone-200">
+                <span><span className="block font-medium">{q.label}</span><span className="block text-sm text-stone-500">{q.hint}</span></span>
+                <span aria-hidden className="text-stone-400">›</span>
+              </Link>
+            ),
+          )}
+        </section>
+      )}
 
       {(itemCount ?? 0) === 0 && (
         <Link

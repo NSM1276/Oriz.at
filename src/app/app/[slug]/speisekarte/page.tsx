@@ -1,4 +1,5 @@
 import { serviceClient } from "@/lib/auth";
+import { allowedLocales } from "@/lib/entitlements";
 import { getEntitlements } from "@/lib/entitlements-server";
 import { cleanLocales } from "@/lib/menu-edit";
 import { requireVenue } from "../../venue";
@@ -40,7 +41,8 @@ export default async function MenuPage({ params }: { params: Promise<{ slug: str
     <MenuEditor
       slug={venue.slug}
       currency={venue.currency}
-      locales={cleanLocales(v?.enabled_locales ?? [])}
+      locales={cleanLocales(v?.enabled_locales ?? [], allowedLocales(ent))}
+      allLanguages={ent.allLanguages}
       sections={sections ?? []}
       items={items ?? []}
       menus={menuRows.map((m) => ({ id: m.id, name: m.name }))}

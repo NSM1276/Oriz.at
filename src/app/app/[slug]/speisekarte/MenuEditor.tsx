@@ -4,8 +4,10 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/format";
-import { parseAllergens, parseDiet, parseVariants } from "@/lib/guest-menu";
+import { foldForSearch, parseAllergens, parseDiet, parseVariants } from "@/lib/guest-menu";
 import { LOCALE_NAMES, MENU_LOCALES, type MenuLocale } from "@/lib/menu-edit";
+import { PACKAGE_LOCALES } from "@/lib/locales";
+import { lockedText } from "@/lib/entitlements";
 import { createSection, deleteSection, moveSection, saveSection, setAvailable, setLocales } from "./actions";
 import { setSectionMenu } from "./menus-actions";
 
@@ -25,6 +27,8 @@ export type EditorItem = {
 };
 
 const card = "rounded-2xl bg-white shadow-sm ring-1 ring-stone-200";
+// A search box appears once scrolling through the list stops being quick.
+const SEARCH_MIN_ITEMS = 30;
 
 function priceSummary(item: EditorItem, currency: string): string {
   const sizes = parseVariants(item.price_variants);
@@ -120,6 +124,7 @@ export function MenuEditor({
   slug,
   currency,
   locales,
+  allLanguages,
   sections,
   items,
   menus,
@@ -127,7 +132,10 @@ export function MenuEditor({
 }: {
   slug: string;
   currency: string;
+  /** Languages switched on (only those the plan includes). */
   locales: MenuLocale[];
+  /** The "20+ Sprachen" add-on (or the trial): every language may be switched on. */
+  allLanguages: boolean;
   sections: EditorSection[];
   items: EditorItem[];
   /** The venue's separate menus (lunch, dinner…); empty = one menu for everything. */
@@ -141,9 +149,19 @@ export function MenuEditor({
   const [availability, setAvailability] = useState<Record<string, boolean>>({});
   const [editing, setEditing] = useState<EditorSection | null>(null);
   const [newSection, setNewSection] = useState("");
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
+  const [query, setQuery] = useState("");
 
   const isAvailable = (it: EditorItem) => availability[it.id] ?? it.is_active;
   const unknownAllergens = items.filter((it) => parseAllergens(it.allergens) === null).length;
+  const soldOut = items.filter((it) => !isAvailable(it)).length;
+  const canSearch = items.length >= SEARCH_MIN_ITEMS;
+  const tokens = foldForSearch(query).split(" ").filter(Boolean);
+  const matchesQuery = (it: EditorItem) => tokens.length === 0 || tokens.every((t) => foldForSearch(it.name).includes(t));
+
+  function toggleCollapsed(id: string) {
+    setCollapsed((c) => { const n = new Set(c); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  }
 
   function run(fn: () => Promise<{ ok: boolean; error?: string }>, onFail?: () => void) {
     setError(null);
@@ -166,13 +184,13 @@ export function MenuEditor({
     run(() => setLocales(slug, next));
   }
 
-  return (
-    <div className="space-y-4">
+  const asideCards = (
+    <>
       <section className={`${card} p-5`}>
         <p className="font-semibold">Sprachen der Karte</p>
         <p className="mt-0.5 text-sm text-stone-600">Deutsch immer. Gäste wählen oben in der Karte; fehlende Übersetzungen erscheinen auf Deutsch.</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {MENU_LOCALES.map((l) => {
+          {(allLanguages ? MENU_LOCALES : PACKAGE_LOCALES).map((l) => {
             const on = locales.includes(l);
             const done = items.filter((it) => it.translations?.[l]?.name).length;
             return (
@@ -190,6 +208,14 @@ export function MenuEditor({
             );
           })}
         </div>
+        {!allLanguages && (
+          <div className="mt-4 rounded-xl bg-stone-50 p-3 ring-1 ring-stone-200">
+            <p className="text-sm font-medium">{lockedText("languages").title}</p>
+            <p className="mt-0.5 text-sm text-stone-600">{lockedText("languages").body}</p>
+            <p className="mt-1 text-xs text-stone-500">{MENU_LOCALES.filter((l) => !PACKAGE_LOCALES.includes(l)).map((l) => LOCALE_NAMES[l]).join(", ")}</p>
+            <Link href={`/app/${slug}/konto`} className="mt-2 inline-block text-sm font-medium underline">Zum Zusatzpaket</Link>
+          </div>
+        )}
       </section>
 
       <section className={`${card} p-5`}>
@@ -219,6 +245,29 @@ export function MenuEditor({
       </section>
 
       {menusSlot}
+    </>
+  );
+
+  return (
+    <div className="space-y-4">
+      {items.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-sm text-stone-600">
+          <span>{sections.length} {sections.length === 1 ? "Bereich" : "Bereiche"} · {items.length} {items.length === 1 ? "Gericht" : "Gerichte"}</span>
+          {soldOut > 0 && <span className="font-medium text-red-700">{soldOut} ausverkauft</span>}
+          <a href={`/${slug}`} target="_blank" rel="noreferrer" className="ml-auto font-medium underline">Als Gast ansehen</a>
+        </div>
+      )}
+
+      {canSearch && (
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Gericht suchen"
+          aria-label="Gericht suchen"
+          className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base outline-none focus:border-stone-900"
+        />
+      )}
 
       {unknownAllergens > 0 && items.length > 0 && (
         <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
@@ -230,13 +279,27 @@ export function MenuEditor({
       {error && <p className="text-sm text-red-700">{error}</p>}
 
       {sections.map((s, si) => {
-        const list = items.filter((it) => it.section_id === s.id).sort((a, b) => a.position - b.position);
+        const all = items.filter((it) => it.section_id === s.id).sort((a, b) => a.position - b.position);
+        const list = all.filter(matchesQuery);
+        // While searching, sections without a hit step aside; the rest open up.
+        if (tokens.length > 0 && list.length === 0) return null;
+        const isCollapsed = tokens.length === 0 && collapsed.has(s.id);
         return (
           <section key={s.id} className={card}>
             <header className="flex items-center gap-2 border-b border-stone-100 px-4 py-3">
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold">{s.name}</p>
-                <p className="text-xs text-stone-500">{list.length} {list.length === 1 ? "Gericht" : "Gerichte"}</p>
+              <button
+                type="button"
+                onClick={() => toggleCollapsed(s.id)}
+                aria-expanded={!isCollapsed}
+                className="flex min-w-0 flex-1 items-center gap-2 text-left"
+              >
+                <span aria-hidden className={`shrink-0 text-stone-400 transition-transform ${isCollapsed ? "" : "rotate-90"}`}>›</span>
+                <span className="min-w-0">
+                  <span className="block truncate font-semibold">{s.name}</span>
+                  <span className="block text-xs text-stone-500">{all.length} {all.length === 1 ? "Gericht" : "Gerichte"}</span>
+                </span>
+              </button>
+              <div className="min-w-0">
                 {menus.length > 0 && (
                   <select
                     aria-label={`Karte für ${s.name}`}
@@ -257,6 +320,7 @@ export function MenuEditor({
               <button type="button" onClick={() => setEditing(s)} className="rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100">Bearbeiten</button>
             </header>
 
+            {!isCollapsed && (<>
             <ul className="divide-y divide-stone-100">
               {list.map((it) => {
                 const allergens = parseAllergens(it.allergens);
@@ -293,9 +357,14 @@ export function MenuEditor({
             <Link href={`/app/${slug}/speisekarte/gericht/neu?bereich=${s.id}`} className="block border-t border-stone-100 px-4 py-3 text-sm font-medium text-stone-700 hover:bg-stone-50">
               + Gericht
             </Link>
+            </>)}
           </section>
         );
       })}
+
+      {tokens.length > 0 && items.filter(matchesQuery).length === 0 && (
+        <p className="px-1 text-sm text-stone-600">Kein Gericht passt zu „{query}“.</p>
+      )}
 
       <form
         onSubmit={(e) => { e.preventDefault(); const n = newSection; run(() => createSection(slug, n)); setNewSection(""); }}
@@ -308,6 +377,8 @@ export function MenuEditor({
       <Link href={`/app/${slug}/start`} className="block text-center text-sm text-stone-600 underline">
         Mehrere Gerichte auf einmal als Text einfügen
       </Link>
+
+      {asideCards}
 
       {editing && (
         <SectionDialog

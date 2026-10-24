@@ -219,13 +219,34 @@ export function DishEditor({
         <section className={card}>
           <span className={label}>Übersetzungen</span>
           <p className="mt-0.5 text-sm text-stone-600">Leer lassen = Gäste sehen den deutschen Text.</p>
-          {locales.map((l) => (
-            <div key={l} className="mt-4">
-              <p className="text-xs font-medium uppercase tracking-widest text-stone-500">{LOCALE_NAMES[l]}</p>
-              <input aria-label={`Name ${LOCALE_NAMES[l]}`} value={form.translations[l]?.name ?? ""} placeholder={form.name} maxLength={200} onChange={(e) => set("translations", { ...form.translations, [l]: { ...form.translations[l], name: e.target.value } })} className={input} />
-              <textarea aria-label={`Beschreibung ${LOCALE_NAMES[l]}`} rows={2} value={form.translations[l]?.description ?? ""} placeholder={form.description} maxLength={600} onChange={(e) => set("translations", { ...form.translations, [l]: { ...form.translations[l], description: e.target.value } })} className={input} />
-            </div>
-          ))}
+          {locales.map((l) => {
+            const filled = !!(form.translations[l]?.name || form.translations[l]?.description);
+            const fields = (
+              <>
+                <input aria-label={`Name ${LOCALE_NAMES[l]}`} value={form.translations[l]?.name ?? ""} placeholder={form.name} maxLength={200} onChange={(e) => set("translations", { ...form.translations, [l]: { ...form.translations[l], name: e.target.value } })} className={input} />
+                <textarea aria-label={`Beschreibung ${LOCALE_NAMES[l]}`} rows={2} value={form.translations[l]?.description ?? ""} placeholder={form.description} maxLength={600} onChange={(e) => set("translations", { ...form.translations, [l]: { ...form.translations[l], description: e.target.value } })} className={input} />
+              </>
+            );
+            // With many languages each one folds away; a dot shows which are already filled.
+            if (locales.length > 5) {
+              return (
+                <details key={l} className="mt-2 rounded-xl ring-1 ring-stone-200 open:bg-stone-50">
+                  <summary className="flex cursor-pointer items-center gap-2 px-3 py-2.5 text-sm font-medium">
+                    <span className={`h-2 w-2 rounded-full ${filled ? "bg-emerald-500" : "bg-stone-300"}`} aria-hidden />
+                    {LOCALE_NAMES[l]}
+                    {!filled && <span className="font-normal text-stone-500">· noch leer</span>}
+                  </summary>
+                  <div className="px-3 pb-3">{fields}</div>
+                </details>
+              );
+            }
+            return (
+              <div key={l} className="mt-4">
+                <p className="text-xs font-medium uppercase tracking-widest text-stone-500">{LOCALE_NAMES[l]}</p>
+                {fields}
+              </div>
+            );
+          })}
         </section>
       )}
 
@@ -252,7 +273,8 @@ export function DishEditor({
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-stone-100/95 px-4 pb-[max(env(safe-area-inset-bottom),12px)] pt-3 backdrop-blur">
+      {/* Sits above the phone's bottom bar (z-30) so the save button is never covered. */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-stone-100/95 px-4 pb-[max(env(safe-area-inset-bottom),12px)] pt-3 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center gap-3">
           {error && <p className="min-w-0 flex-1 text-sm text-red-700">{error}</p>}
           <button type="submit" disabled={pending} className={`${error ? "" : "flex-1"} rounded-xl bg-stone-900 px-6 py-3 font-medium text-white disabled:opacity-50`}>

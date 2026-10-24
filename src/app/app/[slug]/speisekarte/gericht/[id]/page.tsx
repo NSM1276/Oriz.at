@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { serviceClient } from "@/lib/auth";
 import { EMPTY_DISH, cleanLocales, formFromItem } from "@/lib/menu-edit";
+import { allowedLocales } from "@/lib/entitlements";
+import { getEntitlements } from "@/lib/entitlements-server";
 import { requireVenue } from "../../../../venue";
 import { DishEditor } from "./DishEditor";
 
@@ -21,11 +23,12 @@ export default async function DishPage({
   const { venue } = await requireVenue(slug);
   const db = serviceClient();
 
-  const [{ data: v }, { data: sections }] = await Promise.all([
+  const [{ data: v }, { data: sections }, ent] = await Promise.all([
     db.from("venues").select("enabled_locales").eq("id", venue.id).single<{ enabled_locales: string[] | null }>(),
     db.from("sections").select("id, name").eq("venue_id", venue.id).order("position").returns<{ id: string; name: string }[]>(),
+    getEntitlements(venue.id),
   ]);
-  const locales = cleanLocales(v?.enabled_locales ?? []);
+  const locales = cleanLocales(v?.enabled_locales ?? [], allowedLocales(ent));
   if (!sections?.length) notFound();
 
   if (id === "neu") {

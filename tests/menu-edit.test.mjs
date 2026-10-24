@@ -94,6 +94,6 @@ test("form from an old row with free-text allergens", () => {
 });
 
 test("locales: only supported ones", () => {
-  assert.deepEqual(cleanLocales(["uk", "fr", "en", "en", "de"]), ["en", "uk"]);
+  assert.deepEqual(cleanLocales(["uk", "fr", "en", "en", "de", "xx"]), ["en", "fr", "uk"]);
   assert.deepEqual(cleanLocales("en"), []);
 });

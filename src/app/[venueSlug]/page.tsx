@@ -12,6 +12,9 @@ import { CallButton } from "@/components/menu/CallButton";
 import { serviceClient } from "@/lib/auth";
 import { tableDisplayName } from "@/lib/tables";
 import { isListedVenue, jsonLdScript, restaurantJsonLd } from "@/lib/seo";
+import { allowedLocales } from "@/lib/entitlements";
+import { getEntitlements } from "@/lib/entitlements-server";
+import { cleanLocales } from "@/lib/menu-edit";
 import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 0;
@@ -36,6 +39,15 @@ export default async function GuestMenuPage({
       .eq("id", table.venueId)
       .single<{ service_calls_enabled: boolean }>();
     callsEnabled = !!data?.service_calls_enabled;
+  }
+
+  // Languages the plan does not include stay stored but are not shown (package of five, or "20+ Sprachen").
+  const entitlements = await getEntitlements(initial.venue.id);
+  initial.venue.enabled_locales = cleanLocales(initial.venue.enabled_locales, allowedLocales(entitlements));
+  // Trial over, nothing bought: the menu stays online as text; photos are not served (they cost us
+  // traffic) but stay stored for PHOTO_GRACE_DAYS, so paying later brings them straight back.
+  if (entitlements.locked) {
+    for (const s of initial.sections) for (const it of s.items) it.image_url = null;
   }
 
   const acceptLanguage = (await headers()).get("accept-language");

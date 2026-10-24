@@ -48,8 +48,10 @@ const clamp3 = {
   WebkitBoxOrient: "vertical",
 } as React.CSSProperties;
 
-function hasDetail(item: GuestItem) {
-  return !!(item.text || item.story || item.imageUrl || item.allergens !== null || item.variants.length > 1);
+// Every dish opens its card — guests should not have to guess which rows react.
+// The card still says "no allergen information" when nothing was entered.
+function hasDetail(_item: GuestItem) {
+  return true;
 }
 
 function rowProps(item: GuestItem, onOpen: (i: GuestItem) => void, extra?: React.CSSProperties) {
@@ -102,11 +104,11 @@ const classic: Look = {
               <DietBadges item={item} locale={locale} />
               {!item.available && <UnavailableBadge locale={locale} />}
             </div>
-            {item.text && <p className="mt-1 font-sans text-sm leading-relaxed" style={{ color: "var(--color-dim)" }}>{item.text}</p>}
+            {item.text && <p className="mt-1 font-sans text-[15px] leading-relaxed" style={{ color: "var(--color-dim)" }}>{item.text}</p>}
             <AllergenLetters item={item} />
           </div>
           {item.imageUrl && (
-            <div className="shrink-0 overflow-hidden" style={{ width: 72, height: 72, borderRadius: 4 }}>
+            <div className="shrink-0 overflow-hidden" style={{ width: 84, height: 84, borderRadius: 6 }}>
               <DishMedia src={item.imageUrl} alt={item.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
             </div>
           )}
@@ -167,12 +169,12 @@ const modern: Look = {
               <DietBadges item={item} locale={locale} />
               {!item.available && <UnavailableBadge locale={locale} />}
             </div>
-            {item.text && <p className="mt-0.5 font-sans text-sm leading-snug" style={{ color: "var(--color-dim)", overflowWrap: "anywhere", hyphens: "auto" }}>{item.text}</p>}
+            {item.text && <p className="mt-0.5 font-sans text-[15px] leading-snug" style={{ color: "var(--color-dim)", overflowWrap: "anywhere", hyphens: "auto" }}>{item.text}</p>}
             <AllergenLetters item={item} />
           </div>
           <Price item={item} currency={currency} locale={locale} className="shrink-0 font-sans font-medium" style={{ fontSize: "clamp(0.9rem, 2vw, 1.05rem)", color: "var(--accent)" }} />
           {item.imageUrl && (
-            <div className="shrink-0 overflow-hidden" style={{ width: 80, height: 80, borderRadius: 6 }}>
+            <div className="shrink-0 overflow-hidden" style={{ width: 88, height: 88, borderRadius: 8 }}>
               <DishMedia src={item.imageUrl} alt={item.name} className="h-full w-full object-cover transition-transform duration-500 group-active:scale-110" />
             </div>
           )}
@@ -219,7 +221,7 @@ function TextRow({ item, currency, locale, onOpen }: { item: GuestItem; currency
           <DietBadges item={item} locale={locale} />
           {!item.available && <UnavailableBadge locale={locale} />}
         </div>
-        {item.text && <p className="mt-1 font-sans text-sm leading-relaxed" style={{ color: "var(--color-dim)" }}>{item.text}</p>}
+        {item.text && <p className="mt-1 font-sans text-[15px] leading-relaxed" style={{ color: "var(--color-dim)" }}>{item.text}</p>}
         <AllergenLetters item={item} />
       </div>
       <Price item={item} currency={currency} locale={locale} className="shrink-0 font-sans text-base" style={{ color: "var(--color-text)" }} />

@@ -3,6 +3,7 @@
 // through src/lib/guest-menu.ts, so both sides agree on every format.
 
 import { ALLERGEN_CODES, type AllergenCode, parseAllergens, parseDiet, parseVariants } from "./guest-menu.ts";
+import { LOCALE_NAMES, MENU_LOCALES, type MenuLocale } from "./locales.ts";
 
 export const NAME_MAX = 200;
 export const DESCRIPTION_MAX = 600;
@@ -12,10 +13,8 @@ export const SIZE_LABEL_MAX = 30;
 export const SIZES_MAX = 6;
 export const SECTION_NAME_MAX = 80;
 
-/** Locales the guest menu has interface texts for (German is the base). */
-export const MENU_LOCALES = ["en", "it", "uk"] as const;
-export type MenuLocale = (typeof MENU_LOCALES)[number];
-export const LOCALE_NAMES: Record<MenuLocale, string> = { en: "Englisch", it: "Italienisch", uk: "Ukrainisch" };
+// Locales live in ./locales.ts; re-exported so the admin screens keep one import.
+export { LOCALE_NAMES, MENU_LOCALES, type MenuLocale };
 
 export type DishForm = {
   name: string;
@@ -182,10 +181,14 @@ export const EMPTY_DISH: DishForm = {
   translations: {},
 };
 
-/** Only locales the guest menu supports, deduplicated, base excluded. */
-export function cleanLocales(raw: unknown): MenuLocale[] {
+/**
+ * Only locales the guest menu supports, deduplicated, base excluded, in the fixed order.
+ * With `allowed`, locales the plan does not include are dropped too (they stay stored,
+ * so a venue that books "20+ Sprachen" later gets them back).
+ */
+export function cleanLocales(raw: unknown, allowed?: readonly string[]): MenuLocale[] {
   if (!Array.isArray(raw)) return [];
-  return MENU_LOCALES.filter((l) => raw.includes(l));
+  return MENU_LOCALES.filter((l) => raw.includes(l) && (!allowed || allowed.includes(l)));
 }
 
 export function cleanSectionName(raw: unknown): string | null {

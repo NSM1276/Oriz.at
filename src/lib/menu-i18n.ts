@@ -1,4 +1,5 @@
 import type { Item, Section, Venue } from "@/lib/supabase/types";
+import { ALLERGEN_EXTRA, UI_EXTRA } from "./menu-i18n-extra.ts";
 
 /** Base/source language every menu is authored in — never stored in `enabled_locales`. */
 export const BASE_LOCALE = "de";
@@ -88,6 +89,8 @@ type UiStrings = {
   reset: string;
   done: string;
   from: string;
+  sections: string;
+  textSize: string;
 };
 
 const UI: Record<string, UiStrings> = {
@@ -119,6 +122,8 @@ const UI: Record<string, UiStrings> = {
     reset: "Zurücksetzen",
     done: "Fertig",
     from: "ab",
+    sections: "Bereiche",
+    textSize: "Schriftgröße",
   },
   en: {
     allergens: "Allergens",
@@ -148,6 +153,8 @@ const UI: Record<string, UiStrings> = {
     reset: "Reset",
     done: "Done",
     from: "from",
+    sections: "Sections",
+    textSize: "Text size",
   },
   it: {
     allergens: "Allergeni",
@@ -177,6 +184,8 @@ const UI: Record<string, UiStrings> = {
     reset: "Azzera",
     done: "Fatto",
     from: "da",
+    sections: "Sezioni",
+    textSize: "Dimensione testo",
   },
   uk: {
     allergens: "Алергени",
@@ -206,8 +215,14 @@ const UI: Record<string, UiStrings> = {
     reset: "Скинути",
     done: "Готово",
     from: "від",
+    sections: "Розділи",
+    textSize: "Розмір тексту",
   },
+  ...UI_EXTRA,
 };
+
+/** Locales the guest menu has interface texts for. */
+export const UI_LOCALES: readonly string[] = Object.keys(UI);
 
 /** Picks the singular or plural form and fills in the count. */
 export function count([one, other]: [string, string], n: number): string {
@@ -233,6 +248,7 @@ const ALLERGEN_NAMES: Record<string, Record<string, string>> = {
     A: "Глютен", B: "Ракоподібні", C: "Яйця", D: "Риба", E: "Арахіс", F: "Соя", G: "Молоко",
     H: "Горіхи", L: "Селера", M: "Гірчиця", N: "Кунжут", O: "Сульфіти", P: "Люпин", R: "Молюски",
   },
+  ...ALLERGEN_EXTRA,
 };
 
 /** Localized allergen name for a code; `fallback` is the German label from `ALLERGEN_LABELS`. */

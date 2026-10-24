@@ -6,13 +6,13 @@ import QRCode from "qrcode";
 import { getUser, serviceClient } from "@/lib/auth";
 import { hashSecret, newSecret } from "@/lib/secrets";
 import { PAIRING_MINUTES, STAFF_COOKIE, STAFF_COOKIE_MAX_AGE } from "@/lib/service";
-import { requireVenue } from "../../venue";
+import { requireOpenVenue } from "../../venue";
 
 export type PairingResult = { ok: true; url: string; svg: string; expiresAt: string } | { ok: false; error: string };
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
 export async function setServiceEnabled(slug: string, enabled: boolean): Promise<ActionResult> {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   const { error } = await serviceClient()
     .from("venues")
     .update({ service_calls_enabled: !!enabled })
@@ -31,7 +31,7 @@ async function origin() {
 
 /** A one-time link + QR, valid for a few minutes, that turns a phone into a staff device. */
 export async function createPairing(slug: string): Promise<PairingResult> {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   const user = await getUser();
   const token = newSecret();
   const expiresAt = new Date(Date.now() + PAIRING_MINUTES * 60_000).toISOString();
@@ -47,7 +47,7 @@ export async function createPairing(slug: string): Promise<PairingResult> {
 
 /** Pairs the browser the owner is using right now. */
 export async function pairThisDevice(slug: string, name: string): Promise<ActionResult> {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   const clean = name.replace(/\s+/g, " ").trim().slice(0, 40) || "Verwaltung";
   const token = newSecret();
   const db = serviceClient();
@@ -70,7 +70,7 @@ export async function pairThisDevice(slug: string, name: string): Promise<Action
 }
 
 export async function revokeDevice(slug: string, deviceId: string): Promise<ActionResult> {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   const { error } = await serviceClient()
     .from("staff_devices")
     .update({ revoked_at: new Date().toISOString(), push_subscription: null })

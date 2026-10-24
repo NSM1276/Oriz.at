@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getEntitlements } from "@/lib/entitlements-server";
 import { requireVenue } from "../venue";
 import { AppNav } from "./AppNav";
+import { LockGate } from "./LockGate";
 import { WhatsAppHelp } from "@/components/WhatsAppHelp";
 
 export default async function VenueLayout({
@@ -39,13 +40,13 @@ export default async function VenueLayout({
               Ansehen
             </a>
           </div>
-          <div className="pb-3">
+          <div className="pb-1 sm:pb-3">
             <AppNav slug={venue.slug} screenLocked={!entitlements.screen} printLocked={!entitlements.printDesign} />
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
-        {children}
+      <main className="mx-auto max-w-3xl px-4 pb-28 pt-5 sm:pb-16 sm:pt-6">
+        <LockGate slug={venue.slug} locked={entitlements.locked}>{children}</LockGate>
         <WhatsAppHelp message={`Hallo, ich brauche Hilfe bei ORIZ (${venue.name}).`} className="mt-10 text-center print:hidden" />
       </main>
     </>

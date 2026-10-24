@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { LOCALE_NAMES, MENU_LOCALES } from "@/lib/menu-edit";
+import { LOCALE_NAMES, PACKAGE_LOCALES } from "@/lib/locales";
 import {
   MENU_SETUP_EXTRA_DISH_CENTS,
   MENU_SETUP_INCLUDED_DISHES,
@@ -144,7 +144,7 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
           <p className="text-sm font-medium">Übersetzungen dazu?</p>
           <p className="mt-0.5 text-sm text-stone-600">Im Preis enthalten.</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {MENU_LOCALES.map((l) => {
+            {PACKAGE_LOCALES.map((l) => {
               const on = languages.includes(l);
               return (
                 <button key={l} type="button" aria-pressed={on} onClick={() => setLanguages((ls) => (on ? ls.filter((x) => x !== l) : [...ls, l]))} className={`rounded-full px-3.5 py-2 text-sm ring-1 ${on ? "bg-stone-900 text-white ring-stone-900" : "bg-white text-stone-700 ring-stone-300"}`}>

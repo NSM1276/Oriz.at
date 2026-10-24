@@ -6,12 +6,14 @@ import { TarifRow } from "./TarifRow";
 
 export const dynamic = "force-dynamic";
 
+type Sub = { plan: PlanId; status: SubStatus; trial_ends_at: string | null; languages_all?: boolean | null };
+
 type Row = {
   id: string;
   name: string;
   slug: string;
   created_at: string;
-  subscriptions: { plan: PlanId; status: SubStatus; trial_ends_at: string | null } | { plan: PlanId; status: SubStatus; trial_ends_at: string | null }[] | null;
+  subscriptions: Sub | Sub[] | null;
 };
 
 const dateFmt = new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "short", year: "numeric" });
@@ -24,7 +26,7 @@ export default async function TarifePage() {
 
   const { data } = await serviceClient()
     .from("venues")
-    .select("id, name, slug, created_at, subscriptions(plan, status, trial_ends_at)")
+    .select("id, name, slug, created_at, subscriptions(*)")
     .order("created_at", { ascending: false })
     .returns<Row[]>();
   const venues = (data ?? []).map((v) => ({ ...v, sub: Array.isArray(v.subscriptions) ? v.subscriptions[0] ?? null : v.subscriptions }));
@@ -51,9 +53,10 @@ export default async function TarifePage() {
                 </div>
                 <p className="mt-0.5 text-sm text-stone-600">
                   Gilt jetzt: {ent.tier === "trial" ? "Testphase (Pro-Funktionen)" : ent.label}
-                  {ent.trialExpired && " · Testphase abgelaufen"}
+                  {ent.trialExpired && " · Testphase abgelaufen, Admin gesperrt"}
+                  {ent.allLanguages && ent.tier !== "trial" && " · 20+ Sprachen"}
                 </p>
-                <TarifRow venueId={v.id} plan={v.sub?.plan ?? "starter"} status={v.sub?.status ?? "trialing"} trialEnd={v.sub?.trial_ends_at ?? null} />
+                <TarifRow venueId={v.id} plan={v.sub?.plan ?? "starter"} status={v.sub?.status ?? "trialing"} trialEnd={v.sub?.trial_ends_at ?? null} languagesAll={!!v.sub?.languages_all} />
               </li>
             );
           })}

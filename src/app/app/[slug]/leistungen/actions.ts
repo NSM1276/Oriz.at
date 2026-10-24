@@ -17,9 +17,10 @@ import {
   type ServiceKind,
 } from "@/lib/services";
 import { requireVenue } from "../../venue";
+import { PACKAGE_LOCALES } from "@/lib/locales";
 
 const BUCKET = "service-uploads";
-const LOCALES = ["en", "it", "uk"];
+const LOCALES: readonly string[] = PACKAGE_LOCALES;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type StartInput = {

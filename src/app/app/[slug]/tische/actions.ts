@@ -9,15 +9,15 @@ import {
   nextNumericLabels,
   normalizeLabel,
 } from "@/lib/tables";
-import { requireVenue } from "../../venue";
+import { requireOpenVenue } from "../../venue";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
-// Every action re-checks membership through requireVenue(slug); the client
+// Every action re-checks membership through requireOpenVenue(slug); the client
 // only ever names a venue by slug and a table by id within that venue.
 
 async function context(slug: string) {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   return { venue, db: serviceClient() };
 }
 

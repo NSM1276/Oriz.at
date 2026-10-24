@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ALLERGEN_LABELS, allergenIcon } from "@/lib/allergens";
 import type { AllergenCode, DietTag, FilterOptions, MenuFilter } from "@/lib/guest-menu";
 import { allergenName, count, ui } from "@/lib/menu-i18n";
+import { useSheet } from "./SectionsSheet";
 
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -41,6 +42,7 @@ export function FilterSheet({
   onClose: () => void;
 }) {
   const t = ui(locale);
+  useSheet(open, onClose);
 
   function toggleDiet(tag: DietTag) {
     const diet = new Set(filter.diet);

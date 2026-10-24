@@ -23,7 +23,7 @@ export const translations = {
       heading: "Was Ihre Gäste verdienen",
       items: [
         { stat: "< 1 s", label: "Sofort live", body: "Preis ändern, Gericht ausverkauft markieren — Ihre Gäste sehen es in Echtzeit. Kein Drucker, kein Laminator." },
-        { stat: "4", label: "Sprachen", body: "Deutsch, Englisch, Italienisch und Ukrainisch. Das Menü zeigt die Sprache des Handys, sobald Sie sie eingetragen haben." },
+        { stat: "5", label: "Sprachen", body: "Deutsch, Englisch, Italienisch, Französisch und Spanisch in jedem Tarif; über 20 Sprachen als Zusatzpaket. Das Menü zeigt die Sprache des Handys, sobald Sie sie eingetragen haben." },
         { stat: "0", label: "Apps nötig", body: "Gäste öffnen das Menü direkt im Browser — ohne Download, ohne Anmeldung, ohne Wartezeit." },
         { stat: "100%", label: "Ihre Marke", body: "Ihre Farben, Ihr Logo, Ihre Schrift. Kein fremdes Branding auf Ihrer Karte — nur Ihr Restaurant." },
       ],
@@ -41,7 +41,7 @@ export const translations = {
     languages: {
       eyebrow: "Mehrsprachigkeit",
       heading: "Jeder Gast liest in seiner Sprache",
-      body1: "Wien ist international. Ihre Gäste lesen die Karte auf Deutsch, Englisch, Italienisch oder Ukrainisch.",
+      body1: "Wien ist international. Ihre Gäste lesen die Karte auf Deutsch, Englisch, Italienisch, Französisch oder Spanisch — mit dem Zusatzpaket in über 20 Sprachen.",
       body2: "ORIZ erkennt die Sprache des Handys und zeigt die Karte passend an. Die Übersetzungen tragen Sie selbst ein — oder wir übernehmen das für Sie.",
       more: "Übersetzungen: von Ihnen oder von uns",
     },
@@ -80,7 +80,7 @@ export const translations = {
       disclaimer: "Endpreise, keine Umsatzsteuer (Kleinunternehmerregelung) · Monatlich kündbar · Keine Einrichtungsgebühr",
       plans: [
         { name: "Test", price: "14 Tage", sub: "kostenlos — alle Funktionen", badge: null as null, features: ["Alle Pro-Funktionen inklusive", "Kein Vertrag, jederzeit kündbar", "Persönlicher Onboarding-Support"], cta: "Kostenlos testen", plan: "trial" as const, accent: false },
-        { name: "Starter", price: "€ 19", sub: "pro Monat", badge: "Empfohlen" as string | null, features: ["1 Karte · unbegrenzte Gerichte", "Änderungen in Echtzeit", "3 Erscheinungsbilder, eigene Farben & Logo", "14 EU-Allergene mit Filter", "QR-Codes für jeden Tisch + Service-Ruf", "Druckfertiges PDF (A4)", "4 Sprachen: DE, EN, IT, UK"], cta: "Starter wählen", plan: "starter" as const, accent: true },
+        { name: "Starter", price: "€ 19", sub: "pro Monat", badge: "Empfohlen" as string | null, features: ["1 Karte · unbegrenzte Gerichte", "Änderungen in Echtzeit", "3 Erscheinungsbilder, eigene Farben & Logo", "14 EU-Allergene mit Filter", "QR-Codes für jeden Tisch + Service-Ruf", "Druckfertiges PDF (A4)", "5 Sprachen: DE, EN, IT, FR, ES"], cta: "Starter wählen", plan: "starter" as const, accent: true },
         { name: "Pro", price: "€ 39", sub: "pro Monat", badge: null as null, features: ["Alles aus Starter", "Bis zu 5 Karten (z. B. Mittag, Abend, Getränke)", "Druck-Design: Ihre Farben und Ihr Logo, Blatt für Blatt nachdrucken", "Screen: Ihre Karte auf dem Fernseher"], cta: "Pro wählen", plan: "pro" as const, accent: false },
       ],
     },
@@ -163,7 +163,7 @@ export const translations = {
       heading: "What your guests deserve",
       items: [
         { stat: "< 1 s", label: "Instant live", body: "Change a price, mark a dish as sold out — your guests see it in real time. No printer, no laminator." },
-        { stat: "4", label: "Languages", body: "German, English, Italian and Ukrainian. The menu shows the phone's language once you have added it." },
+        { stat: "5", label: "Languages", body: "German, English, Italian, French and Spanish in every plan; more than 20 languages as an add-on. The menu shows the phone's language once you have added it." },
         { stat: "0", label: "Apps needed", body: "Guests open the menu directly in the browser — no download, no sign-up, no waiting." },
         { stat: "100%", label: "Your brand", body: "Your colours, your logo, your font. No foreign branding on your menu — just your restaurant." },
       ],
@@ -181,7 +181,7 @@ export const translations = {
     languages: {
       eyebrow: "Multilingual",
       heading: "Every guest reads in their language",
-      body1: "Vienna is international. Your guests read the menu in German, English, Italian or Ukrainian.",
+      body1: "Vienna is international. Your guests read the menu in German, English, Italian, French or Spanish — with the add-on in more than 20 languages.",
       body2: "ORIZ detects the phone's language and shows the menu accordingly. You enter the translations yourself — or we do it for you.",
       more: "Translations: by you or by us",
     },
@@ -220,7 +220,7 @@ export const translations = {
       disclaimer: "Final prices, no VAT charged (small-business exemption) · Cancel monthly · No setup fee",
       plans: [
         { name: "Trial", price: "14 days", sub: "free — all features", badge: null as null, features: ["All Pro features included", "No contract, cancel anytime", "Personal onboarding support"], cta: "Start free trial", plan: "trial" as const, accent: false },
-        { name: "Starter", price: "€ 19", sub: "per month", badge: "Recommended" as string | null, features: ["1 menu · unlimited dishes", "Changes in real time", "3 looks, your own colours & logo", "14 EU allergens with filter", "QR codes for every table + waiter call", "Print-ready PDF (A4)", "4 languages: DE, EN, IT, UK"], cta: "Choose Starter", plan: "starter" as const, accent: true },
+        { name: "Starter", price: "€ 19", sub: "per month", badge: "Recommended" as string | null, features: ["1 menu · unlimited dishes", "Changes in real time", "3 looks, your own colours & logo", "14 EU allergens with filter", "QR codes for every table + waiter call", "Print-ready PDF (A4)", "5 languages: DE, EN, IT, FR, ES"], cta: "Choose Starter", plan: "starter" as const, accent: true },
         { name: "Pro", price: "€ 39", sub: "per month", badge: null as null, features: ["Everything in Starter", "Up to 5 menus (e.g. lunch, dinner, drinks)", "Print design: your colours and logo, reprint sheet by sheet", "Screen: your menu on the TV"], cta: "Choose Pro", plan: "pro" as const, accent: false },
       ],
     },

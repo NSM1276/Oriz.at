@@ -15,14 +15,31 @@ const STATUS_LABEL: Record<SubStatus, string> = {
 
 const field = "rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm";
 
-export function TarifRow({ venueId, plan: initialPlan, status: initialStatus, trialEnd }: { venueId: string; plan: PlanId; status: SubStatus; trialEnd: string | null }) {
+export function TarifRow({
+  venueId,
+  plan: initialPlan,
+  status: initialStatus,
+  trialEnd,
+  languagesAll: initialLanguages,
+}: {
+  venueId: string;
+  plan: PlanId;
+  status: SubStatus;
+  trialEnd: string | null;
+  languagesAll: boolean;
+}) {
   const router = useRouter();
   const [plan, setPlan] = useState<PlanId>(initialPlan);
   const [status, setStatus] = useState<SubStatus>(initialStatus);
   const [end, setEnd] = useState(trialEnd ? trialEnd.slice(0, 10) : "");
+  const [languagesAll, setLanguagesAll] = useState(initialLanguages);
   const [msg, setMsg] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  const dirty = plan !== initialPlan || status !== initialStatus || (status === "trialing" && end !== (trialEnd ? trialEnd.slice(0, 10) : ""));
+  const dirty =
+    plan !== initialPlan ||
+    status !== initialStatus ||
+    languagesAll !== initialLanguages ||
+    (status === "trialing" && end !== (trialEnd ? trialEnd.slice(0, 10) : ""));
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -36,13 +53,17 @@ export function TarifRow({ venueId, plan: initialPlan, status: initialStatus, tr
         ))}
       </select>
       {status === "trialing" && <input type="date" className={field} value={end} onChange={(e) => setEnd(e.target.value)} aria-label="Testphase bis" />}
+      <label className="flex items-center gap-1.5 text-sm">
+        <input type="checkbox" checked={languagesAll} onChange={(e) => setLanguagesAll(e.target.checked)} className="h-4 w-4 accent-stone-900" />
+        20+ Sprachen
+      </label>
       <button
         type="button"
         disabled={pending || !dirty}
         onClick={() =>
           start(async () => {
             setMsg(null);
-            const res = await setSubscription(venueId, plan, status, status === "trialing" && end ? `${end}T23:59:59Z` : null);
+            const res = await setSubscription(venueId, plan, status, status === "trialing" && end ? `${end}T23:59:59Z` : null, languagesAll);
             setMsg(res.ok ? "Gespeichert." : res.error);
             if (res.ok) router.refresh();
           })

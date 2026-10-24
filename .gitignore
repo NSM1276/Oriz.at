@@ -47,3 +47,8 @@ next-env.d.ts
 
 .vercel
 public/_mock/
+
+# Restaurant-Fotos gehören in Vercel Blob, nie ins Repo (Quelldateien: Documents/ORIZ-Fotos)
+/public/items/
+/public/*menu image*/
+/public/*Fotos*/

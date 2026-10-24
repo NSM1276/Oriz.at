@@ -15,12 +15,14 @@ import {
   type RawItem,
 } from "@/lib/guest-menu";
 import { BASE_LOCALE, allergenName, count, localizeAbout, ui } from "@/lib/menu-i18n";
+import { RTL_LOCALES } from "@/lib/locales";
 import { getActiveMenuId } from "@/lib/menu-schedule";
 import type { MenuPayload } from "@/lib/supabase/types";
 import { LanguageSwitcher } from "@/components/menu/LanguageSwitcher";
 import { StickyActionBar } from "@/components/menu/StickyActionBar";
 import { DishSheet } from "./DishSheet";
 import { FilterSheet } from "./FilterSheet";
+import { SectionsSheet } from "./SectionsSheet";
 import { LOOKS, type LookName } from "./looks";
 
 // The guest menu: one behaviour, three looks. Everything a guest can do —
@@ -28,6 +30,10 @@ import { LOOKS, type LookName } from "./looks";
 // looks.tsx only decides how sections and dishes are drawn.
 
 const SEARCH_MIN_ITEMS = 8;
+// From this many sections on, a list of all sections is quicker than scrolling the chips.
+const SECTIONS_SHEET_MIN = 5;
+const TEXT_KEY = "oriz-text-large";
+const LARGE_TEXT_ZOOM = 1.18;
 
 function luminance(hex: string): number {
   if (!/^#[0-9a-f]{6}$/i.test(hex)) return 0.5;
@@ -70,6 +76,17 @@ function FilterIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
       <path d="M4 6h16M7 12h10M10 18h4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ListIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M9 6h11M9 12h11M9 18h11" strokeLinecap="round" />
+      <circle cx="4.5" cy="6" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="4.5" cy="12" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="4.5" cy="18" r="1.1" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -134,8 +151,20 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
   const activeFilterCount = filter.diet.size + filter.avoid.size;
   const [searchOpen, setSearchOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [sectionsOpen, setSectionsOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const searching = filter.query.trim() !== "";
+
+  // ── larger text, remembered on this phone across venues ──
+  const [largeText, setLargeText] = useState(false);
+  useEffect(() => {
+    try { if (localStorage.getItem(TEXT_KEY) === "1") setLargeText(true); } catch { /* private mode */ }
+  }, []);
+  function toggleLargeText() {
+    const next = !largeText;
+    setLargeText(next);
+    try { localStorage.setItem(TEXT_KEY, next ? "1" : "0"); } catch { /* ignore */ }
+  }
 
   // ── dish sheet follows live data and language ──
   const [openId, setOpenId] = useState<string | null>(null);
@@ -176,7 +205,8 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
   }
 
   const showTabs = !searching && result.sections.length > 1;
-  const showToolbar = showTabs || canSearch || canFilter;
+  const showSections = !searching && result.sections.length >= SECTIONS_SHEET_MIN;
+  const showToolbar = showTabs || canSearch || canFilter || totalItems > 0;
 
   const links = [
     venue.instagram_url && { href: venue.instagram_url, label: "Instagram" },
@@ -186,8 +216,8 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
   ].filter(Boolean) as { href: string; label: string }[];
 
   return (
-    <div style={{ backgroundColor: colors.bg, minHeight: "100vh", color: "var(--color-text)", ...colors.vars }}>
-      <main className={`mx-auto ${look.main} pt-6 md:pt-14`} style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))" }}>
+    <div dir={RTL_LOCALES.has(locale) ? "rtl" : "ltr"} style={{ backgroundColor: colors.bg, minHeight: "100vh", color: "var(--color-text)", ...colors.vars }}>
+      <main className={`mx-auto ${look.main} pt-6 md:pt-14`} style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))", zoom: largeText ? LARGE_TEXT_ZOOM : 1 }}>
         <look.Header venue={venue} about={localizeAbout(venue, locale)} isDark={colors.isDark} text={colors.text} locale={locale} />
 
         {(enabledLocales.length > 0 || menus.length > 1) && (
@@ -235,6 +265,17 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
               </div>
             ) : (
               <div className="flex items-center">
+                {showSections && (
+                  <button
+                    type="button"
+                    aria-label={t.sections}
+                    onClick={() => setSectionsOpen(true)}
+                    className="flex h-11 w-10 shrink-0 items-center justify-center"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    <ListIcon />
+                  </button>
+                )}
                 {canSearch && (
                   <button
                     type="button"
@@ -246,7 +287,7 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
                     <SearchIcon />
                   </button>
                 )}
-                <div ref={tabsRef} className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap py-1.5" style={{ scrollbarWidth: "none" }}>
+                <div ref={tabsRef} className="relative flex min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap py-1.5" style={{ scrollbarWidth: "none" }}>
                   {showTabs && result.sections.map((s) => {
                     const tab = look.tab(activeSection === s.id);
                     return (
@@ -256,6 +297,18 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
                     );
                   })}
                 </div>
+                <button
+                  type="button"
+                  aria-label={t.textSize}
+                  aria-pressed={largeText}
+                  title={t.textSize}
+                  onClick={toggleLargeText}
+                  className="flex h-11 w-10 shrink-0 items-center justify-center font-sans"
+                  style={{ color: "var(--accent)", opacity: largeText ? 1 : 0.75 }}
+                >
+                  <span style={{ fontSize: 11, lineHeight: 1 }}>A</span>
+                  <span style={{ fontSize: 17, lineHeight: 1, fontWeight: largeText ? 700 : 400 }}>A</span>
+                </button>
                 {canFilter && (
                   <button
                     type="button"
@@ -336,6 +389,7 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
 
       <DishSheet item={openItem} currency={venue.currency} locale={locale} titleClass={look.sheetTitle} onClose={closeItem} />
       <FilterSheet open={filterOpen} options={options} filter={filter} matched={applyFilter(sections, { ...filter, query: "" }).matched} locale={locale} onChange={setFilter} onClose={() => setFilterOpen(false)} />
+      <SectionsSheet open={sectionsOpen} sections={result.sections} activeId={activeSection} locale={locale} onJump={jumpTo} onClose={() => setSectionsOpen(false)} />
       <StickyActionBar venue={venue} theme={lookName} locale={locale} />
     </div>
   );

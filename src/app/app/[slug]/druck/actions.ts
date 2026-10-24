@@ -6,7 +6,7 @@ import { getEntitlements } from "@/lib/entitlements-server";
 import { cleanDesign } from "@/lib/print/design";
 import { loadDesignContext, loadPlan, savePages } from "@/lib/print/design-server";
 import { assignSection, movePage } from "@/lib/print/pages";
-import { requireVenue } from "../../venue";
+import { requireOpenVenue } from "../../venue";
 
 export type DruckResult = { ok: true } | { ok: false; error: string };
 
@@ -15,7 +15,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Every action starts here: a member of the venue, and the plan includes the print design. */
 async function proVenue(slug: string) {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   return (await getEntitlements(venue.id)).printDesign ? venue : null;
 }
 

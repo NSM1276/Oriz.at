@@ -3,17 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { serviceClient } from "@/lib/auth";
 import { cleanLocales, cleanSectionName, dishFromForm, type DishForm } from "@/lib/menu-edit";
-import { requireVenue } from "../../venue";
+import { allowedLocales } from "@/lib/entitlements";
+import { getEntitlements } from "@/lib/entitlements-server";
+import { requireOpenVenue } from "../../venue";
 
 export type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
 
-// Every action re-checks membership via requireVenue(slug) and only touches
+// Every action re-checks membership via requireOpenVenue(slug) and only touches
 // rows whose venue_id is that venue — ids from the browser are never trusted alone.
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function context(slug: string) {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   const db = serviceClient();
   const { data } = await db.from("venues").select("enabled_locales").eq("id", venue.id).single<{ enabled_locales: string[] | null }>();
   return { venue, db, locales: data?.enabled_locales ?? [] };
@@ -183,8 +185,13 @@ export async function deleteDish(slug: string, itemId: string): Promise<ActionRe
 // ── Languages ─────────────────────────────────────────────────────────────
 
 export async function setLocales(slug: string, locales: string[]): Promise<ActionResult> {
-  const { venue, db } = await context(slug);
-  const { error } = await db.from("venues").update({ enabled_locales: cleanLocales(locales) }).eq("id", venue.id);
+  const { venue, db, locales: stored } = await context(slug);
+  // Only languages the plan includes can change; the others keep their stored state
+  // (a venue that drops "20+ Sprachen" gets them back when it books the add-on again).
+  const allowed = allowedLocales(await getEntitlements(venue.id));
+  const kept = cleanLocales(stored).filter((l) => !allowed.includes(l));
+  const next = cleanLocales([...kept, ...cleanLocales(locales, allowed)]);
+  const { error } = await db.from("venues").update({ enabled_locales: next }).eq("id", venue.id);
   if (error) return { ok: false, error: "Sprachen konnten nicht gespeichert werden." };
   return done(slug);
 }

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { serviceClient } from "@/lib/auth";
 import { COLOR_PRESETS } from "@/lib/colorPresets";
 import { linesToImport, parseMenuText } from "@/lib/menu-parser";
-import { requireVenue } from "../../venue";
+import { requireOpenVenue } from "../../venue";
 
 export type StepResult = { ok: true } | { ok: false; error: string };
 
@@ -19,7 +19,7 @@ type MenuTheme = (typeof MENU_THEMES)[number];
 
 /** Parses the pasted text here again — the browser preview is only a preview. */
 export async function importMenuText(slug: string, text: string): Promise<StepResult & { items?: number }> {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   if (typeof text !== "string" || !text.trim()) return { ok: false, error: "Bitte die Speisekarte einfügen." };
   if (text.length > MAX_TEXT) return { ok: false, error: "Der Text ist zu lang. Bitte in Teilen einfügen." };
 
@@ -73,7 +73,7 @@ export async function importMenuText(slug: string, text: string): Promise<StepRe
 }
 
 export async function saveStyle(slug: string, input: { theme: string; presetId: string }): Promise<StepResult> {
-  const { venue } = await requireVenue(slug);
+  const { venue } = await requireOpenVenue(slug);
   if (!MENU_THEMES.includes(input.theme as MenuTheme)) return { ok: false, error: "Unbekannte Darstellung." };
   // "custom" keeps the venue's own colours and only changes the layout.
   const preset = COLOR_PRESETS.find((p) => p.id === input.presetId);
