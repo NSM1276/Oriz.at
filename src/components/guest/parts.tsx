@@ -98,6 +98,7 @@ export function DishMedia({
   style,
   sizes = "160px",
   onError,
+  eager = false,
 }: {
   src: string;
   alt: string;
@@ -106,6 +107,8 @@ export function DishMedia({
   /** Shown width; list rows keep the default and get the 640 px copy. */
   sizes?: string;
   onError?: () => void;
+  /** Above the fold (cover photo): load at once instead of lazily. */
+  eager?: boolean;
 }) {
   const small = thumbUrl(src);
   const [useSmall, setUseSmall] = useState(small !== src);
@@ -125,7 +128,8 @@ export function DishMedia({
       srcSet={useSmall ? `${small} 640w, ${src} 1600w` : undefined}
       sizes={useSmall ? sizes : undefined}
       alt={alt}
-      loading="lazy"
+      loading={eager ? "eager" : "lazy"}
+      fetchPriority={eager ? "high" : undefined}
       className={className}
       style={style}
       onError={hide}

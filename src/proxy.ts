@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+import { SITE_URL } from "@/lib/site";
+import { movedGuestPage, routeVenueHost, slugFromHost } from "@/lib/venue-host";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -27,13 +29,45 @@ function svcClient() {
   );
 }
 
+/** Someone is signed in (Supabase keeps the session in sb-<project>-auth-token, maybe split in parts). */
+function hasSession(request: NextRequest): boolean {
+  return request.cookies.getAll().some((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
+}
+
 export async function proxy(request: NextRequest) {
+  const host = request.headers.get("host")?.toLowerCase() ?? "";
+  const path = request.nextUrl.pathname;
+
+  // 0) Venue subdomains: belvedere.oriz.at is the menu of /belvedere (see lib/venue-host.ts).
+  const venueSlug = slugFromHost(host);
+  if (venueSlug) {
+    const route = routeVenueHost(venueSlug, path);
+    if (route.kind === "rewrite") {
+      const url = request.nextUrl.clone();
+      url.pathname = route.path;
+      return NextResponse.rewrite(url);
+    }
+    if (route.kind === "redirect") {
+      // Local tests run on <slug>.localhost:3000; their main site is localhost:3000.
+      const main = /\.localhost(:\d+)?$/.test(host) ? `${request.nextUrl.protocol}//${host.replace(/^[^.]+\./, "")}` : SITE_URL;
+      const here = `${request.nextUrl.protocol}//${host}`; // the host the guest typed, not the internal one
+      const target = new URL(route.path + request.nextUrl.search, route.main ? main : here);
+      return NextResponse.redirect(target, 308);
+    }
+    return NextResponse.next({ request });
+  }
+
+  // Old links (oriz.at/belvedere, printed QR codes) move to the venue's own address. Signed-in
+  // owners stay: their session lives on www.oriz.at, and they preview menus that are not public yet.
+  if ((host === "www.oriz.at" || host === "oriz.at") && !hasSession(request)) {
+    const moved = movedGuestPage(path);
+    if (moved) return NextResponse.redirect(new URL(moved + request.nextUrl.search), 308);
+  }
+
   // 1) Custom-domain routing.
   // If the request comes in on a tenant's domain (e.g. belvedere.at),
   // look it up in the DB and internally rewrite to the matching slug.
   // Skips /admin and /api so the platform UI always stays on oriz.at.
-  const host = request.headers.get("host")?.toLowerCase() ?? "";
-  const path = request.nextUrl.pathname;
   const isPlatformPath =
     path.startsWith("/admin") ||
     path.startsWith("/api") ||

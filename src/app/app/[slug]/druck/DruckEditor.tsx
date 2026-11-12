@@ -109,8 +109,7 @@ export function DruckEditor({
   return (
     <div className="space-y-4">
       <section className={`${card} p-5`}>
-        <h1 className="text-xl font-semibold">Druck-Design</h1>
-        <p className="mt-1 text-sm text-stone-600">
+        <p className="text-sm text-stone-600">
           Ihre Karte in Ihrem Stil, Blatt für Blatt. Auf jedem Blatt steht ein Datum („Stand“): So sehen Sie am Blatt in der Mappe, ob es noch zur Karte passt.
           Ändern Sie ein Gericht, müssen Sie nur dieses Blatt neu drucken.
         </p>

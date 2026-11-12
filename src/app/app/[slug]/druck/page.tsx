@@ -10,6 +10,7 @@ import { UpgradeCard } from "../UpgradeCard";
 import { DruckEditor, type SheetView } from "./DruckEditor";
 import { serviceClient } from "@/lib/auth";
 import { cleanLocales, LOCALE_NAMES } from "@/lib/menu-edit";
+import { PACKAGE_LOCALES } from "@/lib/locales";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +26,7 @@ export default async function DruckPage({ params, searchParams }: { params: Prom
   if (ctx.sheets.length === 0) {
     return (
       <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
-        <h1 className="text-xl font-semibold">Druck-Design</h1>
-        <p className="mt-2 text-stone-600">Sobald Gerichte in Ihrer Karte stehen, können Sie hier Blätter zum Drucken gestalten.</p>
+        <p className="text-stone-600">Sobald Gerichte in Ihrer Karte stehen, können Sie hier Blätter zum Drucken gestalten.</p>
       </section>
     );
   }
@@ -47,7 +47,8 @@ export default async function DruckPage({ params, searchParams }: { params: Prom
     sections: s.sections.map((sec) => ({ id: sec.id, name: sec.name, items: sec.items.length })),
   }));
 
-  const locales = cleanLocales(v?.enabled_locales ?? [], allowedLocales(ent));
+  // Printed only in the language package; the other "20+" languages stay online.
+  const locales = cleanLocales(v?.enabled_locales ?? [], allowedLocales(ent)).filter((l) => PACKAGE_LOCALES.includes(l));
   return (
     <DruckEditor
       slug={venue.slug}

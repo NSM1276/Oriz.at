@@ -3,6 +3,7 @@ import { getEntitlements } from "@/lib/entitlements-server";
 import { requireVenue } from "../venue";
 import { AppNav } from "./AppNav";
 import { LockGate } from "./LockGate";
+import { PageTitle } from "./PageTitle";
 import { WhatsAppHelp } from "@/components/WhatsAppHelp";
 
 export default async function VenueLayout({
@@ -46,6 +47,7 @@ export default async function VenueLayout({
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 pb-28 pt-5 sm:pb-16 sm:pt-6">
+        <PageTitle slug={venue.slug} />
         <LockGate slug={venue.slug} locked={entitlements.locked}>{children}</LockGate>
         <WhatsAppHelp message={`Hallo, ich brauche Hilfe bei ORIZ (${venue.name}).`} className="mt-10 text-center print:hidden" />
       </main>

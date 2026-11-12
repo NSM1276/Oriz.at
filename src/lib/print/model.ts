@@ -13,6 +13,7 @@ import { buildSections, usedAllergens, type AllergenCode, type GuestItem, type R
 import { ALLERGEN_LABELS } from "../allergens.ts";
 import { allergenName } from "../menu-i18n.ts";
 import { formatPrice } from "../format.ts";
+import { venueUrl } from "../venue-host.ts";
 
 export type PrintPrice = { label: string | null; price: string };
 export type PrintItem = {
@@ -46,8 +47,12 @@ const UI: Record<string, PrintUi & { vegan: string; vegetarian: string; dateTag:
   de: { stand: "Stand", online: "Aktuelle Karte online, mit Fotos und Allergenen", allergens: "Allergene", vegan: "vegan", vegetarian: "vegetarisch", dateTag: "de-AT" },
   en: { stand: "As of", online: "Current menu online, with photos and allergens", allergens: "Allergens", vegan: "vegan", vegetarian: "vegetarian", dateTag: "en-GB" },
   it: { stand: "Aggiornato al", online: "Menu aggiornato online, con foto e allergeni", allergens: "Allergeni", vegan: "vegano", vegetarian: "vegetariano", dateTag: "it-IT" },
-  uk: { stand: "Станом на", online: "Актуальне меню онлайн, з фото та алергенами", allergens: "Алергени", vegan: "веган", vegetarian: "вегетаріанське", dateTag: "uk-UA" },
+  fr: { stand: "Mis à jour le", online: "Carte actuelle en ligne, avec photos et allergènes", allergens: "Allergènes", vegan: "végan", vegetarian: "végétarien", dateTag: "fr-FR" },
+  es: { stand: "Actualizado el", online: "Carta actual en línea, con fotos y alérgenos", allergens: "Alérgenos", vegan: "vegano", vegetarian: "vegetariano", dateTag: "es-ES" },
 };
+
+/** Languages the printed menu speaks besides German: the fixed package (DE + EN, IT, FR, ES). */
+export const PRINT_LOCALES: readonly string[] = Object.keys(UI).filter((l) => l !== "de");
 
 /** The language to print: German unless the venue offers the requested one. */
 export function printLocale(requested: string | null | undefined, enabled: string[] | null | undefined): string {
@@ -114,7 +119,7 @@ export function buildPrintModel(source: PrintSource, requestedLocale: string | n
     })),
     legend: usedAllergens(sections).map((code: AllergenCode) => ({ code, name: allergenName(code, locale, ALLERGEN_LABELS[code]) })),
     standDate: standDate(now, locale),
-    menuUrl: `https://oriz.at/${source.venue.slug}`,
+    menuUrl: venueUrl(source.venue.slug),
     ui: { stand: ui.stand, online: ui.online, allergens: ui.allergens },
   };
 }

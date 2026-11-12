@@ -41,7 +41,6 @@ export type HomeCopy = {
   featuresEyebrow: string;
   featuresHeading: string;
   features: Pair[];
-  featuresTv: string;
   stepsEyebrow: string;
   stepsHeading: string;
   steps: { n: string; title: string; body: string }[];
@@ -112,7 +111,6 @@ export const HOME_DE: HomeCopy = {
     { title: "Vier Sprachen", body: "Gäste wählen Deutsch, Englisch, Italienisch oder Ukrainisch. Auch die Allergene übersetzen sich mit." },
     { title: "Service per Tap", body: "Gäste rufen die Bedienung mit Tischnummer. Ihr Team sieht jeden Ruf sofort auf Handy oder Tablet." },
   ],
-  featuresTv: "Auch als Bildschirm für den Fernseher an der Wand: Ihre Karte läuft dort automatisch mit.",
   stepsEyebrow: "So geht’s",
   stepsHeading: "In drei Schritten online.",
   steps: [
@@ -235,7 +233,6 @@ export const HOME_EN: HomeCopy = {
     { title: "Four languages", body: "Guests choose German, English, Italian or Ukrainian. The allergens are translated too." },
     { title: "Service by tap", body: "Guests call the waiter with their table number. Your team sees every call right away on a phone or tablet." },
   ],
-  featuresTv: "Also as a screen for the TV on the wall: your menu runs there automatically.",
   stepsEyebrow: "How it works",
   stepsHeading: "Online in three steps.",
   steps: [

@@ -1,5 +1,7 @@
 "use client";
 
+import { venueUrl } from "@/lib/venue-host";
+
 type Props = {
   slug: string | null;
   name: string;
@@ -9,7 +11,7 @@ type Props = {
 export function QRModal({ slug, name, onClose }: Props) {
   if (!slug) return null;
 
-  const url = `https://oriz.at/${slug}`;
+  const url = venueUrl(slug);
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=20&color=0A0A0A&bgcolor=F5F0EC&data=${encodeURIComponent(url)}`;
 
   async function handleDownload() {

@@ -14,7 +14,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       onClick={onClick}
       className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3.5 font-sans text-[13px] transition-colors"
       style={{
-        color: active ? "var(--color-bg)" : "var(--color-text)",
+        color: active ? "var(--accent-ink)" : "var(--color-text)",
         backgroundColor: active ? "var(--accent)" : "transparent",
         boxShadow: active ? "none" : "inset 0 0 0 1px var(--color-border)",
       }}
@@ -123,7 +123,7 @@ export function FilterSheet({
                 type="button"
                 onClick={onClose}
                 className="flex-1 rounded-full py-3 font-sans text-sm font-semibold"
-                style={{ backgroundColor: "var(--accent)", color: "var(--color-bg)" }}
+                style={{ backgroundColor: "var(--accent)", color: "var(--accent-ink)" }}
               >
                 {matched > 0 ? count(t.results, matched) : t.noResults}
               </button>

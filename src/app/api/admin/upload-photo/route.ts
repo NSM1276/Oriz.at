@@ -7,6 +7,7 @@ import { isBlobUrl, putPublic, removePrefix, removeUrls, stampedPath } from "@/l
 import { maxPhotos, TRIAL_MAX_PHOTOS } from "@/lib/entitlements";
 import { getEntitlements } from "@/lib/entitlements-server";
 import { originalPath, thumbPath } from "@/lib/media";
+import { GALLERY_MAX } from "@/lib/venue-profile";
 
 const MAX_BYTES = 1_500_000; // 1.5 MB — sanity cap after client resize
 const MAX_THUMB_BYTES = 300_000;
@@ -175,6 +176,23 @@ export async function POST(req: NextRequest) {
     dir = `carta/${id}`;
     base = "cover";
     previous = venue.cover_url;
+  } else if (target === "carta-venue-gallery") {
+    // Photos of the place itself (the guest's "Info" page): appended, at most GALLERY_MAX.
+    const { data: venue } = await admin.from("venues").select("id, gallery").eq("id", id).maybeSingle<{ id: string; gallery: string[] | null }>();
+    if (!venue) return json({ error: "venue not found" }, 404);
+    if (!(await venueRole(user.id, venue.id))) return json({ error: "forbidden" }, 403);
+    if (!isSuper && (await venueLocked(venue.id))) return json(LOCKED, 403);
+    const gallery = venue.gallery ?? [];
+    if (gallery.length >= GALLERY_MAX) return json({ error: `Höchstens ${GALLERY_MAX} Fotos. Bitte zuerst eines entfernen.` }, 400);
+    let url: string;
+    try {
+      url = await putPublic(stampedPath(`carta/${id}/gallery`, "photo"), file, imageType(file));
+    } catch (err) {
+      console.error("[upload-photo] blob error:", err);
+      return json({ error: "Das Foto konnte nicht gespeichert werden." }, 500);
+    }
+    await admin.from("venues").update({ gallery: [...gallery, url] }).eq("id", id);
+    return json({ url });
   } else if (target === "casa-block") {
     const { data: block } = await admin
       .schema("casa")
@@ -261,6 +279,15 @@ export async function DELETE(req: NextRequest) {
     if (!isSuper && prop?.owner_id !== user.id) return json({ error: "forbidden" }, 403);
     previous = block.image_url;
     await admin.schema("casa").from("content_blocks").update({ image_url: null }).eq("id", id);
+  } else if (target === "carta-venue-gallery-item") {
+    const photoUrl = url.searchParams.get("photoUrl");
+    const { data: venue } = await admin.from("venues").select("id, gallery").eq("id", id).maybeSingle<{ id: string; gallery: string[] | null }>();
+    if (!venue || !photoUrl) return json({ error: "not found" }, 404);
+    if (!(await venueRole(user.id, venue.id))) return json({ error: "forbidden" }, 403);
+    await admin.from("venues").update({ gallery: (venue.gallery ?? []).filter((u) => u !== photoUrl) }).eq("id", id);
+    // Only our own files are deleted; old site images and outside links just leave the list.
+    if ((venue.gallery ?? []).includes(photoUrl)) await removeUrls([photoUrl]);
+    return json({ ok: true });
   } else if (target === "casa-property-all" || target === "carta-venue-all") {
     // Cascade cleanup — used when a whole property or venue is deleted.
     // Super-admin only (regular owners don't have a delete-everything UI).

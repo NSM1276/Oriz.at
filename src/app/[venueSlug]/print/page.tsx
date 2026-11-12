@@ -4,6 +4,7 @@ import { formatPrice } from "@/lib/format";
 import { PrintButton } from "@/components/menu/PrintButton";
 import { VenueLogo } from "@/components/brand/VenueLogo";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
+import { venueUrl } from "@/lib/venue-host";
 
 export const revalidate = 0;
 
@@ -39,7 +40,7 @@ export default async function PrintPage({
     .filter((s) => s.items.length > 0);
 
   const accent = data.color_primary ?? "#C69B3C";
-  const menuUrl = `https://oriz.at/${venueSlug}`;
+  const menuUrl = venueUrl(venueSlug);
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(menuUrl)}&bgcolor=ffffff&color=0a0a0a&margin=1`;
 
   return (

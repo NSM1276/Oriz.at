@@ -40,10 +40,10 @@ test("robots.txt leaves every public page open (a plain /i prefix would have blo
 import { restaurantJsonLd, jsonLdScript } from "../src/lib/seo.ts";
 
 test("restaurant structured data carries only what the owner filled in", () => {
-  const bare = restaurantJsonLd({ slug: "gasthaus-mayer", name: "Gasthaus Mayer" }, SITE_URL);
+  const bare = restaurantJsonLd({ slug: "gasthaus-mayer", name: "Gasthaus Mayer" });
   assert.equal(bare["@type"], "Restaurant");
-  assert.equal(bare.url, "https://www.oriz.at/gasthaus-mayer");
-  assert.equal(bare.hasMenu, "https://www.oriz.at/gasthaus-mayer");
+  assert.equal(bare.url, "https://gasthaus-mayer.oriz.at");
+  assert.equal(bare.hasMenu, "https://gasthaus-mayer.oriz.at");
   for (const k of ["description", "telephone", "address", "priceRange", "image", "sameAs", "openingHoursSpecification"]) assert.equal(k in bare, false, k);
 });
 
@@ -53,7 +53,7 @@ test("restaurant structured data: profile, links and opening hours", () => {
     cover_url: "https://cdn.example/cover.jpg", logo_url: "javascript:alert(1)",
     website_url: "https://x.at", instagram_url: "kein link", facebook_url: "https://facebook.com/x",
     opening_hours: { tue: [["11:30", "14:00"], ["17:30", "22:00"]], mon: [], sun: [["25:00", "26:00"]] },
-  }, SITE_URL);
+  });
   assert.equal(ld.description, "Hausmannskost");
   assert.deepEqual(ld.address, { "@type": "PostalAddress", streetAddress: "Hauptstraße 1, 1010 Wien" });
   assert.deepEqual(ld.image, ["https://cdn.example/cover.jpg"]);
@@ -62,7 +62,7 @@ test("restaurant structured data: profile, links and opening hours", () => {
 });
 
 test("the script payload cannot close its own tag", () => {
-  const out = jsonLdScript(restaurantJsonLd({ slug: "x", name: "</script><script>alert(1)</script>" }, SITE_URL));
+  const out = jsonLdScript(restaurantJsonLd({ slug: "x", name: "</script><script>alert(1)</script>" }));
   assert.ok(!out.includes("</script>"));
   assert.equal(JSON.parse(out).name, "</script><script>alert(1)</script>");
 });

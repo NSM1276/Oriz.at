@@ -73,11 +73,6 @@ export default async function ServicesPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold">Leistungen</h1>
-        <p className="mt-1 text-sm text-stone-600">Keine Zeit? Wir erledigen das für Sie — von Hand, innerhalb von 2 Werktagen nach Zahlung.</p>
-      </div>
-
       {offers.map((o) => (
         <section key={o.kind} className={card}>
           <p className="font-semibold">{SERVICE_INFO[o.kind].title}</p>

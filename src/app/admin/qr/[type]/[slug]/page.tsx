@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { QrCard } from "@/components/admin/QrCard";
 import { DEMO_SLUGS } from "@/lib/demo";
+import { venueUrl } from "@/lib/venue-host";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +48,7 @@ export default async function QrCardPage({
     return (
       <QrCard
         name={data.name}
-        url={`https://oriz.at/${slug}`}
+        url={venueUrl(slug)}
         colorBg={data.color_bg ?? undefined}
         accent={data.color_primary ?? "#C69B3C"}
         kind="carta"

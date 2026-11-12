@@ -2,7 +2,7 @@
 //
 // Plans (prices per month, no VAT charged (small-business exemption); also written in the website copy, a test keeps both in step):
 //   Starter 19 € — one menu, everything a single venue needs.
-//   Pro     39 € — Screen (TV board), several menus, print design.
+//   Pro     39 € — several menus, print design. (Screen is parked; the flag stays for later.)
 // A trial gives the Pro features (and every language) for 14 days, so owners meet them before they pay.
 //
 // Languages: every plan includes German plus EN, IT, FR, ES (fixed). "20+ Sprachen" is an add-on

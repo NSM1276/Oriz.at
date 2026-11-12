@@ -231,12 +231,17 @@ export function MenuEditor({
             <a href={`/app/${slug}/speisekarte/pdf`} target="_blank" rel="noopener" className="inline-flex min-h-11 items-center rounded-xl bg-stone-900 px-5 text-sm font-medium text-white">
               PDF öffnen
             </a>
-            {locales.map((l) => (
+            {locales.filter((l) => PACKAGE_LOCALES.includes(l)).map((l) => (
               <a key={l} href={`/app/${slug}/speisekarte/pdf?lang=${l}`} target="_blank" rel="noopener" className="inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-medium ring-1 ring-stone-300">
                 PDF · {LOCALE_NAMES[l]}
               </a>
             ))}
           </div>
+        )}
+        {locales.some((l) => !PACKAGE_LOCALES.includes(l)) && (
+          <p className="mt-3 text-sm text-stone-500">
+            Gedruckt wird auf Deutsch, Englisch, Italienisch, Französisch und Spanisch. Die weiteren Sprachen gibt es in der Online-Karte.
+          </p>
         )}
         <p className="mt-3 text-sm text-stone-600">
           Ihre Farben, Ihr Logo und Blatt für Blatt nachdrucken?{" "}

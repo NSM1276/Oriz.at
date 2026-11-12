@@ -162,7 +162,7 @@ export function InviteClientModal({ open, onClose, onCreated }: Props) {
                 />
               </Field>
 
-              <Field label="Slug · URL" hint={`oriz.at/${product === "casa" ? "casa/" : ""}${slug || "…"}`}>
+              <Field label="Slug · URL" hint={product === "casa" ? `oriz.at/casa/${slug || "…"}` : `${slug || "…"}.oriz.at`}>
                 <input
                   type="text"
                   value={slug}

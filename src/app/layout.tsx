@@ -18,9 +18,9 @@ const garamond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "ORIZ — Digitale Speisekarte & Hospitality Software aus Wien",
+  title: "ORIZ — Digitale Speisekarte per QR-Code aus Wien",
   description:
-    "ORIZ ersetzt die Papierkarte durch eine ruhige, lebendige Speisekarte per QR-Code. Carta · Casa · Screen — für Restaurants, Hotels & Pensionen. Aus Wien.",
+    "ORIZ ersetzt die Papierkarte durch eine digitale Speisekarte per QR-Code: in fünf Sprachen, mit Allergenen, Preise in Sekunden geändert. Für Restaurants, Cafés und Bars. Aus Wien.",
   metadataBase: new URL(SITE_URL),
   // "./" = the address of the page itself. A fixed address here would be inherited by every page
   // that sets none, telling search engines that each of them is a copy of the home page.
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
     canonical: "./",
   },
   openGraph: {
-    title: "ORIZ — Digitale Speisekarte für Restaurants & Hotels",
+    title: "ORIZ — Digitale Speisekarte per QR-Code",
     description:
-      "Drei Produkte. Eine Sprache. Carta (Speisekarte), Casa (Begrüßungskarte), Screen (Lobby-Display) — quiet luxury für Gastronomie & Hospitality.",
+      "Ihre Speisekarte auf dem Handy des Gastes — in fünf Sprachen, mit Allergenen, Preise ändern Sie selbst. 14 Tage kostenlos.",
     siteName: "ORIZ",
     locale: "de_AT",
     type: "website",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ORIZ — Digitale Speisekarte aus Wien",
-    description: "Carta · Casa · Screen — quiet luxury für Gastronomie & Hospitality.",
+    description: "Ihre Speisekarte auf dem Handy des Gastes — in fünf Sprachen, mit Allergenen. 14 Tage kostenlos.",
   },
   robots: {
     index: true,
@@ -50,8 +50,8 @@ export const metadata: Metadata = {
     "QR Code Speisekarte",
     "Restaurant Software Wien",
     "Menükarte digital",
-    "Hotel Gästekarte",
-    "Hospitality Software",
+    "Speisekarte mehrsprachig",
+    "Allergene Speisekarte",
     "ORIZ",
   ],
 };

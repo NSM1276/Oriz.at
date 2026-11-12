@@ -10,12 +10,11 @@ import { currentTable } from "@/lib/table-session";
 import { TableBanner } from "@/components/menu/TableBanner";
 import { CallButton } from "@/components/menu/CallButton";
 import { serviceClient } from "@/lib/auth";
-import { tableDisplayName } from "@/lib/tables";
 import { isListedVenue, jsonLdScript, restaurantJsonLd } from "@/lib/seo";
 import { allowedLocales } from "@/lib/entitlements";
 import { getEntitlements } from "@/lib/entitlements-server";
 import { cleanLocales } from "@/lib/menu-edit";
-import { SITE_URL } from "@/lib/site";
+import { venueUrl } from "@/lib/venue-host";
 
 export const revalidate = 0;
 
@@ -57,15 +56,20 @@ export default async function GuestMenuPage({
 
   // Structured data only for real customers, same rule as the sitemap: a demo must not read as a real place.
   const { data: sub } = await serviceClient().from("subscriptions").select("status").eq("venue_id", initial.venue.id).maybeSingle<{ status: string }>();
-  const listed = isListedVenue({ slug: venueSlug, status: sub?.status ?? null });
+  const listed = initial.venue.published !== false && isListedVenue({ slug: venueSlug, status: sub?.status ?? null });
 
   return (
     <>
       {listed && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(restaurantJsonLd(initial.venue, SITE_URL)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(restaurantJsonLd(initial.venue)) }} />
+      )}
+      {initial.venue.published === false && (
+        <div className="sticky top-0 z-40 bg-amber-400 px-4 py-2 text-center font-sans text-sm font-medium text-amber-950">
+          Nicht öffentlich — nur Sie sehen diese Karte. Gäste bekommen „nicht gefunden“.
+        </div>
       )}
       {table && (
-        <TableBanner label={table.label} bg={initial.venue.color_bg} accent={initial.venue.color_primary} />
+        <TableBanner label={table.label} locale={initialLocale} bg={initial.venue.color_bg} accent={initial.venue.color_primary} />
       )}
       {isDemo && (
         <DemoBanner
@@ -74,11 +78,11 @@ export default async function GuestMenuPage({
           accent={initial.venue.color_primary ?? "#C69B3C"}
         />
       )}
-      <MenuView initial={initial} initialLocale={initialLocale} />
+      <MenuView initial={initial} initialLocale={initialLocale} track={initial.venue.published !== false} />
       {table && callsEnabled && (
         <CallButton
           slug={venueSlug}
-          tableName={tableDisplayName(table.label)}
+          tableLabel={table.label}
           bg={initial.venue.color_bg}
           accent={initial.venue.color_primary}
           initialLocale={initialLocale}
@@ -111,7 +115,9 @@ export async function generateMetadata({
   return {
     title,
     description,
-    openGraph: { title, description, siteName: "ORIZ", type: "website" },
+    // The menu's own subdomain is the one address search engines should keep (old oriz.at/<slug> links redirect there).
+    alternates: { canonical: venueUrl(venueSlug) },
+    openGraph: { title, description, siteName: "ORIZ", type: "website", url: venueUrl(venueSlug) },
     twitter: { card: "summary_large_image", title, description },
     ...(listed ? {} : { robots: { index: false, follow: true } }),
   };

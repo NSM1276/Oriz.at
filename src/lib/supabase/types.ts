@@ -30,6 +30,8 @@ export type Venue = {
   // ── Guest-menu translations (manual, no AI) ──
   enabled_locales?: string[] | null;
   translations?: TranslationsMap | null;
+  /** false = only its own team and ORIZ see it (migration 0028). */
+  published?: boolean;
 };
 
 export type ItemTranslation = { name?: string; description?: string; about?: string };

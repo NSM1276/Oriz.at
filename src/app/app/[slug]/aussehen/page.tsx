@@ -25,8 +25,6 @@ export default async function LookPage({ params }: { params: Promise<{ slug: str
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold">Aussehen</h1>
-      <p className="mb-5 text-sm text-stone-600">Darstellung und Farben der Speisekarte. Die Vorschau zeigt Ihre echte Karte.</p>
       {role === "owner" && <LogoField venueId={venue.id} logoUrl={data?.logo_url ?? null} hasSvg={!!data?.logo_svg} />}
       <StyleStep
         slug={venue.slug}

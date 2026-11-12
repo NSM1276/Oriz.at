@@ -52,7 +52,7 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
   const SCALE = size.id === "a4" ? 1.2 : Math.min(3.5, 160 / size.w);
 
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=900x900&margin=0&color=${qrFg}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}`;
-  const cardDownload = `/api/qr-card-image?slug=${encodeURIComponent(url.replace(/^https?:\/\/oriz\.at\//, ""))}&name=${encodeURIComponent(name)}&dark=${dark ? "1" : "0"}&accent=${encodeURIComponent(accent)}&kind=${kind}`;
+  const cardDownload = `/api/qr-card-image?slug=${encodeURIComponent(url.replace(/^https?:\/\/oriz\.at\//, "").replace(/^https:\/\/([^.]+)\.oriz\.at$/, "$1"))}&name=${encodeURIComponent(name)}&dark=${dark ? "1" : "0"}&accent=${encodeURIComponent(accent)}&kind=${kind}`;
 
   const count = size.cols * size.rows;
   const stickerProps = { cardBg, textMain, textMuted, qrBoxBg, qrBorder, accent, name, subtitle, url, qrSrc, w: size.w, h: size.h };

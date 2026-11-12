@@ -95,7 +95,7 @@ const classic: Look = {
   Items: ({ section, currency, locale, onOpen }) => (
     <ul>
       {section.items.map((item) => (
-        <li key={item.id} {...rowProps(item, onOpen, { borderBottom: "1px solid var(--color-border)" })} className="group flex items-center gap-4 py-4">
+        <li key={item.id} {...rowProps(item, onOpen, { borderBottom: "1px solid var(--color-border)" })} className="group flex items-start gap-4 py-5">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-2">
               <h3 className="font-display text-xl font-semibold transition-opacity group-hover:opacity-70 md:text-2xl" style={{ color: "var(--color-text)" }}>
@@ -104,15 +104,17 @@ const classic: Look = {
               <DietBadges item={item} locale={locale} />
               {!item.available && <UnavailableBadge locale={locale} />}
             </div>
-            {item.text && <p className="mt-1 font-sans text-[15px] leading-relaxed" style={{ color: "var(--color-dim)" }}>{item.text}</p>}
-            <AllergenLetters item={item} />
+            {item.text && <p className="mt-1 font-sans text-[15px] leading-relaxed" style={{ color: "var(--color-dim)", ...clamp3 }}>{item.text}</p>}
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <Price item={item} currency={currency} locale={locale} className="font-sans text-base font-medium md:text-lg" style={{ color: "var(--accent)" }} />
+              <AllergenLetters item={item} style={{ marginTop: 0 }} />
+            </div>
           </div>
           {item.imageUrl && (
-            <div className="shrink-0 overflow-hidden" style={{ width: 84, height: 84, borderRadius: 6 }}>
+            <div className="shrink-0 self-start overflow-hidden" style={{ width: 96, height: 96, borderRadius: 10 }}>
               <DishMedia src={item.imageUrl} alt={item.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
             </div>
           )}
-          <Price item={item} currency={currency} locale={locale} className="shrink-0 font-sans text-base md:text-lg" style={{ color: "var(--color-text)" }} />
         </li>
       ))}
     </ul>
@@ -169,12 +171,14 @@ const modern: Look = {
               <DietBadges item={item} locale={locale} />
               {!item.available && <UnavailableBadge locale={locale} />}
             </div>
-            {item.text && <p className="mt-0.5 font-sans text-[15px] leading-snug" style={{ color: "var(--color-dim)", overflowWrap: "anywhere", hyphens: "auto" }}>{item.text}</p>}
-            <AllergenLetters item={item} />
+            {item.text && <p className="mt-0.5 font-sans text-[15px] leading-snug" style={{ color: "var(--color-dim)", overflowWrap: "anywhere", hyphens: "auto", ...clamp3 }}>{item.text}</p>}
+            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <Price item={item} currency={currency} locale={locale} className="font-sans font-medium" style={{ fontSize: "clamp(0.95rem, 2vw, 1.05rem)", color: "var(--accent)" }} />
+              <AllergenLetters item={item} style={{ marginTop: 0 }} />
+            </div>
           </div>
-          <Price item={item} currency={currency} locale={locale} className="shrink-0 font-sans font-medium" style={{ fontSize: "clamp(0.9rem, 2vw, 1.05rem)", color: "var(--accent)" }} />
           {item.imageUrl && (
-            <div className="shrink-0 overflow-hidden" style={{ width: 88, height: 88, borderRadius: 8 }}>
+            <div className="shrink-0 self-start overflow-hidden" style={{ width: 96, height: 96, borderRadius: 10 }}>
               <DishMedia src={item.imageUrl} alt={item.name} className="h-full w-full object-cover transition-transform duration-500 group-active:scale-110" />
             </div>
           )}
@@ -193,13 +197,18 @@ function PhotoCard({ item, currency, locale, onOpen }: { item: GuestItem; curren
     <article {...rowProps(item, onOpen, { borderRadius: 10, aspectRatio: "4/3", backgroundColor: "#111" })} className="card-shimmer group relative overflow-hidden">
       <DishMedia src={item.imageUrl!} alt={item.name} sizes="100vw" onError={() => setBroken(true)} className="kenburns absolute inset-0 block h-full w-full object-contain transition-transform duration-700 group-active:scale-105" />
       <div className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.05) 80%)" }} />
+      <Price
+        item={item}
+        currency={currency}
+        locale={locale}
+        compact
+        className="absolute right-2 top-2 rounded-full px-2.5 py-1 font-sans text-[13px] font-semibold"
+        style={{ backgroundColor: "rgba(0,0,0,0.62)", color: "#fff", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
+      />
       <div className="absolute inset-x-0 bottom-0 px-3 pb-3">
-        <div className="flex items-start gap-2">
-          <h3 className="min-w-0 flex-1 font-sans font-semibold text-white" style={{ fontSize: "0.95rem", lineHeight: 1.2, textShadow: "0 1px 8px rgba(0,0,0,0.95)", ...clamp3, WebkitLineClamp: 2 }}>
-            {item.name}
-          </h3>
-          <Price item={item} currency={currency} locale={locale} compact className="shrink-0 font-sans text-sm font-semibold" style={{ color: "var(--accent)", textShadow: "0 1px 4px rgba(0,0,0,0.8)" }} />
-        </div>
+        <h3 className="font-sans font-semibold text-white" style={{ fontSize: "0.98rem", lineHeight: 1.22, textShadow: "0 1px 8px rgba(0,0,0,0.95)", ...clamp3, WebkitLineClamp: 2 }}>
+          {item.name}
+        </h3>
       </div>
       {!item.available && (
         <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.55)" }}>
@@ -243,7 +252,7 @@ const visual: Look = {
   tab: (active) => ({
     className: "rounded-full px-4 py-1.5 font-sans text-[11px] uppercase tracking-regal transition-colors",
     style: {
-      color: active ? "var(--color-bg)" : "var(--accent)",
+      color: active ? "var(--accent-ink)" : "var(--accent)",
       backgroundColor: active ? "var(--accent)" : "transparent",
       boxShadow: active ? "none" : "inset 0 0 0 1px var(--color-border)",
     },

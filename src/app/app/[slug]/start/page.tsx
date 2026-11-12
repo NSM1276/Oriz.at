@@ -3,6 +3,7 @@ import { serviceClient } from "@/lib/auth";
 import { findPreset } from "@/lib/colorPresets";
 import { requireVenue } from "../../venue";
 import { MenuStep, StyleStep, TablesStep } from "./Steps";
+import { venueHost } from "@/lib/venue-host";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +82,7 @@ export default async function SetupPage({
 
   return (
     <>
-      {heading(5, "Ihre Speisekarte ist online", `Gäste erreichen sie unter oriz.at/${venue.slug}. Sie testen 14 Tage kostenlos.`)}
+      {heading(5, "Ihre Speisekarte ist online", `Gäste erreichen sie unter ${venueHost(venue.slug)}. Sie testen 14 Tage kostenlos.`)}
       <div className="space-y-3">
         <a
           href={`/${venue.slug}`}

@@ -180,7 +180,6 @@ export function HomePage({ c }: { c: HomeCopy }) {
                 </li>
               ))}
             </ul>
-            <p className="mt-8 text-lg text-onyx/70">{c.featuresTv}</p>
           </div>
         </section>
 

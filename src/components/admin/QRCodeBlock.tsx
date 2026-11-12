@@ -1,7 +1,9 @@
 "use client";
 
+import { venueUrl } from "@/lib/venue-host";
+
 export function QRCodeBlock({ slug }: { slug: string }) {
-  const menuUrl = `https://oriz.at/${slug}`;
+  const menuUrl = venueUrl(slug);
   const qrDisplay = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(menuUrl)}&bgcolor=ffffff&color=0a0a0a&margin=2`;
   const qrDownload = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&data=${encodeURIComponent(menuUrl)}&bgcolor=ffffff&color=0a0a0a&margin=4&format=png`;
 

@@ -56,13 +56,13 @@ export function TablesManager({ slug, tables }: { slug: string; tables: TableRow
       )}
 
       {tables.length > 0 && (
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-stone-600">
             {tables.length} {tables.length === 1 ? "Tisch" : "Tische"}
             {activeCount < tables.length && ` · ${tables.length - activeCount} ausgeschaltet`}
           </p>
-          <a href={`/app/${slug}/tische/drucken`} target="_blank" rel="noreferrer" className={primaryBtn}>
-            Alle QR-Codes drucken
+          <a href={`/app/${slug}/tische/drucken`} target="_blank" rel="noreferrer" className={`${primaryBtn} text-center`}>
+            QR-Aufkleber drucken
           </a>
         </div>
       )}

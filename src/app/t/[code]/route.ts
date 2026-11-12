@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { TABLE_COOKIE, TABLE_COOKIE_MAX_AGE, resolveTableCode } from "@/lib/table-session";
+import { slugFromHost, venueUrl } from "@/lib/venue-host";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,8 @@ const INVALID_HTML = `<!doctype html><html lang="de"><head><meta charset="utf-8"
 </head><body><main><p><strong>Dieser QR-Code ist nicht mehr gültig.</strong></p>
 <p>Bitte wenden Sie sich an das Personal.</p><p lang="en" style="color:#78716c">This QR code is no longer valid. Please ask the staff.</p></main></body></html>`;
 
-// Entry point printed on every table sticker: oriz.at/t/<code>.
+// Entry point printed on every table sticker: oriz.at/t/<code>. Sets the table cookie and opens
+// the venue's menu on its own subdomain.
 export async function GET(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const table = await resolveTableCode(code);
@@ -21,13 +23,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     });
   }
 
-  const response = NextResponse.redirect(new URL(`/${table.venueSlug}`, request.url), 303);
+  // The menu lives on the venue's own subdomain; the sticker may have been scanned on oriz.at or there.
+  // Locally (localhost) everything stays on one host.
+  const host = request.headers.get("host")?.toLowerCase() ?? "";
+  const onOriz = host === "oriz.at" || host.endsWith(".oriz.at");
+  const target = slugFromHost(host) === table.venueSlug ? new URL(`${request.nextUrl.protocol}//${host}/`) : onOriz ? new URL(venueUrl(table.venueSlug)) : new URL(`/${table.venueSlug}`, request.url);
+
+  const response = NextResponse.redirect(target, 303);
   response.cookies.set(TABLE_COOKIE, code.toUpperCase(), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: TABLE_COOKIE_MAX_AGE,
+    // Shared by oriz.at and every *.oriz.at, so the menu's subdomain sees which table this is.
+    ...(onOriz ? { domain: ".oriz.at" } : {}),
   });
   response.headers.set("cache-control", "no-store");
   return response;

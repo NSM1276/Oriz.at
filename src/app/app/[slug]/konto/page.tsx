@@ -5,6 +5,7 @@ import { LOCALE_NAMES, MENU_LOCALES, PACKAGE_LOCALES } from "@/lib/locales";
 import { whatsappUrl } from "@/lib/contact-info";
 import { requireUser, requireVenue } from "../../venue";
 import { AccountForms } from "./AccountForms";
+import { venueHost } from "@/lib/venue-host";
 
 export const dynamic = "force-dynamic";
 
@@ -20,14 +21,14 @@ export default async function AccountPage({ params, searchParams }: { params: Pr
   const current = ent.tier === "pro" || ent.tier === "trial" ? "pro" : "starter";
   const plans = [
     { id: "starter", name: "Starter", body: "Alles für ein Lokal: Karte mit unbegrenzten Gerichten, Aussehen, Allergene, QR-Codes für die Tische, Service-Ruf und Druck-PDF." },
-    { id: "pro", name: "Pro", body: "Alles aus Starter, dazu bis zu fünf Karten (z. B. Mittag, Abend, Getränke), Druck-Design (Ihre Farben, Ihr Logo, Blatt für Blatt nachdrucken) und Screen (Ihre Karte auf dem Fernseher)." },
+    { id: "pro", name: "Pro", body: "Alles aus Starter, dazu bis zu fünf Karten (z. B. Mittag, Abend, Getränke) und Druck-Design (Ihre Farben, Ihr Logo, Blatt für Blatt nachdrucken)." },
   ] as const;
   const packageNames = PACKAGE_LOCALES.map((l) => LOCALE_NAMES[l]).join(", ");
   const extraCount = MENU_LOCALES.length - PACKAGE_LOCALES.length;
   const allowed = allowedLocales(ent);
 
   const order = (what: string) => upgradeMailto(venue.name, `${what} für ${venue.name}`);
-  const wa = (what: string) => whatsappUrl(`Hallo, ich möchte ${what} für ${venue.name} (oriz.at/${venue.slug}).`);
+  const wa = (what: string) => whatsappUrl(`Hallo, ich möchte ${what} für ${venue.name} (${venueHost(venue.slug)}).`);
 
   return (
     <div className="space-y-4">

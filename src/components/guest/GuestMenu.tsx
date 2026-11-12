@@ -23,6 +23,9 @@ import { StickyActionBar } from "@/components/menu/StickyActionBar";
 import { DishSheet } from "./DishSheet";
 import { FilterSheet } from "./FilterSheet";
 import { SectionsSheet } from "./SectionsSheet";
+import { SectionTiles, TILES_MIN, sectionTiles } from "./SectionTiles";
+import { CoverImage, OpenLine } from "./GuestHero";
+import type { OpeningHours } from "@/lib/opening-status";
 import { LOOKS, type LookName } from "./looks";
 
 // The guest menu: one behaviour, three looks. Everything a guest can do —
@@ -59,6 +62,8 @@ function palette(colorBg: string | null, colorPrimary: string | null) {
       "--color-muted": `rgba(${ink},0.40)`,
       "--color-border": `rgba(${ink},0.10)`,
       "--accent": colorPrimary ?? "#C69B3C",
+      // Text on the accent colour: dark on light accents, white on dark ones, always readable.
+      "--accent-ink": luminance(colorPrimary ?? "#C69B3C") > 0.18 ? "#0A0A0A" : "#FFFFFF",
     } as React.CSSProperties,
   };
 }
@@ -91,7 +96,17 @@ function ListIcon() {
   );
 }
 
-export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: MenuPayload; initialLocale?: string }) {
+/** Counts for the owner's statistics (api/track): fire-and-forget, never blocks the menu. */
+function sendTrack(body: { venueId: string; kind: "view" | "dish"; itemId?: string }) {
+  try {
+    const data = new Blob([JSON.stringify(body)], { type: "application/json" });
+    if (!navigator.sendBeacon?.("/api/track", data)) {
+      fetch("/api/track", { method: "POST", body: data, keepalive: true }).catch(() => {});
+    }
+  } catch { /* statistics are never worth an error */ }
+}
+
+export function GuestMenu({ initial, initialLocale = BASE_LOCALE, track = false }: { initial: MenuPayload; initialLocale?: string; track?: boolean }) {
   const { venue, menus = [] } = initial;
   const lookName: LookName = venue.menu_theme ?? "classic";
   const look = LOOKS[lookName] ?? LOOKS.classic;
@@ -149,7 +164,6 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
   const canSearch = totalItems >= SEARCH_MIN_ITEMS;
   const canFilter = options.diet.length > 0 || options.avoid.length > 0;
   const activeFilterCount = filter.diet.size + filter.avoid.size;
-  const [searchOpen, setSearchOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [sectionsOpen, setSectionsOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -173,6 +187,20 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
     [openId, sections],
   );
   const closeItem = useCallback(() => setOpenId(null), []);
+
+  // ── statistics: one "opened" per page load, each dish card once per page load ──
+  // Not inside a frame: the owner's own preview (Aussehen) must not count as a guest.
+  const counting = track && typeof window !== "undefined" && window.self === window.top;
+  const countedDishes = useRef(new Set<string>());
+  useEffect(() => {
+    if (counting) sendTrack({ venueId: venue.id, kind: "view" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!counting || !openId || countedDishes.current.has(openId)) return;
+    countedDishes.current.add(openId);
+    sendTrack({ venueId: venue.id, kind: "dish", itemId: openId });
+  }, [counting, openId, venue.id]);
 
   useEffect(() => {
     document.body.style.backgroundColor = colors.bg;
@@ -205,8 +233,8 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
   }
 
   const showTabs = !searching && result.sections.length > 1;
+  const tiles = useMemo(() => sectionTiles(result.sections), [result.sections]);
   const showSections = !searching && result.sections.length >= SECTIONS_SHEET_MIN;
-  const showToolbar = showTabs || canSearch || canFilter || totalItems > 0;
 
   const links = [
     venue.instagram_url && { href: venue.instagram_url, label: "Instagram" },
@@ -218,7 +246,9 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
   return (
     <div dir={RTL_LOCALES.has(locale) ? "rtl" : "ltr"} style={{ backgroundColor: colors.bg, minHeight: "100vh", color: "var(--color-text)", ...colors.vars }}>
       <main className={`mx-auto ${look.main} pt-6 md:pt-14`} style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom, 0px))", zoom: largeText ? LARGE_TEXT_ZOOM : 1 }}>
+        {venue.cover_url && <CoverImage src={venue.cover_url} alt={venue.name} bleed={look.bleed} />}
         <look.Header venue={venue} about={localizeAbout(venue, locale)} isDark={colors.isDark} text={colors.text} locale={locale} />
+        <OpenLine hours={venue.opening_hours as OpeningHours | null} locale={locale} center={lookName !== "modern"} />
 
         {(enabledLocales.length > 0 || menus.length > 1) && (
           <div className={`mt-5 flex items-center gap-2 overflow-x-auto ${look.bleed}`} style={{ scrollbarWidth: "none" }}>
@@ -236,11 +266,15 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
           </div>
         )}
 
-        {showToolbar && (
-          <div className={`sticky top-0 z-20 mt-4 ${look.bleed}`} style={{ backgroundColor: "var(--color-bg)", borderBottom: "1px solid var(--color-border)" }}>
-            {searchOpen ? (
-              <div className="flex items-center gap-2 py-2">
-                <span style={{ color: "var(--color-muted)" }}><SearchIcon /></span>
+        {/* Search, filter and text size: always in reach, like the big ordering apps. */}
+        {totalItems > 0 && (
+          <div className="mt-5 flex items-center gap-2">
+            {canSearch ? (
+              <label
+                className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full px-4"
+                style={{ boxShadow: "inset 0 0 0 1px var(--color-border)", backgroundColor: "color-mix(in srgb, var(--color-text) 4%, transparent)", color: "var(--color-muted)" }}
+              >
+                <SearchIcon />
                 <input
                   ref={searchRef}
                   type="text"
@@ -251,83 +285,87 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
                   placeholder={t.searchPlaceholder}
                   aria-label={t.search}
                   onChange={(e) => setFilter((f) => ({ ...f, query: e.target.value }))}
-                  className="min-w-0 flex-1 bg-transparent py-2 font-sans text-base outline-none"
+                  className="min-w-0 flex-1 bg-transparent font-sans text-base outline-none"
                   style={{ color: "var(--color-text)" }}
                 />
+                {searching && (
+                  <button type="button" aria-label={t.reset} onClick={() => setFilter((f) => ({ ...f, query: "" }))} className="shrink-0 px-1 text-lg leading-none" style={{ color: "var(--color-dim)" }}>
+                    ×
+                  </button>
+                )}
+              </label>
+            ) : (
+              <div className="flex-1" />
+            )}
+            {canFilter && (
+              <button
+                type="button"
+                aria-label={activeFilterCount > 0 ? `${t.filter} (${activeFilterCount})` : t.filter}
+                onClick={() => setFilterOpen(true)}
+                className="relative flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 font-sans text-sm"
+                style={{ boxShadow: "inset 0 0 0 1px var(--color-border)", color: activeFilterCount > 0 ? "var(--accent-ink)" : "var(--color-text)", backgroundColor: activeFilterCount > 0 ? "var(--accent)" : "transparent" }}
+              >
+                <FilterIcon />
+                {activeFilterCount > 0 ? activeFilterCount : <span className="sr-only">{t.filter}</span>}
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label={t.textSize}
+              aria-pressed={largeText}
+              title={t.textSize}
+              onClick={toggleLargeText}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-sans"
+              style={{ boxShadow: "inset 0 0 0 1px var(--color-border)", color: "var(--color-text)", backgroundColor: largeText ? "color-mix(in srgb, var(--accent) 20%, transparent)" : "transparent" }}
+            >
+              <span style={{ fontSize: 11, lineHeight: 1 }}>A</span>
+              <span style={{ fontSize: 17, lineHeight: 1, fontWeight: largeText ? 700 : 400 }}>A</span>
+            </button>
+          </div>
+        )}
+
+        {/* Photo tiles to jump into a section — only when the menu has the photos for it. */}
+        {!searching && activeFilterCount === 0 && tiles.length >= TILES_MIN && (
+          <SectionTiles tiles={tiles} bleed={look.bleed} onJump={jumpTo} />
+        )}
+
+        {/* Sections follow the scroll and stay on top. */}
+        {showTabs && (
+          <div className={`sticky top-0 z-20 mt-3 ${look.bleed}`} style={{ backgroundColor: "var(--color-bg)", borderBottom: "1px solid var(--color-border)" }}>
+            <div className="flex items-center">
+              {showSections && (
                 <button
                   type="button"
-                  onClick={() => { setFilter((f) => ({ ...f, query: "" })); setSearchOpen(false); }}
-                  className="shrink-0 rounded-full px-3 py-2 font-sans text-sm"
+                  aria-label={t.sections}
+                  onClick={() => setSectionsOpen(true)}
+                  className="flex h-11 w-10 shrink-0 items-center justify-center"
                   style={{ color: "var(--accent)" }}
                 >
-                  {t.close}
+                  <ListIcon />
                 </button>
+              )}
+              <div ref={tabsRef} className="relative flex min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap py-1.5" style={{ scrollbarWidth: "none" }}>
+                {result.sections.map((s) => {
+                  const tab = look.tab(activeSection === s.id);
+                  return (
+                    <button key={s.id} type="button" data-section={s.id} onClick={() => jumpTo(s.id)} className={`shrink-0 ${tab.className}`} style={tab.style}>
+                      {s.name}
+                    </button>
+                  );
+                })}
               </div>
-            ) : (
-              <div className="flex items-center">
-                {showSections && (
-                  <button
-                    type="button"
-                    aria-label={t.sections}
-                    onClick={() => setSectionsOpen(true)}
-                    className="flex h-11 w-10 shrink-0 items-center justify-center"
-                    style={{ color: "var(--accent)" }}
-                  >
-                    <ListIcon />
-                  </button>
-                )}
-                {canSearch && (
-                  <button
-                    type="button"
-                    aria-label={t.search}
-                    onClick={() => { setSearchOpen(true); requestAnimationFrame(() => searchRef.current?.focus()); }}
-                    className="flex h-11 w-10 shrink-0 items-center justify-center"
-                    style={{ color: "var(--accent)" }}
-                  >
-                    <SearchIcon />
-                  </button>
-                )}
-                <div ref={tabsRef} className="relative flex min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap py-1.5" style={{ scrollbarWidth: "none" }}>
-                  {showTabs && result.sections.map((s) => {
-                    const tab = look.tab(activeSection === s.id);
-                    return (
-                      <button key={s.id} type="button" data-section={s.id} onClick={() => jumpTo(s.id)} className={`shrink-0 ${tab.className}`} style={tab.style}>
-                        {s.name}
-                      </button>
-                    );
-                  })}
-                </div>
+              {canSearch && (
                 <button
                   type="button"
-                  aria-label={t.textSize}
-                  aria-pressed={largeText}
-                  title={t.textSize}
-                  onClick={toggleLargeText}
-                  className="flex h-11 w-10 shrink-0 items-center justify-center font-sans"
-                  style={{ color: "var(--accent)", opacity: largeText ? 1 : 0.75 }}
+                  aria-label={t.search}
+                  onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); setTimeout(() => searchRef.current?.focus(), 350); }}
+                  className="flex h-11 w-10 shrink-0 items-center justify-center"
+                  style={{ color: "var(--accent)" }}
                 >
-                  <span style={{ fontSize: 11, lineHeight: 1 }}>A</span>
-                  <span style={{ fontSize: 17, lineHeight: 1, fontWeight: largeText ? 700 : 400 }}>A</span>
+                  <SearchIcon />
                 </button>
-                {canFilter && (
-                  <button
-                    type="button"
-                    aria-label={activeFilterCount > 0 ? `${t.filter} (${activeFilterCount})` : t.filter}
-                    onClick={() => setFilterOpen(true)}
-                    className="relative flex h-11 shrink-0 items-center gap-1.5 pl-3 font-sans text-[11px] uppercase tracking-regal"
-                    style={{ color: "var(--accent)" }}
-                  >
-                    <FilterIcon />
-                    <span className="hidden sm:inline">{t.filter}</span>
-                    {activeFilterCount > 0 && (
-                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-semibold tracking-normal" style={{ backgroundColor: "var(--accent)", color: "var(--color-bg)" }}>
-                        {activeFilterCount}
-                      </span>
-                    )}
-                  </button>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
@@ -360,7 +398,7 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE }: { initial: M
         {result.sections.length === 0 && filterActive(filter) && (
           <div className="py-20 text-center font-sans">
             <p style={{ color: "var(--color-dim)" }}>{t.noResults}</p>
-            <button type="button" onClick={() => { setFilter(EMPTY_FILTER); setSearchOpen(false); }} className="mt-3 underline" style={{ color: "var(--accent)" }}>
+            <button type="button" onClick={() => setFilter(EMPTY_FILTER)} className="mt-3 underline" style={{ color: "var(--accent)" }}>
               {t.reset}
             </button>
           </div>

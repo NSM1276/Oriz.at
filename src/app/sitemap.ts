@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { serviceClient } from "@/lib/auth";
 import { isListedVenue } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
+import { venueUrl } from "@/lib/venue-host";
 
 // The sitemap lists the marketing pages and the guest pages of real restaurants.
 // Demo and test restaurants are left out (see isListedVenue), and so are Casa guest cards for now:
@@ -20,17 +21,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/en`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${SITE_URL}/carta`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/registrieren`, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${SITE_URL}/screen`, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${SITE_URL}/casa`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${SITE_URL}/impressum`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${SITE_URL}/datenschutz`, changeFrequency: "yearly", priority: 0.1 },
   ];
 
   try {
-    const { data } = await serviceClient().from("venues").select("slug, subscriptions(status)").not("slug", "is", null).returns<VenueRow[]>();
+    const { data } = await serviceClient().from("venues").select("slug, subscriptions(status)").not("slug", "is", null).eq("published", true).returns<VenueRow[]>();
     const venues = (data ?? [])
       .filter((v) => isListedVenue({ slug: v.slug, status: (Array.isArray(v.subscriptions) ? v.subscriptions[0] : v.subscriptions)?.status ?? null }))
-      .map((v) => ({ url: `${SITE_URL}/${v.slug}`, changeFrequency: "daily" as const, priority: 0.6 }));
+      // Each menu on its own subdomain; Search Console verifies all of *.oriz.at through the TXT record on oriz.at.
+      .map((v) => ({ url: venueUrl(v.slug), changeFrequency: "daily" as const, priority: 0.6 }));
     return [...pages, ...venues];
   } catch (err) {
     // Database unreachable while refreshing: ship the fixed pages rather than nothing.

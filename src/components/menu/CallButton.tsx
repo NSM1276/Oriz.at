@@ -2,68 +2,52 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { CallKind, CallStatus } from "@/lib/service";
+import { callText, tableText } from "@/lib/call-i18n";
+import { RTL_LOCALES } from "@/lib/locales";
 
 // Floating "Service" button for guests who sat down through a table sticker.
 // The table itself is never sent from here — the server reads it from the
 // httpOnly cookie the sticker set. It floats just above the menu's own
 // bottom action bar (StickyActionBar, ~58px) so it never covers it.
 
-const STRINGS = {
-  de: {
-    button: "Service",
-    title: "Wie können wir helfen?",
-    kinds: {
-      order: ["Bestellen", "Wir kommen an den Tisch"],
-      bill: ["Zahlen", "Die Rechnung, bitte"],
-      help: ["Frage", "Jemand kommt kurz vorbei"],
-    },
-    sent: "Gesendet — das Team weiß Bescheid",
-    accepted: "Kommt gleich zu Ihnen",
-    done: "Erledigt",
-    cancel: "Zurücknehmen",
-    close: "Schließen",
-    limit: "Das Team ist schon informiert. Bitte einen Moment Geduld.",
-    error: "Hat leider nicht geklappt. Bitte sprechen Sie das Personal direkt an.",
-  },
-  en: {
-    button: "Service",
-    title: "How can we help?",
-    kinds: {
-      order: ["Order", "We'll come to your table"],
-      bill: ["Pay", "The bill, please"],
-      help: ["Question", "Someone will stop by"],
-    },
-    sent: "Sent — the team has been notified",
-    accepted: "On the way to you",
-    done: "Done",
-    cancel: "Cancel",
-    close: "Close",
-    limit: "The team already knows. Please bear with us for a moment.",
-    error: "That didn't work. Please ask the staff directly.",
-  },
-} as const;
-
 type Active = { id: string; secret: string | null; kind: CallKind; status: CallStatus };
 
 const POLL_MS = 5000;
 
-function isDark(hex: string | null): boolean {
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex ?? "");
-  if (!m) return false;
-  const n = parseInt(m[1], 16);
-  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 128;
+/** Relative luminance (WCAG) of a #rrggbb colour; unknown colours count as mid-grey. */
+function luminance(hex: string): number {
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return 0.5;
+  const ch = (i: number) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * ch(1) + 0.7152 * ch(3) + 0.0722 * ch(5);
+}
+
+const ICONS: Record<CallKind | "bell", string> = {
+  bell: "M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16ZM10 20.5a2 2 0 0 0 4 0",
+  order: "M4 5h16M4 12h16M4 19h10",
+  bill: "M6 3h12v18l-3-2-3 2-3-2-3 2V3ZM9 8h6M9 12h6",
+  help: "M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01",
+};
+
+function Icon({ d, size = 20 }: { d: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={d} />
+    </svg>
+  );
 }
 
 export function CallButton({
   slug,
-  tableName,
+  tableLabel,
   bg,
   accent,
   initialLocale,
 }: {
   slug: string;
-  tableName: string;
+  tableLabel: string;
   bg: string | null;
   accent: string | null;
   initialLocale: string;
@@ -75,10 +59,13 @@ export function CallButton({
   const [sending, setSending] = useState<CallKind | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const t = locale === "de" ? STRINGS.de : STRINGS.en;
+  const t = callText(locale);
+  const dir = RTL_LOCALES.has(locale) ? "rtl" : "ltr";
   const background = bg ?? "#F5F0EC";
   const color = accent ?? "#C69B3C";
-  const text = isDark(background) ? "#F5F0EC" : "#1C1917";
+  const text = luminance(background) < 0.4 ? "#F5F0EC" : "#1C1917";
+  // Text on the accent: whichever of black/white has more contrast (same rule as the menu's --accent-ink).
+  const ink = luminance(color) > 0.18 ? "#0A0A0A" : "#FFFFFF";
 
   const remember = useCallback((a: Active | null) => {
     setActive(a);
@@ -172,69 +159,84 @@ export function CallButton({
     <>
       <button
         type="button"
+        dir={dir}
         onClick={() => { syncLocale(); setOpen(true); }}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full px-5 py-3 font-sans text-sm font-semibold shadow-lg"
-        style={{ backgroundColor: color, color: background }}
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+72px)] left-1/2 z-40 flex max-w-[calc(100vw-32px)] -translate-x-1/2 items-center gap-2.5 rounded-full py-2.5 pe-5 ps-2.5 font-sans text-[15px] font-semibold transition-transform active:scale-95"
+        style={{ backgroundColor: color, color: ink, boxShadow: "0 10px 30px -8px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.18)" }}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-          <path d="M4 17h16M6 17a6 6 0 0 1 12 0M12 8V6M10 6h4" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span>{status && active ? `${t.kinds[active.kind][0]} · ${status}` : t.button}</span>
-        {active?.status === "open" && <span className="h-2 w-2 animate-pulse rounded-full" style={{ backgroundColor: background }} />}
+        <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full" style={{ backgroundColor: ink === "#FFFFFF" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.1)" }}>
+          <Icon d={pending && active ? ICONS[active.kind] : ICONS.bell} size={18} />
+          {active?.status === "open" && (
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-ping rounded-full" style={{ backgroundColor: ink }} />
+          )}
+        </span>
+        <span className="truncate">{status && active ? `${t[active.kind][0]} · ${status}` : t.button}</span>
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t.title}>
-          <button type="button" aria-label={t.close} className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
+        <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t.title} dir={dir}>
+          <button type="button" aria-label={t.close} className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" onClick={() => setOpen(false)} />
           <div
-            className="relative w-full max-w-md rounded-t-3xl px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-5 font-sans shadow-2xl"
+            className="relative w-full max-w-md rounded-t-[28px] px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-3 font-sans shadow-2xl"
             style={{ backgroundColor: background, color: text }}
           >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full opacity-30" style={{ backgroundColor: text }} />
-            <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color }}>{tableName}</p>
-            <p className="mt-1 text-xl font-semibold">{t.title}</p>
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full opacity-25" style={{ backgroundColor: text }} />
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color }}>{tableText(tableLabel, locale)}</p>
+                <p className="mt-1 text-xl font-semibold">{t.title}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label={t.close}
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${text} 18%, transparent)` }}
+              >
+                <Icon d="M6 6l12 12M18 6L6 18" size={16} />
+              </button>
+            </div>
 
             {pending && active ? (
-              <div className="mt-5 rounded-2xl p-4" style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)` }}>
-                <p className="text-lg font-semibold">{t.kinds[active.kind][0]}</p>
-                <p className="mt-0.5 text-sm opacity-80">{status}</p>
-                {active.secret && active.status === "open" && (
-                  <button type="button" onClick={cancel} className="mt-3 text-sm font-medium underline opacity-80">
-                    {t.cancel}
-                  </button>
-                )}
+              <div className="mt-5 flex items-center gap-4 rounded-2xl p-4" style={{ backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)` }}>
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full" style={{ backgroundColor: color, color: ink }}>
+                  <Icon d={ICONS[active.kind]} size={22} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-lg font-semibold">{t[active.kind][0]}</span>
+                  <span className="mt-0.5 flex items-center gap-2 text-sm opacity-80">
+                    {active.status === "open" && <span className="h-2 w-2 shrink-0 animate-pulse rounded-full" style={{ backgroundColor: color }} />}
+                    {status}
+                  </span>
+                  {active.secret && active.status === "open" && (
+                    <button type="button" onClick={cancel} className="mt-2 text-sm font-medium underline underline-offset-2 opacity-80">
+                      {t.cancel}
+                    </button>
+                  )}
+                </span>
               </div>
             ) : (
-              <div className="mt-5 grid gap-2">
+              <div className="mt-5 grid grid-cols-3 gap-2.5">
                 {(["order", "bill", "help"] as const).map((kind) => (
                   <button
                     key={kind}
                     type="button"
                     disabled={sending !== null}
                     onClick={() => call(kind)}
-                    className="flex items-center justify-between rounded-2xl px-4 py-4 text-left ring-1 transition-opacity disabled:opacity-50"
-                    style={{ borderColor: color, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 45%, transparent)` }}
+                    className="flex min-h-[132px] flex-col items-center justify-start gap-2 rounded-2xl px-2 pb-3 pt-4 text-center transition-[opacity,transform] active:scale-[0.97] disabled:opacity-50"
+                    style={{ boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 40%, transparent)`, backgroundColor: `color-mix(in srgb, ${color} 7%, transparent)` }}
                   >
-                    <span>
-                      <span className="block text-base font-semibold">{t.kinds[kind][0]}</span>
-                      <span className="block text-sm opacity-70">{t.kinds[kind][1]}</span>
+                    <span className="grid h-12 w-12 place-items-center rounded-full" style={{ backgroundColor: color, color: ink }}>
+                      {sending === kind ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Icon d={ICONS[kind]} size={22} />}
                     </span>
-                    <span aria-hidden style={{ color }}>{sending === kind ? "…" : "›"}</span>
+                    <span className="text-[15px] font-semibold leading-tight">{t[kind][0]}</span>
+                    <span className="text-xs leading-snug opacity-70">{t[kind][1]}</span>
                   </button>
                 ))}
               </div>
             )}
 
-            {notice && <p className="mt-4 text-sm opacity-80">{notice}</p>}
-
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="mt-5 w-full rounded-2xl py-3 text-sm font-semibold"
-              style={{ backgroundColor: color, color: background }}
-            >
-              {t.close}
-            </button>
+            {notice && <p className="mt-4 text-sm opacity-80" role="status">{notice}</p>}
           </div>
         </div>
       )}
@@ -242,7 +244,8 @@ export function CallButton({
       {!open && notice && (
         <p
           role="status"
-          className="fixed bottom-[calc(env(safe-area-inset-bottom)+128px)] left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-2 font-sans text-sm shadow"
+          dir={dir}
+          className="fixed bottom-[calc(env(safe-area-inset-bottom)+132px)] left-1/2 z-40 max-w-[calc(100vw-32px)] -translate-x-1/2 rounded-full px-4 py-2 text-center font-sans text-sm shadow-lg"
           style={{ backgroundColor: background, color: text }}
         >
           {notice}

@@ -1,3 +1,4 @@
+import { venueUrl } from "./venue-host.ts";
 // What search engines may see. Pure — unit-tested.
 
 /**
@@ -27,6 +28,7 @@ export const ROBOTS_DISALLOW = [
   "/i$", // iOS shortcut page
   "/screen/", // TV boards (the /screen product page stays open)
   "/*/print", // the old print page of a venue duplicates its menu
+  "/print$", // the same on a venue's subdomain (belvedere.oriz.at/print)
 ];
 
 const DAY_NAME: Record<string, string> = {
@@ -54,10 +56,10 @@ type JsonLdVenue = {
 
 /**
  * schema.org Restaurant for a guest menu page. Only what the owner filled in; nothing is invented.
- * `siteUrl` has no trailing slash. Returns plain data: the caller serialises it (and escapes "<").
+ * Its address is the menu's own subdomain. Returns plain data: the caller serialises it (and escapes "<").
  */
-export function restaurantJsonLd(v: JsonLdVenue, siteUrl: string): Record<string, unknown> {
-  const url = `${siteUrl}/${v.slug}`;
+export function restaurantJsonLd(v: JsonLdVenue): Record<string, unknown> {
+  const url = venueUrl(v.slug);
   const hours = DAY_ORDER.flatMap((d) =>
     (v.opening_hours?.[d] ?? [])
       .filter((r) => Array.isArray(r) && TIME_RE.test(r[0]) && TIME_RE.test(r[1]))

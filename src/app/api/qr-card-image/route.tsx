@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { venueUrl } from "@/lib/venue-host";
+import { slugProblem } from "@/lib/slug";
 
 export const runtime = "edge";
 
@@ -23,7 +25,8 @@ export async function GET(request: Request) {
   const qrFg  = dark ? "F5F0EC" : "0A0A0A";
   const qrBg  = dark ? "0A0A0A" : "F5F0EC";
 
-  const menuUrl = `https://oriz.at/${slug}`;
+  // Casa cards come as "c/<slug>" and stay on oriz.at; menus live on their own subdomain.
+  const menuUrl = slug.startsWith("c/") ? `https://oriz.at/${slug}` : slugProblem(slug) === null ? venueUrl(slug) : "https://www.oriz.at";
 
   // 800 px QR at margin=2 (minimal quiet zone, scanner-safe)
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=800x800&margin=2&color=${qrFg}&bgcolor=${qrBg}&data=${encodeURIComponent(menuUrl)}`;

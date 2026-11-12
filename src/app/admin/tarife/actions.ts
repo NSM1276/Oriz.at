@@ -41,3 +41,14 @@ export async function setSubscription(venueId: string, plan: PlanId, status: Sub
   revalidatePath("/admin/tarife");
   return { ok: true };
 }
+
+/** Online or not: an unpublished venue is seen only by its own team and by us (migration 0028). */
+export async function setPublished(venueId: string, published: boolean): Promise<TarifResult> {
+  const user = await getUser();
+  if (!user || !(await isPlatformAdmin(user.id))) throw new Error("forbidden");
+  if (!UUID.test(venueId)) return { ok: false, error: "Ungültige Eingabe." };
+  const { error } = await serviceClient().from("venues").update({ published: !!published }).eq("id", venueId);
+  if (error) return { ok: false, error: "Konnte nicht gespeichert werden." };
+  revalidatePath("/admin/tarife");
+  return { ok: true };
+}

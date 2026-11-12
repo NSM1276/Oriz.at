@@ -1,7 +1,8 @@
 // tests/print-model.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildPrintModel, printLocale, standDate } from "../src/lib/print/model.ts";
+import { PRINT_LOCALES, buildPrintModel, printLocale, standDate } from "../src/lib/print/model.ts";
+import { PACKAGE_LOCALES } from "../src/lib/locales.ts";
 import { buildPrintDoc, estimateSectionHeight } from "../src/lib/print/doc.ts";
 
 const item = (id, over = {}) => ({
@@ -22,6 +23,13 @@ test("language: German unless the venue offers the requested one", () => {
   assert.equal(printLocale("EN", ["en"]), "en");
   assert.equal(printLocale("it", ["en"]), "de");
   assert.equal(printLocale("xx", ["xx"]), "de"); // no strings for it
+  assert.equal(printLocale("fr", ["fr"]), "fr");
+  assert.equal(printLocale("es", ["es"]), "es");
+  assert.equal(printLocale("uk", ["uk"]), "de"); // not part of the package
+});
+
+test("prints exactly the language package: DE + EN, IT, FR, ES", () => {
+  assert.deepEqual([...PRINT_LOCALES].sort(), [...PACKAGE_LOCALES].sort());
 });
 
 test("the Stand date is the Vienna date, not UTC", () => {

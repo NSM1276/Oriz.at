@@ -12,6 +12,14 @@ const config: NextConfig = {
     "/app/[slug]/druck": FONTS,
     "/app/[slug]/druck/pdf": FONTS,
   },
+  // ORIZ is the digital menu only for now. Screen and Casa stay in the code (and their
+  // venue pages keep working) but their sales pages lead home until we bring them back.
+  async redirects() {
+    return [
+      { source: "/screen", destination: "/", permanent: false },
+      { source: "/casa", destination: "/", permanent: false },
+    ];
+  },
 };
 
 export default config;

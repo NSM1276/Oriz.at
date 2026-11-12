@@ -43,6 +43,40 @@ function Allergens({ item, locale }: { item: GuestItem; locale: string }) {
   );
 }
 
+function RoundButton({ label, onClick, plain, children }: { label: string; onClick: () => void; plain?: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex h-10 w-10 items-center justify-center rounded-full transition-opacity active:opacity-70"
+      style={plain ? { color: "var(--color-dim)" } : { backgroundColor: "rgba(255,255,255,0.92)", color: "#0A0A0A", boxShadow: "0 2px 10px rgba(0,0,0,0.25)" }}
+    >
+      {children}
+    </button>
+  );
+}
+
+const CloseGlyph = () => (
+  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden>
+    <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+const ShareGlyph = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M12 3v12M7 8l5-5 5 5" /><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />
+  </svg>
+);
+
+/** The menu link with the dish name — "look what I'm having". Falls back to copying the link. */
+async function shareDish(name: string) {
+  const url = window.location.href.split("#")[0];
+  try {
+    if (navigator.share) await navigator.share({ title: name, text: name, url });
+    else await navigator.clipboard?.writeText(url);
+  } catch { /* cancelled */ }
+}
+
 export function DishSheet({
   item,
   currency,
@@ -94,30 +128,29 @@ export function DishSheet({
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 360, damping: 38 }}
           >
-            <div className="flex shrink-0 justify-center pb-1 pt-3 sm:hidden">
-              <div className="h-1 w-10 rounded-full" style={{ backgroundColor: "var(--color-border)" }} />
-            </div>
-
-            {item.imageUrl && (
-              <div className="shrink-0 overflow-hidden" style={{ backgroundColor: "var(--color-bg)" }}>
-                <DishMedia src={item.imageUrl} alt={item.name} sizes="100vw" className="kenburns block w-full object-contain" style={{ maxHeight: "45dvh" }} />
+            {/* Photo first and large, like the dish pages of FineDine and me&u; buttons float on it. */}
+            {item.imageUrl ? (
+              <div className="relative shrink-0 overflow-hidden" style={{ backgroundColor: "#111", aspectRatio: "4 / 3", maxHeight: "48dvh" }}>
+                <DishMedia src={item.imageUrl} alt={item.name} sizes="100vw" className="kenburns absolute inset-0 block h-full w-full object-cover" />
+                <div className="absolute inset-x-0 top-0 flex justify-center pt-2 sm:hidden">
+                  <div className="h-1 w-10 rounded-full bg-white/70" />
+                </div>
+                <div className="absolute inset-x-0 top-0 flex justify-between p-3">
+                  <RoundButton label={t.share} onClick={() => shareDish(item.name)}><ShareGlyph /></RoundButton>
+                  <RoundButton label={t.close} onClick={onClose}><CloseGlyph /></RoundButton>
+                </div>
+              </div>
+            ) : (
+              <div className="flex shrink-0 items-center justify-between px-4 pb-1 pt-3">
+                <RoundButton label={t.share} onClick={() => shareDish(item.name)} plain><ShareGlyph /></RoundButton>
+                <div className="h-1 w-10 rounded-full sm:hidden" style={{ backgroundColor: "var(--color-border)" }} />
+                <RoundButton label={t.close} onClick={onClose} plain><CloseGlyph /></RoundButton>
               </div>
             )}
 
-            <div className="relative overflow-y-auto px-7 pb-8 pt-5">
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label={t.close}
-                className="absolute right-4 top-3 flex h-9 w-9 items-center justify-center rounded-full transition-opacity hover:opacity-60"
-                style={{ color: "var(--color-dim)" }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-                  <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </button>
+            <div className={`relative overflow-y-auto px-7 pb-8 ${item.imageUrl ? "-mt-5 rounded-t-3xl pt-6" : "pt-2"}`} style={{ backgroundColor: "var(--color-bg)" }}>
 
-              <h2 className={`pr-10 leading-tight ${titleClass}`} style={{ fontSize: "clamp(1.6rem, 5vw, 2rem)", color: "var(--color-text)" }}>
+              <h2 className={`leading-tight ${titleClass}`} style={{ fontSize: "clamp(1.6rem, 5vw, 2rem)", color: "var(--color-text)" }}>
                 {item.name}
               </h2>
 

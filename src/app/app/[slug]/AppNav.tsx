@@ -24,13 +24,14 @@ function MenuIcon() {
     </svg>
   );
 }
-function TablesIcon() {
+function StoreIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden>
-      <rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><path d="M14 14h6v6h-6z" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M4 9.5 5.5 4h13L20 9.5" /><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0" /><path d="M5.5 11.5V20h13v-8.5" /><path d="M10 20v-4.5h4V20" />
     </svg>
   );
 }
+
 function BellIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -53,14 +54,14 @@ export function AppNav({ slug, screenLocked = false, printLocked = false }: { sl
   const main: Tab[] = [
     { href: base, label: "Übersicht", active: pathname === base, icon: <HomeIcon /> },
     { href: `${base}/speisekarte`, label: "Speisekarte", active: is("speisekarte"), icon: <MenuIcon /> },
-    { href: `${base}/tische`, label: "Tische", active: is("tische"), icon: <TablesIcon /> },
+    { href: `${base}/lokal`, label: "Lokal", active: is("lokal"), icon: <StoreIcon /> },
     { href: `${base}/service`, label: "Service", active: is("service"), icon: <BellIcon /> },
   ];
   const more: Tab[] = [
+    { href: `${base}/statistik`, label: "Statistik", active: is("statistik") },
+    { href: `${base}/tische`, label: "Tische", active: is("tische") },
     { href: `${base}/druck`, label: "Druck", active: is("druck"), pro: printLocked },
     { href: `${base}/aussehen`, label: "Aussehen", active: is("aussehen") },
-    { href: `${base}/profil`, label: "Profil", active: is("profil") },
-    { href: `${base}/screen`, label: "Screen", active: is("screen"), pro: screenLocked },
     { href: `${base}/leistungen`, label: "Leistungen", active: is("leistungen") },
     { href: `${base}/konto`, label: "Konto", active: is("konto") },
   ];

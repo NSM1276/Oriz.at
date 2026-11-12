@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getUser, isPlatformAdmin, serviceClient } from "@/lib/auth";
 import { entitlementsFor, type PlanId, type SubStatus } from "@/lib/entitlements";
+import { PublishToggle } from "./PublishToggle";
 import { TarifRow } from "./TarifRow";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ type Row = {
   name: string;
   slug: string;
   created_at: string;
+  published: boolean;
   subscriptions: Sub | Sub[] | null;
 };
 
@@ -26,7 +28,7 @@ export default async function TarifePage() {
 
   const { data } = await serviceClient()
     .from("venues")
-    .select("id, name, slug, created_at, subscriptions(*)")
+    .select("id, name, slug, created_at, published, subscriptions(*)")
     .order("created_at", { ascending: false })
     .returns<Row[]>();
   const venues = (data ?? []).map((v) => ({ ...v, sub: Array.isArray(v.subscriptions) ? v.subscriptions[0] ?? null : v.subscriptions }));
@@ -56,6 +58,7 @@ export default async function TarifePage() {
                   {ent.trialExpired && " · Testphase abgelaufen, Admin gesperrt"}
                   {ent.allLanguages && ent.tier !== "trial" && " · 20+ Sprachen"}
                 </p>
+                <PublishToggle venueId={v.id} published={v.published} />
                 <TarifRow venueId={v.id} plan={v.sub?.plan ?? "starter"} status={v.sub?.status ?? "trialing"} trialEnd={v.sub?.trial_ends_at ?? null} languagesAll={!!v.sub?.languages_all} />
               </li>
             );
