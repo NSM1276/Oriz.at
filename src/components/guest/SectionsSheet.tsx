@@ -79,7 +79,7 @@ export function SectionsSheet({
                         style={{ backgroundColor: active ? "color-mix(in srgb, var(--accent) 14%, transparent)" : "transparent", color: "var(--color-text)" }}
                       >
                         <span className="min-w-0 flex-1 truncate" style={{ fontWeight: active ? 600 : 400 }}>{s.name}</span>
-                        <span className="shrink-0 text-sm tabular-nums" style={{ color: "var(--color-muted)" }}>{count(t.results, s.items.length)}</span>
+                        <span className="shrink-0 text-base tabular-nums" style={{ color: "var(--color-muted)" }}>{count(t.results, s.items.length)}</span>
                       </button>
                     </li>
                   );

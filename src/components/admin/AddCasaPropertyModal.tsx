@@ -126,7 +126,7 @@ export function AddCasaPropertyModal({ open, onClose, onCreated }: Props) {
               onChange={(e) =>
                 setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
               }
-              className={inputCls + " font-mono"}
+              className={inputCls}
               placeholder="belmondo"
             />
           </Field>

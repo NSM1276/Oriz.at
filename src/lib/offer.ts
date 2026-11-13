@@ -4,6 +4,8 @@
 export const PRICE_MONTH_CENTS = 19_90;
 export const PRICE_YEAR_CENTS = 180_00;
 export const TRIAL_DAYS = 14;
+/** The add-on that opens every menu language (the plan has German + EN, IT, FR, ES). Decided 2026-11-13. */
+export const LANGUAGES_ALL_CENTS = 5_00;
 
 // Written out by hand instead of toLocaleString: the server and a browser must print the same text.
 function euro(cents: number): string {
@@ -16,3 +18,5 @@ function euro(cents: number): string {
 export const PRICE_MONTH = euro(PRICE_MONTH_CENTS);
 /** "180 €" */
 export const PRICE_YEAR = euro(PRICE_YEAR_CENTS);
+/** "5 €" a month for all languages */
+export const LANGUAGES_ALL = euro(LANGUAGES_ALL_CENTS);

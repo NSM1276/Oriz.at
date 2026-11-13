@@ -313,7 +313,7 @@ function QrSticker({
       <div style={{ textAlign: "center", width: "100%" }}>
         <div style={{ width: `${14 * fScale}mm`, height: "0.35mm", background: accent, opacity: 0.5, margin: `0 auto ${1.5 * fScale}mm` }} />
         <h1 style={{
-          fontFamily: "var(--font-garamond, serif)", fontWeight: 300,
+          fontFamily: "var(--font-garamond, serif)", fontWeight: 500,
           // Scale font size down for long names so they always fit in 2 lines
           fontSize: `${(name.length > 22 ? 7.5 : name.length > 15 ? 8.5 : 10) * fScale}pt`,
           color: textMain,
@@ -330,7 +330,7 @@ function QrSticker({
         </h1>
         {subtitle && (
           <p style={{
-            fontFamily: "var(--font-garamond, serif)", fontStyle: "italic",
+            fontFamily: "var(--font-inter, sans-serif)",
             fontSize: `${(subtitle.length > 20 ? 5.5 : 6.5) * fScale}pt`, color: textMuted,
             margin: `0 0 ${1 * fScale}mm`,
             display: "-webkit-box",

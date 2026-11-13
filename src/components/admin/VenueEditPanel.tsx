@@ -614,7 +614,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
                           className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-2 py-1.5 text-onyx focus:outline-none focus:border-gold" />
                       </>
                     ) : (
-                      <span className="font-sans text-xs text-onyx/30 italic">Geschlossen</span>
+                      <span className="font-sans text-xs text-onyx/30">Geschlossen</span>
                     )}
                   </div>
                 );
@@ -633,7 +633,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
                     className="text-onyx/30 hover:text-red-600 transition-colors flex-shrink-0 text-xs">✕</button>
                 </div>
               ))}
-              {gallery.length === 0 && <p className="font-sans text-xs text-onyx/30 italic">Keine Bilder</p>}
+              {gallery.length === 0 && <p className="font-sans text-xs text-onyx/30">Keine Bilder</p>}
             </div>
             <div className="flex gap-2">
               <input type="url" value={galleryInput} onChange={e => setGalleryInput(e.target.value)}
@@ -656,7 +656,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
               </p>
             )}
             {!ownerCurrent && (
-              <p className="font-sans text-xs text-onyx/40 italic">No owner assigned yet</p>
+              <p className="font-sans text-xs text-onyx/40">No owner assigned yet</p>
             )}
             <div className="flex gap-2">
               <input

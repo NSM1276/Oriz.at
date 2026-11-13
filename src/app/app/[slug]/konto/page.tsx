@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { UPGRADE_MAIL, allowedLocales, upgradeMailto } from "@/lib/entitlements";
-import { PRICE_MONTH, PRICE_YEAR } from "@/lib/offer";
+import { LANGUAGES_ALL, PRICE_MONTH, PRICE_YEAR } from "@/lib/offer";
 import { getEntitlements } from "@/lib/entitlements-server";
 import { LOCALE_NAMES, MENU_LOCALES, PACKAGE_LOCALES } from "@/lib/locales";
 import { whatsappUrl } from "@/lib/contact-info";
@@ -83,10 +83,10 @@ export default async function AccountPage({ params, searchParams }: { params: Pr
           <div className="mt-3 rounded-xl bg-onyx/[0.03] p-3 ring-1 ring-onyx/10">
             <p className="text-base font-medium">Zusatzpaket „20+ Sprachen“</p>
             <p className="mt-0.5 text-base text-onyx/70">
-              Noch {extraCount} Sprachen dazu — von Polnisch und Türkisch bis Arabisch, Chinesisch und Japanisch. Preis auf Anfrage.
+              Noch {extraCount} Sprachen dazu — von Polnisch und Türkisch bis Arabisch, Chinesisch und Japanisch. {LANGUAGES_ALL} im Monat mehr.
             </p>
             <a href={order("Zusatzpaket 20+ Sprachen")} className="mt-2 inline-flex min-h-10 items-center rounded-xl px-3 text-base font-medium ring-1 ring-onyx/20">
-              20+ Sprachen anfragen
+              20+ Sprachen bestellen
             </a>
           </div>
         )}

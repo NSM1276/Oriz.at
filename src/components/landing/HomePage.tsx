@@ -32,8 +32,8 @@ function Phone({ title }: { title: string }) {
           title={title}
           src="/belvedere" // same site, so it also shows on a local copy; the proxy leaves framed pages where they are
           loading="lazy"
-          className="absolute left-0 top-0 h-[807px] w-[390px] origin-top-left border-0"
-          style={{ transform: "scale(0.7436)" }}
+          className="absolute left-0 top-0 h-[745px] w-[360px] origin-top-left border-0"
+          style={{ transform: "scale(0.8056)" }} // 360 px is the narrowest common phone: less shrinking, text stays readable
         />
       </div>
     </div>

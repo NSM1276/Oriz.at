@@ -198,7 +198,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
               onChange={(e) =>
                 setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
               }
-              className={inputCls + " font-mono"}
+              className={inputCls}
             />
           </Field>
 

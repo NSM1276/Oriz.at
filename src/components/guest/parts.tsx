@@ -56,7 +56,7 @@ export function Price({
 export function AllergenLetters({ item, style }: { item: GuestItem; style?: CSSProperties }) {
   if (!item.allergens || item.allergens.length === 0) return null;
   return (
-    <p className="mt-1 font-sans text-[11px] tracking-wide" style={{ color: "var(--color-muted)", ...style }}>
+    <p className="mt-1 font-sans text-[13px] tracking-wide" style={{ color: "var(--color-muted)", ...style }}>
       {item.allergens.join(" · ")}
     </p>
   );
@@ -68,7 +68,7 @@ export function DietBadges({ item, locale }: { item: GuestItem; locale: string }
   const label = item.diet.has("vegan") ? t.vegan : t.vegetarian;
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 font-sans text-[10px] font-medium uppercase tracking-wider"
+      className="inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 font-sans text-[12px] font-medium uppercase tracking-wider"
       style={{ color: "var(--accent)", border: "1px solid color-mix(in srgb, var(--accent) 45%, transparent)" }}
     >
       <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
@@ -82,7 +82,7 @@ export function DietBadges({ item, locale }: { item: GuestItem; locale: string }
 export function UnavailableBadge({ locale }: { locale: string }) {
   return (
     <span
-      className="shrink-0 px-1.5 py-0.5 font-sans text-[10px] uppercase tracking-regal"
+      className="shrink-0 px-1.5 py-0.5 font-sans text-[12px] uppercase tracking-regal"
       style={{ color: "var(--color-dim)", border: "1px solid var(--color-border)" }}
     >
       {ui(locale).notAvailable}

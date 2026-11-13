@@ -108,7 +108,7 @@ export function VenueLogo({
       style={{
         fontSize: Math.round(effectiveHeight * 0.7),
         lineHeight: 1,
-        fontWeight: 300,
+        fontWeight: 500,
       }}
     >
       {name}

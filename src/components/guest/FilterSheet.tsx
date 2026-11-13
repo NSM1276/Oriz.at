@@ -12,7 +12,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3.5 font-sans text-[13px] transition-colors"
+      className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3.5 font-sans text-[15px] transition-colors"
       style={{
         color: active ? "var(--accent-ink)" : "var(--color-text)",
         backgroundColor: active ? "var(--accent)" : "transparent",
@@ -82,7 +82,7 @@ export function FilterSheet({
 
               {options.diet.length > 0 && (
                 <section className="mt-5">
-                  <p className="mb-2 font-sans text-[11px] uppercase tracking-regal" style={{ color: "var(--color-muted)" }}>{t.diet}</p>
+                  <p className="mb-2 font-sans text-[13px] uppercase tracking-regal" style={{ color: "var(--color-muted)" }}>{t.diet}</p>
                   <div className="flex flex-wrap gap-2">
                     {options.diet.map(({ tag, count }) => (
                       <Chip key={tag} active={filter.diet.has(tag)} onClick={() => toggleDiet(tag)}>
@@ -96,8 +96,8 @@ export function FilterSheet({
 
               {options.avoid.length > 0 && (
                 <section className="mt-6">
-                  <p className="font-sans text-[11px] uppercase tracking-regal" style={{ color: "var(--color-muted)" }}>{t.avoid}</p>
-                  <p className="mb-2 mt-0.5 font-sans text-sm" style={{ color: "var(--color-dim)" }}>{t.avoidHint}</p>
+                  <p className="font-sans text-[13px] uppercase tracking-regal" style={{ color: "var(--color-muted)" }}>{t.avoid}</p>
+                  <p className="mb-2 mt-0.5 font-sans text-base" style={{ color: "var(--color-dim)" }}>{t.avoidHint}</p>
                   <div className="flex flex-wrap gap-2">
                     {options.avoid.map((code) => (
                       <Chip key={code} active={filter.avoid.has(code)} onClick={() => toggleAvoid(code)}>
@@ -114,7 +114,7 @@ export function FilterSheet({
               <button
                 type="button"
                 onClick={() => onChange({ ...filter, diet: new Set(), avoid: new Set(), includeUnknown: false })}
-                className="rounded-full px-4 py-3 font-sans text-sm"
+                className="rounded-full px-4 py-3 font-sans text-base"
                 style={{ color: "var(--color-dim)" }}
               >
                 {t.reset}
@@ -122,7 +122,7 @@ export function FilterSheet({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-full py-3 font-sans text-sm font-semibold"
+                className="flex-1 rounded-full py-3 font-sans text-base font-semibold"
                 style={{ backgroundColor: "var(--accent)", color: "var(--accent-ink)" }}
               >
                 {matched > 0 ? count(t.results, matched) : t.noResults}

@@ -99,7 +99,7 @@ export function InviteClientModal({ open, onClose, onCreated }: Props) {
         <h2 className="font-display text-2xl text-onyx mb-1">
           Klient einladen
         </h2>
-        <p className="font-display italic text-onyx/50 text-sm mb-6">
+        <p className="font-sans text-onyx/60 text-sm mb-6">
           Erstellt das Objekt und sendet dem Klienten einen E-Mail-Link,
           mit dem er sein Passwort setzt.
         </p>
@@ -107,7 +107,7 @@ export function InviteClientModal({ open, onClose, onCreated }: Props) {
         {success ? (
           <>
             <div className="border border-gold/40 bg-gold/5 p-5 mb-6">
-              <p className="font-display text-onyx leading-relaxed">{success}</p>
+              <p className="font-sans text-onyx leading-relaxed">{success}</p>
             </div>
             <button
               onClick={handleClose}
@@ -169,7 +169,7 @@ export function InviteClientModal({ open, onClose, onCreated }: Props) {
                   onChange={(e) =>
                     setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
                   }
-                  className={inputCls + " font-mono"}
+                  className={inputCls}
                 />
               </Field>
 

@@ -16,19 +16,19 @@ function Allergens({ item, locale }: { item: GuestItem; locale: string }) {
   const t = ui(locale);
   return (
     <div className="mt-6 border-t pt-5" style={{ borderColor: "var(--color-border)" }}>
-      <span className="mb-2 block font-sans text-[10px] uppercase tracking-regal" style={{ color: "var(--color-muted)" }}>
+      <span className="mb-2 block font-sans text-[14px] font-medium uppercase tracking-regal" style={{ color: "var(--color-dim)" }}>
         {t.allergens}
       </span>
       {item.allergens === null ? (
-        <p className="font-sans text-sm" style={{ color: "var(--color-dim)" }}>{t.allergenUnknown}</p>
+        <p className="font-sans text-lg" style={{ color: "var(--color-dim)" }}>{t.allergenUnknown}</p>
       ) : item.allergens.length === 0 ? (
-        <p className="font-sans text-sm" style={{ color: "var(--color-dim)" }}>{t.allergenNone}</p>
+        <p className="font-sans text-lg" style={{ color: "var(--color-dim)" }}>{t.allergenNone}</p>
       ) : (
         <div className="flex flex-wrap gap-1.5">
           {item.allergens.map((code) => (
             <span
               key={code}
-              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-sans text-[12px]"
+              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-sans text-base"
               style={{ color: "var(--color-dim)", border: "1px solid var(--color-border)" }}
             >
               <span className="shrink-0 opacity-80" aria-hidden>{allergenIcon(code)}</span>
@@ -150,7 +150,7 @@ export function DishSheet({
 
             <div className={`relative overflow-y-auto px-7 pb-8 ${item.imageUrl ? "-mt-5 rounded-t-3xl pt-6" : "pt-2"}`} style={{ backgroundColor: "var(--color-bg)" }}>
 
-              <h2 className={`leading-tight ${titleClass}`} style={{ fontSize: "clamp(1.6rem, 5vw, 2rem)", color: "var(--color-text)" }}>
+              <h2 className={`leading-tight ${titleClass}`} style={{ fontSize: "clamp(1.5rem, 5vw, 1.75rem)", color: "var(--color-text)" }}>
                 {item.name}
               </h2>
 
@@ -166,7 +166,7 @@ export function DishSheet({
                   </tbody>
                 </table>
               ) : (item.variants[0]?.priceCents ?? item.priceCents) > 0 && (
-                <p className="mt-2 font-sans text-lg tabular-nums" style={{ color: "var(--accent)" }}>
+                <p className="mt-2 font-sans text-xl font-medium tabular-nums" style={{ color: "var(--accent)" }}>
                   {item.variants.length === 1 && <span style={{ color: "var(--color-dim)" }}>{item.variants[0].label} · </span>}
                   {formatPrice(item.variants[0]?.priceCents ?? item.priceCents, currency)}
                 </p>
@@ -177,16 +177,16 @@ export function DishSheet({
               {item.diet.size > 0 && <div className="mb-3"><DietBadges item={item} locale={locale} /></div>}
 
               {item.text && (
-                <p className="font-display text-lg italic leading-relaxed" style={{ color: "var(--color-dim)" }}>{item.text}</p>
+                <p className="font-sans text-xl leading-relaxed" style={{ color: "var(--color-text)" }}>{item.text}</p>
               )}
               {item.story && (
-                <p className="mt-3 font-sans text-sm leading-relaxed" style={{ color: "var(--color-muted)" }}>{item.story}</p>
+                <p className="mt-3 font-sans text-lg leading-relaxed" style={{ color: "var(--color-dim)" }}>{item.story}</p>
               )}
 
               <Allergens item={item} locale={locale} />
 
               {!item.available && (
-                <div className="mt-5 inline-block px-3 py-1.5 font-sans text-[11px] uppercase tracking-regal" style={{ color: "var(--color-muted)", border: "1px solid var(--color-border)" }}>
+                <div className="mt-5 inline-block px-3 py-1.5 font-sans text-[13px] uppercase tracking-regal" style={{ color: "var(--color-muted)", border: "1px solid var(--color-border)" }}>
                   {t.currentlyNotAvailable}
                 </div>
               )}

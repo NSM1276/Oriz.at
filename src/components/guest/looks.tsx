@@ -70,12 +70,12 @@ function rowProps(item: GuestItem, onOpen: (i: GuestItem) => void, extra?: React
 const classic: Look = {
   main: "max-w-3xl px-6",
   bleed: "-mx-6 px-6",
-  sheetTitle: "font-display font-light",
+  sheetTitle: "font-sans font-semibold",
   Header: ({ venue, about, isDark, text }) => (
     <header className="text-center">
       <VenueLogo name={venue.name} svg={venue.logo_svg} url={venue.logo_url} bg={venue.color_bg} accent={venue.color_primary} color="auto" height={56} textColor={text} isDarkBg={isDark} />
       {about && (
-        <p className="mx-auto mt-2 max-w-xs font-display text-base italic md:max-w-xl md:text-lg" style={{ color: "var(--color-dim)", ...clamp3 }}>
+        <p className="mx-auto mt-2 max-w-xs font-sans text-base md:max-w-xl md:text-lg" style={{ color: "var(--color-dim)", ...clamp3 }}>
           {about}
         </p>
       )}
@@ -83,12 +83,12 @@ const classic: Look = {
     </header>
   ),
   tab: (active) => ({
-    className: "font-sans text-[11px] uppercase tracking-regal px-4 py-1.5 transition-opacity",
+    className: "font-sans text-[13px] uppercase tracking-regal px-4 py-1.5 transition-opacity",
     style: { color: "var(--accent)", opacity: active ? 1 : 0.55, fontWeight: active ? 600 : 400 },
   }),
   SectionTitle: ({ section }) => (
     <header className="mb-5 flex items-center gap-4">
-      <h2 className="shimmer-title font-sans text-[11px] uppercase tracking-regal">{section.name}</h2>
+      <h2 className="shimmer-title font-sans text-[13px] uppercase tracking-regal">{section.name}</h2>
       <div className="h-px flex-1" style={{ backgroundColor: "var(--color-border)" }} />
     </header>
   ),
@@ -98,15 +98,15 @@ const classic: Look = {
         <li key={item.id} {...rowProps(item, onOpen, { borderBottom: "1px solid var(--color-border)" })} className="group flex items-start gap-4 py-5">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-2">
-              <h3 className="font-display text-xl font-semibold transition-opacity group-hover:opacity-70 md:text-2xl" style={{ color: "var(--color-text)" }}>
+              <h3 className="font-sans text-xl font-semibold transition-opacity group-hover:opacity-70 md:text-2xl" style={{ color: "var(--color-text)" }}>
                 {item.name}
               </h3>
               <DietBadges item={item} locale={locale} />
               {!item.available && <UnavailableBadge locale={locale} />}
             </div>
-            {item.text && <p className="mt-1 font-sans text-[15px] leading-relaxed" style={{ color: "var(--color-dim)", ...clamp3 }}>{item.text}</p>}
+            {item.text && <p className="mt-1 font-sans text-[17px] leading-relaxed" style={{ color: "var(--color-dim)", ...clamp3 }}>{item.text}</p>}
             <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <Price item={item} currency={currency} locale={locale} className="font-sans text-base font-medium md:text-lg" style={{ color: "var(--accent)" }} />
+              <Price item={item} currency={currency} locale={locale} className="font-sans text-lg font-medium md:text-xl" style={{ color: "var(--accent)" }} />
               <AllergenLetters item={item} style={{ marginTop: 0 }} />
             </div>
           </div>
@@ -126,20 +126,20 @@ const classic: Look = {
 const modern: Look = {
   main: "max-w-2xl px-6",
   bleed: "-mx-6 px-6",
-  sheetTitle: "font-display font-light",
+  sheetTitle: "font-sans font-semibold",
   Header: ({ venue, about, isDark, text, locale }) => (
     <header>
       <VenueLogo name={venue.name} svg={venue.logo_svg} url={venue.logo_url} bg={venue.color_bg} accent={venue.color_primary} color="auto" height={60} textColor={text} isDarkBg={isDark} />
-      {about && <p className="mt-3 max-w-md font-sans text-sm leading-relaxed" style={{ color: "var(--color-dim)", ...clamp3 }}>{about}</p>}
+      {about && <p className="mt-3 max-w-md font-sans text-base leading-relaxed" style={{ color: "var(--color-dim)", ...clamp3 }}>{about}</p>}
       <div className="mt-5 flex items-center gap-4">
         <div className="h-px flex-1" style={{ backgroundColor: "var(--color-border)" }} />
-        <span className="font-sans text-[10px] uppercase tracking-regal" style={{ color: "var(--color-muted)" }}>{ui(locale).menu}</span>
+        <span className="font-sans text-[12px] uppercase tracking-regal" style={{ color: "var(--color-muted)" }}>{ui(locale).menu}</span>
         <div className="h-px flex-1" style={{ backgroundColor: "var(--color-border)" }} />
       </div>
     </header>
   ),
   tab: (active) => ({
-    className: "relative font-sans text-[11px] uppercase tracking-regal px-4 py-3 transition-colors",
+    className: "relative font-sans text-[13px] uppercase tracking-regal px-4 py-3 transition-colors",
     style: {
       color: active ? "var(--accent)" : "var(--color-muted)",
       boxShadow: active ? "inset 0 -2px 0 var(--accent)" : "none",
@@ -147,11 +147,11 @@ const modern: Look = {
   }),
   SectionTitle: ({ section, index }) => (
     <div className="mb-5 flex items-end gap-5">
-      <span className="select-none font-display font-light leading-none" style={{ fontSize: "clamp(4rem, 12vw, 7rem)", color: "var(--accent)", opacity: 0.12, lineHeight: 0.85 }}>
+      <span className="select-none font-display font-medium leading-none" style={{ fontSize: "clamp(4rem, 12vw, 7rem)", color: "var(--accent)", opacity: 0.12, lineHeight: 0.85 }}>
         {String(index + 1).padStart(2, "0")}
       </span>
       <div className="pb-1">
-        <h2 className="shimmer-title font-display font-light" style={{ fontSize: "clamp(1.4rem, 3.5vw, 1.8rem)", letterSpacing: "-0.01em" }}>{section.name}</h2>
+        <h2 className="shimmer-title font-display font-medium" style={{ fontSize: "clamp(1.4rem, 3.5vw, 1.8rem)", letterSpacing: "-0.01em" }}>{section.name}</h2>
         <div className="mt-1.5 h-px w-10" style={{ backgroundColor: "var(--accent)" }} />
       </div>
     </div>
@@ -160,20 +160,20 @@ const modern: Look = {
     <ul>
       {section.items.map((item, i) => (
         <li key={item.id} {...rowProps(item, onOpen, { borderBottom: "1px solid var(--color-border)" })} className="group relative flex items-center gap-3 py-4 sm:gap-4">
-          <span className="w-10 shrink-0 select-none text-right font-display font-light tabular-nums" style={{ fontSize: "clamp(2rem, 5vw, 2.8rem)", color: "var(--accent)", opacity: 0.25, lineHeight: 1 }}>
+          <span className="w-10 shrink-0 select-none text-right font-display font-medium tabular-nums" style={{ fontSize: "clamp(2rem, 5vw, 2.8rem)", color: "var(--accent)", opacity: 0.25, lineHeight: 1 }}>
             {String(i + 1).padStart(2, "0")}
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-2">
-              <h3 className="font-sans font-medium leading-tight transition-opacity group-hover:opacity-60" style={{ fontSize: "clamp(1.05rem, 3vw, 1.25rem)", color: "var(--color-text)", letterSpacing: "-0.01em", overflowWrap: "anywhere", hyphens: "auto" }}>
+              <h3 className="font-sans font-medium leading-tight transition-opacity group-hover:opacity-60" style={{ fontSize: "clamp(1.2rem, 3.4vw, 1.4rem)", color: "var(--color-text)", letterSpacing: "-0.01em", overflowWrap: "anywhere", hyphens: "auto" }}>
                 {item.name}
               </h3>
               <DietBadges item={item} locale={locale} />
               {!item.available && <UnavailableBadge locale={locale} />}
             </div>
-            {item.text && <p className="mt-0.5 font-sans text-[15px] leading-snug" style={{ color: "var(--color-dim)", overflowWrap: "anywhere", hyphens: "auto", ...clamp3 }}>{item.text}</p>}
+            {item.text && <p className="mt-0.5 font-sans text-[17px] leading-snug" style={{ color: "var(--color-dim)", overflowWrap: "anywhere", hyphens: "auto", ...clamp3 }}>{item.text}</p>}
             <div className="mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <Price item={item} currency={currency} locale={locale} className="font-sans font-medium" style={{ fontSize: "clamp(0.95rem, 2vw, 1.05rem)", color: "var(--accent)" }} />
+              <Price item={item} currency={currency} locale={locale} className="font-sans font-medium" style={{ fontSize: "clamp(1.1rem, 2.4vw, 1.2rem)", color: "var(--accent)" }} />
               <AllergenLetters item={item} style={{ marginTop: 0 }} />
             </div>
           </div>
@@ -202,17 +202,17 @@ function PhotoCard({ item, currency, locale, onOpen }: { item: GuestItem; curren
         currency={currency}
         locale={locale}
         compact
-        className="absolute right-2 top-2 rounded-full px-2.5 py-1 font-sans text-[13px] font-semibold"
+        className="absolute right-2 top-2 rounded-full px-2.5 py-1 font-sans text-[15px] font-semibold"
         style={{ backgroundColor: "rgba(0,0,0,0.62)", color: "#fff", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
       />
       <div className="absolute inset-x-0 bottom-0 px-3 pb-3">
-        <h3 className="font-sans font-semibold text-white" style={{ fontSize: "0.98rem", lineHeight: 1.22, textShadow: "0 1px 8px rgba(0,0,0,0.95)", ...clamp3, WebkitLineClamp: 2 }}>
+        <h3 className="font-sans font-semibold text-white" style={{ fontSize: "1.1rem", lineHeight: 1.22, textShadow: "0 1px 8px rgba(0,0,0,0.95)", ...clamp3, WebkitLineClamp: 2 }}>
           {item.name}
         </h3>
       </div>
       {!item.available && (
         <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.55)" }}>
-          <span className="px-2 py-1 font-sans text-[10px] uppercase tracking-regal" style={{ color: "rgba(245,240,236,0.8)", border: "1px solid rgba(245,240,236,0.3)" }}>
+          <span className="px-2 py-1 font-sans text-[12px] uppercase tracking-regal" style={{ color: "rgba(245,240,236,0.8)", border: "1px solid rgba(245,240,236,0.3)" }}>
             {ui(locale).notAvailable}
           </span>
         </div>
@@ -226,11 +226,11 @@ function TextRow({ item, currency, locale, onOpen }: { item: GuestItem; currency
     <article {...rowProps(item, onOpen, { borderBottom: "1px solid var(--color-border)" })} className="group flex items-baseline gap-4 py-4">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-2">
-          <h3 className="font-sans text-lg font-medium transition-opacity group-hover:opacity-60" style={{ color: "var(--color-text)" }}>{item.name}</h3>
+          <h3 className="font-sans text-xl font-medium transition-opacity group-hover:opacity-60" style={{ color: "var(--color-text)" }}>{item.name}</h3>
           <DietBadges item={item} locale={locale} />
           {!item.available && <UnavailableBadge locale={locale} />}
         </div>
-        {item.text && <p className="mt-1 font-sans text-[15px] leading-relaxed" style={{ color: "var(--color-dim)" }}>{item.text}</p>}
+        {item.text && <p className="mt-1 font-sans text-[17px] leading-relaxed" style={{ color: "var(--color-dim)" }}>{item.text}</p>}
         <AllergenLetters item={item} />
       </div>
       <Price item={item} currency={currency} locale={locale} className="shrink-0 font-sans text-base" style={{ color: "var(--color-text)" }} />
@@ -241,16 +241,16 @@ function TextRow({ item, currency, locale, onOpen }: { item: GuestItem; currency
 const visual: Look = {
   main: "max-w-2xl px-4",
   bleed: "-mx-4 px-4",
-  sheetTitle: "font-display font-light",
+  sheetTitle: "font-sans font-semibold",
   Header: ({ venue, about, isDark, text }) => (
     <header className="text-center">
       <VenueLogo name={venue.name} svg={venue.logo_svg} url={venue.logo_url} bg={venue.color_bg} accent={venue.color_primary} color="auto" height={52} textColor={text} isDarkBg={isDark} />
-      {about && <p className="mx-auto mt-2 max-w-xs font-sans text-sm leading-snug" style={{ color: "var(--color-dim)", ...clamp3 }}>{about}</p>}
+      {about && <p className="mx-auto mt-2 max-w-xs font-sans text-base leading-snug" style={{ color: "var(--color-dim)", ...clamp3 }}>{about}</p>}
       <div className="mx-auto mt-3 h-px w-10" style={{ backgroundColor: "var(--accent)", opacity: 0.4 }} />
     </header>
   ),
   tab: (active) => ({
-    className: "rounded-full px-4 py-1.5 font-sans text-[11px] uppercase tracking-regal transition-colors",
+    className: "rounded-full px-4 py-1.5 font-sans text-[13px] uppercase tracking-regal transition-colors",
     style: {
       color: active ? "var(--accent-ink)" : "var(--accent)",
       backgroundColor: active ? "var(--accent)" : "transparent",

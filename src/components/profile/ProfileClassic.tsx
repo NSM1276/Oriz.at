@@ -258,7 +258,7 @@ export function ProfileClassic({ venue, t, allergens = [], events = [] }: Profil
             <div className="space-y-3">
               {events.map((ev) => (
                 <div key={ev.id} className="py-3 border-b" style={{ borderColor: t.border }}>
-                  <p className="font-display italic text-lg" style={{ color: t.text }}>{ev.title}</p>
+                  <p className="font-display text-xl font-medium" style={{ color: t.text }}>{ev.title}</p>
                   <p className="font-sans text-[12px] mt-1" style={{ color: t.dim }}>
                     {new Date(ev.event_date).toLocaleDateString("de-AT", { day: "numeric", month: "short", year: "numeric" })}
                     {ev.time_start ? ` · ${ev.time_start.slice(0, 5)}` : ""}

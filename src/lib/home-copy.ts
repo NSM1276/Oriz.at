@@ -3,7 +3,7 @@
 // a WhatsApp message or a call, and the account is opened through a personal link afterwards.
 // Setup and photo editing are "on request" — no price is printed for them.
 
-import { PRICE_MONTH, PRICE_YEAR, TRIAL_DAYS } from "./offer.ts";
+import { LANGUAGES_ALL, PRICE_MONTH, PRICE_YEAR, TRIAL_DAYS } from "./offer.ts";
 
 export type Pair = { title: string; body: string };
 
@@ -91,7 +91,7 @@ export const HOME_DE: HomeCopy = {
   ],
   reasonsHeading: "Warum ORIZ.",
   reasons: [
-    { title: "Wir übersetzen Ihre Karte für Sie.", body: "Mit unserem eigenen Küchen-Wörterbuch für 20 Sprachen. Damit der Tafelspitz auch auf Englisch stimmt." },
+    { title: "Wir übersetzen Ihre Karte für Sie.", body: "Mit unserem eigenen Küchen-Wörterbuch für über 20 Sprachen, kein Google Translate. Damit der Tafelspitz auch auf Englisch stimmt." },
     { title: "Allergene, wie Österreich sie verlangt.", body: "Die 14 Allergene mit den Buchstaben A bis R, bei jedem Gericht. Gäste filtern nach dem, was sie nicht vertragen." },
     { title: "Gäste rufen den Kellner vom Tisch.", body: "Bestellen, zahlen, Hilfe: ein Tipp am Handy. Ihr Team sieht sofort, welcher Tisch ruft." },
     { title: "Die Papierkarte gleich dazu.", body: "Aus denselben Daten drucken Sie Ihre Karte als A4-Blatt. Preis geändert, ein Blatt neu, fertig." },
@@ -106,6 +106,7 @@ export const HOME_DE: HomeCopy = {
     included: [
       "Beliebig viele Gerichte, Fotos und Bereiche",
       "Fünf Sprachen: Deutsch, Englisch, Italienisch, Französisch, Spanisch",
+      `Alle Sprachen, über 20: ${LANGUAGES_ALL} im Monat mehr`,
       "Allergene A bis R mit Filter für Gäste",
       "QR-Code für jeden Tisch und „Kellner rufen“",
       "Druckfertige Karte als PDF",
@@ -114,7 +115,6 @@ export const HOME_DE: HomeCopy = {
     extraLabel: "Auf Anfrage",
     extra: [
       "Wir tragen Ihre Karte für Sie ein",
-      "Weitere Sprachen, bis zu 20",
       "Wir bearbeiten Ihre Gerichtsfotos",
     ],
     note: "Endpreise, keine Umsatzsteuer (Kleinunternehmerregelung).",
@@ -195,7 +195,7 @@ export const HOME_EN: HomeCopy = {
   ],
   reasonsHeading: "Why ORIZ.",
   reasons: [
-    { title: "We translate your menu for you.", body: "With our own kitchen dictionary for 20 languages. So that Tafelspitz is right in English too." },
+    { title: "We translate your menu for you.", body: "With our own kitchen dictionary for more than 20 languages, not Google Translate. So that Tafelspitz is right in English too." },
     { title: "Allergens the way Austria requires.", body: "The 14 allergens with the letters A to R, on every dish. Guests filter by what they cannot eat." },
     { title: "Guests call the waiter from the table.", body: "Order, pay, help: one tap on the phone. Your team sees at once which table is calling." },
     { title: "The paper menu comes with it.", body: "From the same data you print your menu as an A4 sheet. Price changed, one sheet reprinted, done." },
@@ -210,6 +210,7 @@ export const HOME_EN: HomeCopy = {
     included: [
       "As many dishes, photos and sections as you like",
       "Five languages: German, English, Italian, French, Spanish",
+      `All languages, more than 20: ${LANGUAGES_ALL} a month extra`,
       "Allergens A to R with a filter for guests",
       "A QR code for every table and “call the waiter”",
       "Print-ready menu as a PDF",
@@ -218,7 +219,6 @@ export const HOME_EN: HomeCopy = {
     extraLabel: "On request",
     extra: [
       "We enter your menu for you",
-      "More languages, up to 20",
       "We edit your dish photos",
     ],
     note: "Final prices, no VAT (Austrian small-business rule).",

@@ -58,8 +58,8 @@ function palette(colorBg: string | null, colorPrimary: string | null) {
     vars: {
       "--color-bg": bg,
       "--color-text": isDark ? "#F5F0EC" : "#0A0A0A",
-      "--color-dim": `rgba(${ink},0.62)`,
-      "--color-muted": `rgba(${ink},0.40)`,
+      "--color-dim": `rgba(${ink},0.78)`,
+      "--color-muted": `rgba(${ink},0.58)`,
       "--color-border": `rgba(${ink},0.10)`,
       "--accent": colorPrimary ?? "#C69B3C",
       // Text on the accent colour: dark on light accents, white on dark ones, always readable.
@@ -302,7 +302,7 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE, track = false 
                 type="button"
                 aria-label={activeFilterCount > 0 ? `${t.filter} (${activeFilterCount})` : t.filter}
                 onClick={() => setFilterOpen(true)}
-                className="relative flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 font-sans text-sm"
+                className="relative flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 font-sans text-base"
                 style={{ boxShadow: "inset 0 0 0 1px var(--color-border)", color: activeFilterCount > 0 ? "var(--accent-ink)" : "var(--color-text)", backgroundColor: activeFilterCount > 0 ? "var(--accent)" : "transparent" }}
               >
                 <FilterIcon />
@@ -370,7 +370,7 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE, track = false 
         )}
 
         {(searching || activeFilterCount > 0) && (
-          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-sm" style={{ color: "var(--color-dim)" }}>
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-base" style={{ color: "var(--color-dim)" }}>
             <span>{result.matched > 0 ? count(t.results, result.matched) : t.noResults}</span>
             {activeFilterCount > 0 && (
               <button type="button" onClick={() => setFilter((f) => ({ ...EMPTY_FILTER, query: f.query }))} className="underline" style={{ color: "var(--accent)" }}>
@@ -380,7 +380,7 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE, track = false 
           </div>
         )}
         {result.hiddenUnknown > 0 && (
-          <p className="mt-2 font-sans text-sm" style={{ color: "var(--color-dim)" }}>
+          <p className="mt-2 font-sans text-base" style={{ color: "var(--color-dim)" }}>
             {count(t.hiddenUnknown, result.hiddenUnknown)}{" "}
             <button type="button" onClick={() => setFilter((f) => ({ ...f, includeUnknown: true }))} className="underline" style={{ color: "var(--accent)" }}>
               {t.showUnknown}
@@ -405,7 +405,7 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE, track = false 
         )}
 
         {legend.length > 0 && !searching && (
-          <p className="mt-16 font-sans text-[11px] leading-relaxed" style={{ color: "var(--color-muted)" }}>
+          <p className="mt-16 font-sans text-[13px] leading-relaxed" style={{ color: "var(--color-muted)" }}>
             <span className="uppercase tracking-regal">{t.allergens}: </span>
             {legend.map((c) => `${c} ${allergenName(c, locale, ALLERGEN_LABELS[c])}`).join(" · ")}
           </p>
@@ -415,13 +415,13 @@ export function GuestMenu({ initial, initialLocale = BASE_LOCALE, track = false 
           {links.length > 0 && (
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
               {links.map((l) => (
-                <a key={l.label} href={l.href} target="_blank" rel="noreferrer" className="font-sans text-[10px] uppercase tracking-regal transition-opacity hover:opacity-60" style={{ color: "var(--color-dim)" }}>
+                <a key={l.label} href={l.href} target="_blank" rel="noreferrer" className="font-sans text-[12px] uppercase tracking-regal transition-opacity hover:opacity-60" style={{ color: "var(--color-dim)" }}>
                   {l.label}
                 </a>
               ))}
             </div>
           )}
-          <span className="font-sans text-[11px] uppercase tracking-regal" style={{ color: "var(--color-muted)" }}>Powered by ORIZ</span>
+          <span className="font-sans text-[13px] uppercase tracking-regal" style={{ color: "var(--color-muted)" }}>Powered by ORIZ</span>
         </footer>
       </main>
 

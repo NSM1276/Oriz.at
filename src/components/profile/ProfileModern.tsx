@@ -44,7 +44,7 @@ function NumberedBlock({
     <section className="mt-20">
       <div className="flex items-end gap-5 mb-8">
         <span
-          className="font-display font-light leading-none select-none"
+          className="font-display font-medium leading-none select-none"
           style={{
             fontSize: "clamp(3rem, 11vw, 5.5rem)",
             color: t.accent,
@@ -136,7 +136,7 @@ export function ProfileModern({ venue, t, allergens = [], events = [] }: Profile
             isDarkBg={t.isDark}
           />
           <h1
-            className="font-display font-light mt-6"
+            className="font-display font-medium mt-6"
             style={{
               fontSize: "clamp(2rem, 8vw, 3.25rem)",
               color: t.text,

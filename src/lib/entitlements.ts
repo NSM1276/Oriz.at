@@ -14,6 +14,7 @@
 // and the plan column of venues is protected by a trigger.
 
 import { MENU_LOCALES, PACKAGE_LOCALES, type MenuLocale } from "./locales.ts";
+import { LANGUAGES_ALL } from "./offer.ts";
 
 export type PlanId = "starter" | "pro";
 export type SubStatus = "trialing" | "active" | "past_due" | "canceled" | "comped";
@@ -133,7 +134,7 @@ export function lockedText(feature: "screen" | "menus" | "printDesign" | "langua
     case "printDesign":
       return { title: "Druck-Design gehört zum Abo", body: "Ihre Farben, Ihr Logo, feste Seiten zum einzelnen Nachdrucken." };
     case "languages":
-      return { title: "20+ Sprachen als Zusatzpaket", body: "Ihr Tarif enthält Deutsch, Englisch, Italienisch, Französisch und Spanisch. Mit dem Zusatzpaket zeigen Sie Ihre Karte in über 20 Sprachen." };
+      return { title: "20+ Sprachen als Zusatzpaket", body: `Ihr Tarif enthält Deutsch, Englisch, Italienisch, Französisch und Spanisch. Mit dem Zusatzpaket zeigen Sie Ihre Karte in über 20 Sprachen, für ${LANGUAGES_ALL} im Monat mehr.` };
   }
 }
 

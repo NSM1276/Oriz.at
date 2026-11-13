@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
       <main className="min-h-screen flex flex-col items-center justify-center px-6">
         <h1 className="font-display text-4xl text-onyx">ORIZ</h1>
         <div className="hairline w-16 my-6" />
-        <p className="font-display italic text-onyx/60 mt-8 max-w-sm text-center leading-relaxed">
+        <p className="font-sans text-onyx/60 mt-8 max-w-sm text-center leading-relaxed">
           Wenn ein Konto mit dieser E-Mail existiert, haben wir Ihnen einen
           Link zum Zurücksetzen geschickt.
         </p>

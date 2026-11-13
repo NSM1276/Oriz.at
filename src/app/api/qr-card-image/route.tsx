@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { venueUrl } from "@/lib/venue-host";
 import { slugProblem } from "@/lib/slug";
+import { brandFonts } from "@/lib/og-fonts";
 
 export const runtime = "edge";
 
@@ -34,6 +35,8 @@ export async function GET(request: Request) {
   // QR renders at 580 px inside an 800-wide card
   const QR = 580;
 
+  const fonts = await brandFonts(`SCAN MICH · ORIZ · ${name}`);
+
   return new ImageResponse(
     (
       <div
@@ -56,8 +59,8 @@ export async function GET(request: Request) {
               color: accentDim,
               fontSize: 22,
               letterSpacing: "0.42em",
-              fontFamily: "sans-serif",
-              fontWeight: 300,
+              fontFamily: "Inter",
+              fontWeight: 600,
               textTransform: "uppercase",
               marginBottom: 12,
             }}
@@ -86,8 +89,8 @@ export async function GET(request: Request) {
             style={{
               color: textMain,
               fontSize: 38,
-              fontWeight: 300,
-              fontFamily: "serif",
+              fontWeight: 500,
+              fontFamily: "Cormorant Garamond",
               textAlign: "center",
               letterSpacing: "0.02em",
               maxWidth: 680,
@@ -101,8 +104,8 @@ export async function GET(request: Request) {
               color: textMuted,
               fontSize: 16,
               letterSpacing: "0.28em",
-              fontFamily: "sans-serif",
-              fontWeight: 300,
+              fontFamily: "Inter",
+              fontWeight: 400,
               marginTop: 10,
               textTransform: "uppercase",
             }}
@@ -115,6 +118,7 @@ export async function GET(request: Request) {
     {
       width: W,
       height: H,
+      fonts,
       headers: {
         "Content-Disposition": `attachment; filename="qr-${slug}-${dark ? "dunkel" : "hell"}.png"`,
       },

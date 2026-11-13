@@ -27,7 +27,7 @@ export function SectionTiles({ tiles, bleed, onJump }: { tiles: ReturnType<typeo
         >
           <DishMedia src={t.image} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-active:scale-105" />
           <span className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.1) 65%)" }} />
-          <span className="absolute inset-x-2.5 bottom-2 font-sans text-[13px] font-semibold leading-tight text-white" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.8)" }}>
+          <span className="absolute inset-x-2.5 bottom-2 font-sans text-[15px] font-semibold leading-tight text-white" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.8)" }}>
             {t.name}
           </span>
         </button>

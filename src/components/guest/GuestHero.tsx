@@ -29,7 +29,7 @@ export function OpenLine({ hours, locale, center }: { hours: OpeningHours | null
   }, [hours]);
   if (!status) return null;
   return (
-    <p className={`mt-3 flex items-center gap-2 font-sans text-sm ${center ? "justify-center" : ""}`} style={{ color: "var(--color-dim)" }}>
+    <p className={`mt-3 flex items-center gap-2 font-sans text-base ${center ? "justify-center" : ""}`} style={{ color: "var(--color-dim)" }}>
       <span aria-hidden className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: status.open ? "#22c55e" : "var(--color-muted)" }} />
       {openText(status, locale)}
     </p>

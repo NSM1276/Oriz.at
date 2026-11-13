@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { whatsappUrl } from "@/lib/contact-info";
 import { PERSON, personName, phoneHref } from "@/lib/person";
-import { PRICE_MONTH, PRICE_YEAR, TRIAL_DAYS } from "@/lib/offer";
+import { LANGUAGES_ALL, PRICE_MONTH, PRICE_YEAR, TRIAL_DAYS } from "@/lib/offer";
 import { venueUrl } from "@/lib/venue-host";
 
 // The page behind the QR code on the business card. A restaurant owner who was not in when we
@@ -26,7 +26,7 @@ const sub = "block text-base font-normal text-onyx/70";
 const POINTS: [string, string][] = [
   ["Ihre Speisekarte am Handy Ihrer Gäste.", "QR-Code am Tisch scannen, fertig. Ohne App, ohne Anmeldung."],
   ["Preise und Gerichte ändern Sie selbst.", "In Sekunden, vom Handy. Kein Neudruck, keine Agentur."],
-  ["Wir übersetzen Ihre Karte für Sie.", "Mit unserem eigenen Küchen-Wörterbuch für 20 Sprachen. Allergene nach österreichischer Vorschrift."],
+  ["Wir übersetzen Ihre Karte für Sie.", "Mit unserem eigenen Küchen-Wörterbuch, kein Google Translate. Fünf Sprachen inklusive, über 20 auf Wunsch. Allergene nach österreichischer Vorschrift."],
 ];
 
 const ICON = {
@@ -96,7 +96,8 @@ export default function HalloPage() {
             {PRICE_MONTH} im Monat
             <span className="block text-2xl text-parchment/80">oder {PRICE_YEAR} im Jahr</span>
           </p>
-          <p className="mt-3 text-lg text-parchment/85">{TRIAL_DAYS} Tage kostenlos testen. Monatlich kündbar.</p>
+          <p className="mt-3 text-lg text-parchment/85">Fünf Sprachen inklusive. Alle über 20 Sprachen: {LANGUAGES_ALL} im Monat mehr.</p>
+          <p className="mt-2 text-lg text-parchment/85">{TRIAL_DAYS} Tage kostenlos testen. Monatlich kündbar.</p>
         </section>
 
         <h2 className="mt-12 font-display text-3xl font-medium">So erreichen Sie mich</h2>

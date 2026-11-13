@@ -99,7 +99,7 @@ export function MenuImport({ venueId, venueName, slug }: Props) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={"VORSPEISEN\nRindsuppe mit Frittaten 4,90\nSUPPEN\n…"}
-          className={input + " mt-2 resize-y leading-relaxed font-mono"}
+          className={input + " mt-2 resize-y leading-relaxed"}
         />
         <div className="flex items-center gap-4 mt-3">
           <button

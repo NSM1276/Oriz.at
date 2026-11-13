@@ -56,7 +56,7 @@ export default async function AdminLeadsPage() {
           <span className="font-sans text-[10px] tracking-regal uppercase text-gold">
             ORIZ · Casa
           </span>
-          <h1 className="font-display text-2xl font-light mt-1">Lead-Inbox</h1>
+          <h1 className="font-display text-2xl font-medium mt-1">Lead-Inbox</h1>
         </div>
         <div className="flex items-center gap-5">
           <Link
@@ -84,7 +84,7 @@ export default async function AdminLeadsPage() {
       {!error && list.length === 0 && (
         <div className="max-w-4xl mx-auto px-6 py-24 text-center">
           <div className="w-12 h-px bg-gold/40 mx-auto mb-6" />
-          <p className="font-display text-2xl italic text-onyx/50">
+          <p className="font-display text-2xl text-onyx/50">
             Noch keine Anfragen.
           </p>
           <p className="font-sans text-xs text-onyx/35 mt-4 tracking-wide">
@@ -104,7 +104,7 @@ export default async function AdminLeadsPage() {
             >
               <header className="flex items-baseline justify-between gap-4 mb-4">
                 <div>
-                  <h2 className="font-display text-xl font-light text-onyx">
+                  <h2 className="font-display text-xl font-medium text-onyx">
                     {l.property_name || "—"}
                   </h2>
                   {l.property_type && (
@@ -145,7 +145,7 @@ export default async function AdminLeadsPage() {
                   <span className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 block mb-2">
                     Nachricht
                   </span>
-                  <p className="font-display italic text-onyx/70 leading-relaxed whitespace-pre-wrap">
+                  <p className="font-sans text-onyx/70 leading-relaxed whitespace-pre-wrap">
                     {l.message}
                   </p>
                 </div>

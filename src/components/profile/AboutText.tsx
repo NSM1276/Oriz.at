@@ -12,7 +12,7 @@ export function AboutText({ text }: { text: string }) {
   return (
     <div className="max-w-prose mx-auto text-center">
       <p
-        className="font-display italic text-base md:text-lg leading-relaxed whitespace-pre-line"
+        className="font-sans text-base md:text-lg leading-relaxed whitespace-pre-line"
         style={{ color: "var(--color-dim)" }}
       >
         {shown}

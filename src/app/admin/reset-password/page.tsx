@@ -78,14 +78,14 @@ export default function ResetPasswordPage() {
       </p>
 
       {state === "checking" && (
-        <p className="font-display italic text-onyx/40 mt-8">
+        <p className="font-sans text-onyx/40 mt-8">
           Einen Moment …
         </p>
       )}
 
       {state === "no-session" && (
         <div className="mt-8 max-w-sm text-center">
-          <p className="font-display italic text-onyx/60 leading-relaxed">
+          <p className="font-sans text-onyx/60 leading-relaxed">
             Der Reset-Link ist ungültig oder abgelaufen.
           </p>
           <Link
@@ -160,7 +160,7 @@ export default function ResetPasswordPage() {
       )}
 
       {state === "done" && (
-        <p className="font-display italic text-onyx/60 mt-8">
+        <p className="font-sans text-onyx/60 mt-8">
           Passwort gespeichert. Sie werden weitergeleitet …
         </p>
       )}

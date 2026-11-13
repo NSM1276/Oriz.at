@@ -69,7 +69,7 @@ export default async function PrintPage({
             </div>
             {data.about && (
               <p
-                className="font-display italic text-base mt-5 max-w-sm mx-auto leading-relaxed"
+                className="font-sans text-base mt-5 max-w-sm mx-auto leading-relaxed"
                 style={{ color: "rgba(10,10,10,0.55)" }}
               >
                 {data.about}
