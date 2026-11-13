@@ -28,16 +28,16 @@ type Order = {
   created_at: string;
 };
 
-const card = "rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200";
+const card = "rounded-2xl bg-white p-5 ring-1 ring-onyx/10";
 const dateFmt = new Intl.DateTimeFormat("de-AT", { day: "numeric", month: "short", year: "numeric" });
 
 const STATUS_STYLE: Record<OrderStatus, string> = {
-  entwurf: "bg-stone-100 text-stone-600",
+  entwurf: "bg-onyx/5 text-onyx/70",
   neu: "bg-amber-100 text-amber-900",
   bezahlt: "bg-sky-100 text-sky-900",
   in_arbeit: "bg-sky-100 text-sky-900",
   fertig: "bg-emerald-100 text-emerald-900",
-  storniert: "bg-stone-100 text-stone-500",
+  storniert: "bg-onyx/5 text-onyx/60",
 };
 
 function contactInfo() {
@@ -76,10 +76,10 @@ export default async function ServicesPage({ params }: { params: Promise<{ slug:
       {offers.map((o) => (
         <section key={o.kind} className={card}>
           <p className="font-semibold">{SERVICE_INFO[o.kind].title}</p>
-          <p className="mt-1 text-sm text-stone-600">{SERVICE_INFO[o.kind].short}</p>
+          <p className="mt-1 text-base text-onyx/70">{SERVICE_INFO[o.kind].short}</p>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <span className="text-sm font-medium">{o.price}</span>
-            <Link href={`/app/${venue.slug}/leistungen/neu?art=${o.kind}`} className="rounded-xl bg-stone-900 px-5 py-2.5 text-sm font-medium text-white">
+            <span className="text-base font-medium">{o.price}</span>
+            <Link href={`/app/${venue.slug}/leistungen/neu?art=${o.kind}`} className="rounded-xl bg-onyx px-5 py-2.5 text-base font-medium text-white">
               Bestellen
             </Link>
           </div>
@@ -89,7 +89,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ slug:
       {orders.length > 0 && (
         <section className={card}>
           <p className="font-semibold">Ihre Aufträge</p>
-          <ul className="mt-3 divide-y divide-stone-100">
+          <ul className="mt-3 divide-y divide-onyx/10">
             {orders.map((o) => {
               const pay = o.status === "neu"
                 ? paymentUrl(o.kind === "photo_edit" ? process.env.NEXT_PUBLIC_STRIPE_LINK_PHOTO_EDIT : process.env.NEXT_PUBLIC_STRIPE_LINK_MENU_SETUP, o.id, o.contact_email)
@@ -99,33 +99,33 @@ export default async function ServicesPage({ params }: { params: Promise<{ slug:
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-medium">{SERVICE_INFO[o.kind].title}</p>
-                      <p className="text-sm text-stone-500">
+                      <p className="text-base text-onyx/60">
                         {dateFmt.format(new Date(o.submitted_at ?? o.created_at))} · {o.kind === "photo_edit" ? `${o.quantity} Fotos · ` : ""}{euro(o.price_cents)}
                       </p>
                     </div>
-                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLE[o.status]}`}>{STATUS_LABEL[o.status]}</span>
+                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-sm font-medium ${STATUS_STYLE[o.status]}`}>{STATUS_LABEL[o.status]}</span>
                   </div>
                   {o.status === "neu" && (
-                    <div className="mt-3 space-y-2 rounded-xl bg-stone-50 p-3 text-sm">
+                    <div className="mt-3 space-y-2 rounded-xl bg-onyx/[0.03] p-3 text-base">
                       {pay && (
-                        <a href={pay} className="block rounded-xl bg-stone-900 py-2.5 text-center font-medium text-white">Jetzt bezahlen</a>
+                        <a href={pay} className="block rounded-xl bg-onyx py-2.5 text-center font-medium text-white">Jetzt bezahlen</a>
                       )}
-                      <p className="text-stone-600">
+                      <p className="text-onyx/70">
                         {pay ? "Lieber zuerst sprechen oder per Überweisung zahlen? " : "Wir melden uns innerhalb eines Werktags, um die Zahlung abzustimmen. "}
-                        {contact.phone && <a className="font-medium text-stone-900 underline" href={`tel:${contact.phone.replace(/\s+/g, "")}`}>{contact.phone}</a>}
+                        {contact.phone && <a className="font-medium text-onyx underline" href={`tel:${contact.phone.replace(/\s+/g, "")}`}>{contact.phone}</a>}
                         {contact.phone && contact.email && " · "}
-                        {contact.email && <a className="font-medium text-stone-900 underline" href={`mailto:${contact.email}`}>{contact.email}</a>}
+                        {contact.email && <a className="font-medium text-onyx underline" href={`mailto:${contact.email}`}>{contact.email}</a>}
                       </p>
                       <CancelButton slug={venue.slug} orderId={o.id} />
                     </div>
                   )}
                   {invoiceNumbers.get(o.id) && (
-                    <a href={`/api/invoice/${invoiceNumbers.get(o.id)}`} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-medium underline">
+                    <a href={`/api/invoice/${invoiceNumbers.get(o.id)}`} target="_blank" rel="noreferrer" className="mt-2 inline-block text-base font-medium underline">
                       Rechnung {invoiceNumbers.get(o.id)} (PDF)
                     </a>
                   )}
                   {o.status === "fertig" && o.kind === "menu_setup" && (
-                    <Link href={`/app/${venue.slug}/speisekarte`} className="mt-2 inline-block text-sm font-medium underline">
+                    <Link href={`/app/${venue.slug}/speisekarte`} className="mt-2 inline-block text-base font-medium underline">
                       Speisekarte ansehen und Allergene bestätigen
                     </Link>
                   )}

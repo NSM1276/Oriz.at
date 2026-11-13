@@ -41,7 +41,7 @@ export default async function PrintTablesPage({
 
   if (stickers.length === 0) {
     return (
-      <p className="rounded-2xl bg-white p-5 text-sm text-stone-600 ring-1 ring-stone-200">
+      <p className="rounded-2xl bg-white p-5 text-base text-onyx/70 ring-1 ring-onyx/10">
         Keine aktiven Tische zum Drucken.
       </p>
     );

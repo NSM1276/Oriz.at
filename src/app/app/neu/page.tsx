@@ -13,12 +13,12 @@ export default async function NewVenuePage() {
 
   return (
     <main className="mx-auto max-w-md px-4 pb-16 pt-[max(env(safe-area-inset-top),32px)]">
-      <p className="text-xs font-medium uppercase tracking-widest text-stone-500">Schritt 1 von 4</p>
+      <p className="text-sm font-medium uppercase tracking-widest text-onyx/60">Schritt 1 von 4</p>
       <h1 className="mt-1 text-2xl font-semibold">Ihr Lokal</h1>
-      <p className="mt-2 text-sm text-stone-600">
+      <p className="mt-2 text-base text-onyx/70">
         Name und Adresse der Speisekarte. Den Namen können Sie später jederzeit ändern.
       </p>
-      <NewVenueForm />
+      <NewVenueForm initialName={typeof user.user_metadata?.invited_venue === "string" ? user.user_metadata.invited_venue.slice(0, 80) : ""} />
       <WhatsAppHelp message="Hallo, ich brauche Hilfe beim Einrichten meines Lokals bei ORIZ." className="mt-8 text-center" />
     </main>
   );

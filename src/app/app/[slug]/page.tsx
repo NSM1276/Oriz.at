@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { serviceClient } from "@/lib/auth";
-import { PLAN_PRICE_EUR, allowedLocales } from "@/lib/entitlements";
+import { allowedLocales } from "@/lib/entitlements";
 import { getEntitlements } from "@/lib/entitlements-server";
 import { parseAllergens } from "@/lib/guest-menu";
 import { LOCALE_NAMES } from "@/lib/locales";
@@ -27,6 +27,8 @@ function greeting(now: Date): string {
   const h = Number(new Intl.DateTimeFormat("de-AT", { hour: "numeric", hour12: false, timeZone: "Europe/Vienna" }).format(now));
   return h < 11 ? "Guten Morgen" : h < 18 ? "Guten Tag" : "Guten Abend";
 }
+
+import { PRICE_MONTH, PRICE_YEAR } from "@/lib/offer";
 
 export default async function VenueHome({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -106,16 +108,16 @@ export default async function VenueHome({ params }: { params: Promise<{ slug: st
         : "Testphase"
       : ent.locked
         ? "Testphase beendet"
-        : ent.label;
+        : "Abo aktiv";
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-sm text-stone-500">{dateFmt.format(now)}</p>
-          <h1 className="text-2xl font-semibold tracking-tight">{greeting(now)}</h1>
+          <p className="text-base text-onyx/60">{dateFmt.format(now)}</p>
+          <h1 className="font-display text-4xl font-medium leading-tight">{greeting(now)}</h1>
         </div>
-        <Link href={`/app/${venue.slug}/konto`} className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-stone-700 shadow-sm ring-1 ring-stone-200">
+        <Link href={`/app/${venue.slug}/konto`} className="inline-flex min-h-9 items-center rounded-full bg-white px-3.5 text-base font-medium text-onyx/80 ring-1 ring-onyx/15">
           {planText}
         </Link>
       </div>
@@ -123,24 +125,24 @@ export default async function VenueHome({ params }: { params: Promise<{ slug: st
       {setupOpen && (
         <Card padded={false}>
           <div className="px-5 pt-5">
-            <Label action={<span className="text-sm font-medium tabular-nums text-stone-700">{doneCount} von {steps.length}</span>}>Einrichtung</Label>
+            <Label action={<span className="text-base font-medium tabular-nums text-onyx/75">{doneCount} von {steps.length}</span>}>Einrichtung</Label>
             <div className="mt-3"><Progress value={doneCount} max={steps.length} /></div>
           </div>
-          <ul className="mt-3 divide-y divide-stone-100">
+          <ul className="mt-3 divide-y divide-onyx/10">
             {steps.map((s) => (
               <li key={s.title}>
-                <Link href={s.href} className="flex min-h-14 items-center gap-3 px-5 py-3 active:bg-stone-50">
+                <Link href={s.href} className="flex min-h-16 items-center gap-3 px-5 py-3 active:bg-onyx/5">
                   <span
                     aria-hidden
-                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs ${s.done ? "bg-emerald-600 text-white" : "ring-2 ring-stone-300"}`}
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-base ${s.done ? "bg-emerald-600 text-white" : "ring-2 ring-onyx/25"}`}
                   >
                     {s.done ? "✓" : ""}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className={`block font-medium ${s.done ? "text-stone-400 line-through" : ""}`}>{s.title}</span>
-                    {!s.done && <span className="block text-sm text-stone-500">{s.hint}</span>}
+                    <span className={`block text-[17px] font-semibold leading-snug ${s.done ? "font-normal text-onyx/40 line-through" : ""}`}>{s.title}</span>
+                    {!s.done && <span className="block text-base leading-snug text-onyx/60">{s.hint}</span>}
                   </span>
-                  {!s.done && <span aria-hidden className="text-stone-400">›</span>}
+                  {!s.done && <span aria-hidden className="text-xl text-onyx/40">›</span>}
                 </Link>
               </li>
             ))}
@@ -152,7 +154,7 @@ export default async function VenueHome({ params }: { params: Promise<{ slug: st
         <Link href={`/app/${venue.slug}/service`} className="flex items-center justify-between gap-3 rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-300">
           <span>
             <span className="block text-lg font-semibold text-amber-950">{openCalls === 1 ? "1 Gast wartet" : `${openCalls} Gäste warten`}</span>
-            <span className="block text-sm text-amber-900">Offene Service-Rufe der letzten 30 Minuten</span>
+            <span className="block text-base text-amber-900">Offene Service-Rufe der letzten 30 Minuten</span>
           </span>
           <span aria-hidden className="text-amber-700">›</span>
         </Link>
@@ -160,12 +162,11 @@ export default async function VenueHome({ params }: { params: Promise<{ slug: st
 
       {list.length > 0 && (
         <div>
-          <Label action={<CardLink href={`/app/${venue.slug}/statistik?tage=7`}>Statistik ›</CardLink>}>Heute und diese Woche</Label>
-          <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatTile value={nf.format(todayViews)} title="Karte heute" hint="gegenüber letzter Woche" delta={<Delta now={todayViews} before={sameDayViews} />} href={`/app/${venue.slug}/statistik?tage=7`} />
-            <StatTile value={nf.format(viewsThis.total)} title="7 Tage" hint="gegenüber Vorwoche" delta={<Delta now={viewsThis.total} before={viewsLast.total} />} href={`/app/${venue.slug}/statistik?tage=7`} />
-            <StatTile value={nf.format(callsToday)} title="Rufe heute" hint={`${nf.format(callsWeek.total)} in 7 Tagen`} href={`/app/${venue.slug}/statistik?tage=7`} />
-            <StatTile value={callsWeek.medianSeconds === null ? "–" : formatWait(callsWeek.medianSeconds)} title="Reaktionszeit" hint="Median, 7 Tage" href={`/app/${venue.slug}/statistik?tage=7`} />
+          <Label action={<CardLink href={`/app/${venue.slug}/statistik?tage=7`}>Statistik ›</CardLink>}>Heute</Label>
+          <div className="mt-2 grid grid-cols-3 gap-3">
+            <StatTile value={nf.format(todayViews)} title="Aufrufe" delta={<Delta now={todayViews} before={sameDayViews} />} href={`/app/${venue.slug}/statistik?tage=7`} />
+            <StatTile value={nf.format(callsToday)} title="Service-Rufe" href={`/app/${venue.slug}/statistik?tage=7`} />
+            <StatTile value={nf.format(viewsThis.total)} title="Aufrufe, 7 Tage" delta={<Delta now={viewsThis.total} before={viewsLast.total} />} href={`/app/${venue.slug}/statistik?tage=7`} />
           </div>
         </div>
       )}
@@ -175,26 +176,25 @@ export default async function VenueHome({ params }: { params: Promise<{ slug: st
       {tips.length > 0 && (
         <Card padded={false}>
           <div className="px-5 pt-5"><Label>Besser werden</Label></div>
-          <div className="mt-2 divide-y divide-stone-100">
-            {tips.slice(0, 4).map((t) => <RowLink key={t.title} href={t.href} title={t.title} hint={t.hint} />)}
+          <div className="mt-2 divide-y divide-onyx/10">
+            {tips.slice(0, 2).map((t) => <RowLink key={t.title} href={t.href} title={t.title} hint={t.hint} />)}
           </div>
         </Card>
       )}
 
       <Card padded={false}>
         <div className="px-5 pt-5"><Label>Schnell</Label></div>
-        <div className="mt-2 divide-y divide-stone-100">
-          <RowLink href={`/${venue.slug}`} title="Karte als Gast ansehen" hint={venueHost(venue.slug)} external />
-          <RowLink href={`/app/${venue.slug}/lokal?teil=teilen`} title="Karte teilen" hint="Link, WhatsApp, QR-Code für Flyer" />
+        <div className="mt-2 divide-y divide-onyx/10">
+          <RowLink href={`/${venue.slug}`} title="Karte ansehen" hint={venueHost(venue.slug)} external />
           <RowLink href={`/app/${venue.slug}/tische`} title="QR-Codes drucken" hint={`${nf.format(tableCount ?? 0)} Tische`} />
-          <RowLink href={`/app/${venue.slug}/speisekarte/pdf`} title="Karte als PDF" hint="A4, fertig für den Drucker" external />
-          <RowLink href={`/app/${venue.slug}/leistungen`} title="Lieber machen lassen" hint="Wir tragen Ihre Karte für Sie ein" />
+          <RowLink href={`/app/${venue.slug}/speisekarte/pdf`} title="Karte drucken" hint="PDF in A4" external />
+          <RowLink href={`/app/${venue.slug}/lokal?teil=teilen`} title="Karte teilen" hint="Link, WhatsApp, QR-Code" />
         </div>
       </Card>
 
       {ent.tier === "trial" && (
-        <p className="px-1 text-center text-sm text-stone-500">
-          Danach Starter {PLAN_PRICE_EUR.starter} € oder Pro {PLAN_PRICE_EUR.pro} € im Monat. <Link href={`/app/${venue.slug}/konto`} className="underline">Tarife ansehen</Link>
+        <p className="px-1 text-center text-base text-onyx/60">
+          Danach {PRICE_MONTH} im Monat oder {PRICE_YEAR} im Jahr.
         </p>
       )}
     </div>

@@ -5,19 +5,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
 import { createClient } from "@/lib/supabase/client";
-import { cleanRef } from "@/lib/contact-info";
+import { signUpWithInvite } from "./actions";
 
 const PASSWORD_MIN = 8;
+const input = "mt-1 w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-base outline-none focus:border-stone-900";
 
-export function SignupForm() {
+/** The sign-up form behind a personal invitation link; the restaurant's name comes with the link. */
+export function SignupForm({ token, venueName }: { token: string; venueName: string }) {
   const router = useRouter();
-  const [company, setCompany] = useState("");
+  const [company, setCompany] = useState(venueName);
   const [isBusiness, setIsBusiness] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sentTo, setSentTo] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,116 +32,47 @@ export function SignupForm() {
     }
     setBusy(true);
     setError(null);
-    // Where the visitor came from (a QR code on a card says ?ref=markt).
-    const ref = cleanRef(new URLSearchParams(window.location.search).get("ref"));
-    const { data, error: err } = await createClient().auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/app/neu`,
-        // Record that the sign-up was made as a business (ORIZ sells to businesses only).
-        data: { company_name: company.trim().slice(0, 200), business_confirmed_at: new Date().toISOString(), ...(ref && { signup_ref: ref }) },
-      },
-    });
-    setBusy(false);
-
-    if (err) {
-      setError(
-        err.status === 429
-          ? "Zu viele Versuche. Bitte in einigen Minuten erneut versuchen."
-          : /password/i.test(err.message)
-            ? "Dieses Passwort ist zu schwach. Bitte ein längeres wählen."
-            : "Registrierung fehlgeschlagen. Bitte die E-Mail-Adresse prüfen.",
-      );
+    const res = await signUpWithInvite({ token, company, email, password, business: isBusiness });
+    if (!res.ok) {
+      setBusy(false);
+      setError(res.error);
       return;
     }
-    // Counts completed sign-ups per source page; the event carries no email or other data.
-    track("signup", ref ? { ref } : undefined);
-    // Without email confirmation Supabase signs the user in right away.
-    if (data.session) {
-      router.push("/app/neu");
+    // Counts completed sign-ups; the event carries no e-mail or other data.
+    track("signup", { ref: "einladung" });
+    const { error: signInError } = await createClient().auth.signInWithPassword({ email: email.trim(), password });
+    if (signInError) {
+      // The account exists; only the automatic sign-in did not work.
+      router.push("/admin/login?next=/app/neu");
       return;
     }
-    // Same message whether or not the address already had an account, so the
-    // form does not reveal who is registered.
-    setSentTo(email.trim());
-  }
-
-  if (sentTo) {
-    return (
-      <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
-        <p className="font-semibold">Bitte E-Mail bestätigen</p>
-        <p className="mt-1 text-sm text-stone-600">
-          Wir haben einen Link an <span className="font-medium text-stone-900">{sentTo}</span> geschickt.
-          Nach dem Klick richten Sie Ihr Lokal in wenigen Minuten ein.
-        </p>
-        <p className="mt-4 text-xs text-stone-500">
-          Keine E-Mail da? Bitte auch im Spam-Ordner nachsehen.
-        </p>
-      </div>
-    );
+    router.push("/app/neu");
   }
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
       <label className="block">
         <span className="text-sm font-medium">Firmenname</span>
-        <input
-          type="text"
-          required
-          autoComplete="organization"
-          maxLength={200}
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-base outline-none focus:border-stone-900"
-        />
+        <input type="text" required autoComplete="organization" maxLength={200} value={company} onChange={(e) => setCompany(e.target.value)} className={input} />
       </label>
       <label className="block">
         <span className="text-sm font-medium">E-Mail</span>
-        <input
-          type="email"
-          required
-          autoComplete="email"
-          inputMode="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-base outline-none focus:border-stone-900"
-        />
+        <input type="email" required autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} />
       </label>
       <label className="block">
         <span className="text-sm font-medium">Passwort</span>
-        <input
-          type="password"
-          required
-          minLength={PASSWORD_MIN}
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-base outline-none focus:border-stone-900"
-        />
+        <input type="password" required minLength={PASSWORD_MIN} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className={input} />
         <span className="mt-1 block text-xs text-stone-500">Mindestens {PASSWORD_MIN} Zeichen.</span>
       </label>
 
       <label className="flex items-start gap-3">
-        <input
-          type="checkbox"
-          required
-          checked={isBusiness}
-          onChange={(e) => setIsBusiness(e.target.checked)}
-          className="mt-1 h-5 w-5 shrink-0"
-        />
-        <span className="text-sm text-stone-700">
-          Ich bin Unternehmer und schließe den Vertrag im Rahmen meiner gewerblichen Tätigkeit.
-        </span>
+        <input type="checkbox" required checked={isBusiness} onChange={(e) => setIsBusiness(e.target.checked)} className="mt-1 h-5 w-5 shrink-0" />
+        <span className="text-sm text-stone-700">Ich bin Unternehmer und schließe den Vertrag im Rahmen meiner gewerblichen Tätigkeit.</span>
       </label>
 
       {error && <p className="text-sm text-red-700">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={busy}
-        className="w-full rounded-xl bg-stone-900 py-3 font-medium text-white disabled:opacity-50"
-      >
+      <button type="submit" disabled={busy} className="w-full rounded-xl bg-stone-900 py-3 font-medium text-white disabled:opacity-50">
         {busy ? "Wird angelegt…" : "Kostenlos starten"}
       </button>
 

@@ -9,9 +9,9 @@ import { createMenu, deleteMenu, moveMenu, updateMenu } from "./menus-actions";
 
 export type MenuRow = { id: string; name: string; days: string[]; from: string | null; to: string | null; sections: number };
 
-const card = "rounded-2xl bg-white shadow-sm ring-1 ring-stone-200";
-const field = "mt-1 w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base outline-none focus:border-stone-900";
-const btn = "inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-sm font-medium";
+const card = "rounded-2xl bg-white ring-1 ring-onyx/10";
+const field = "mt-1 w-full rounded-xl border border-onyx/20 bg-white px-3 py-2.5 text-base outline-none focus:border-onyx";
+const btn = "inline-flex min-h-11 items-center justify-center rounded-xl px-4 text-base font-medium";
 
 function MenuForm({
   initial,
@@ -32,18 +32,18 @@ function MenuForm({
 
   return (
     <form
-      className="space-y-3 rounded-xl bg-stone-50 p-4 ring-1 ring-stone-200"
+      className="space-y-3 rounded-xl bg-onyx/[0.03] p-4 ring-1 ring-onyx/10"
       onSubmit={(e) => {
         e.preventDefault();
         onSubmit(timed ? { name, days, from, to } : { name, days: [], from: null, to: null });
       }}
     >
       <label className="block">
-        <span className="text-sm font-medium">Name der Karte</span>
+        <span className="text-base font-medium">Name der Karte</span>
         <input value={name} onChange={(e) => setName(e.target.value)} maxLength={MENU_NAME_MAX} required placeholder="z. B. Mittag, Abend, Getränke" className={field} />
       </label>
 
-      <label className="flex items-center gap-3 text-sm">
+      <label className="flex items-center gap-3 text-base">
         <input type="checkbox" checked={timed} onChange={(e) => setTimed(e.target.checked)} className="h-5 w-5" />
         Je nach Tag und Uhrzeit vorwählen
       </label>
@@ -59,7 +59,7 @@ function MenuForm({
                   type="button"
                   aria-pressed={on}
                   onClick={() => setDays((cur) => (on ? cur.filter((x) => x !== d) : [...cur, d]))}
-                  className={`h-11 w-11 text-sm font-medium ring-1 ${on ? "bg-stone-900 text-white ring-stone-900" : "bg-white text-stone-700 ring-stone-300"}`}
+                  className={`h-11 w-11 text-base font-medium ring-1 ${on ? "bg-onyx text-white ring-onyx" : "bg-white text-onyx/80 ring-onyx/20"}`}
                 >
                   {DAY_LABELS[d]}
                 </button>
@@ -68,11 +68,11 @@ function MenuForm({
           </div>
           <div className="flex items-center gap-3">
             <label className="block flex-1">
-              <span className="text-sm text-stone-600">Von</span>
+              <span className="text-base text-onyx/70">Von</span>
               <input type="time" value={from} onChange={(e) => setFrom(e.target.value)} required className={field} />
             </label>
             <label className="block flex-1">
-              <span className="text-sm text-stone-600">Bis</span>
+              <span className="text-base text-onyx/70">Bis</span>
               <input type="time" value={to} onChange={(e) => setTo(e.target.value)} required className={field} />
             </label>
           </div>
@@ -80,8 +80,8 @@ function MenuForm({
       )}
 
       <div className="flex gap-2">
-        <button type="submit" disabled={busy || !name.trim()} className={`${btn} bg-stone-900 text-white disabled:opacity-40`}>Speichern</button>
-        <button type="button" onClick={onCancel} className={`${btn} ring-1 ring-stone-300`}>Abbrechen</button>
+        <button type="submit" disabled={busy || !name.trim()} className={`${btn} bg-onyx text-white disabled:opacity-40`}>Speichern</button>
+        <button type="button" onClick={onCancel} className={`${btn} ring-1 ring-onyx/20`}>Abbrechen</button>
       </div>
     </form>
   );
@@ -108,9 +108,9 @@ export function MenusCard({ slug, venueName, maxMenus, menus }: { slug: string; 
     const t = lockedText("menus");
     return (
       <section className={`${card} p-5`}>
-        <p className="font-semibold">Mehrere Karten <span className="ml-1 rounded bg-amber-200 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900">Pro</span></p>
-        <p className="mt-0.5 text-sm text-stone-600">{t.body}</p>
-        <a href={upgradeMailto(venueName)} className={`${btn} mt-3 ring-1 ring-stone-300`}>Pro anfragen</a>
+        <p className="font-semibold">Mehrere Karten <span className="ml-1 rounded bg-amber-200 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-900">Abo</span></p>
+        <p className="mt-0.5 text-base text-onyx/70">{t.body}</p>
+        <a href={upgradeMailto(venueName)} className={`${btn} mt-3 ring-1 ring-onyx/20`}>Abo anfragen</a>
       </section>
     );
   }
@@ -119,12 +119,12 @@ export function MenusCard({ slug, venueName, maxMenus, menus }: { slug: string; 
   return (
     <section className={`${card} p-5`}>
       <p className="font-semibold">Karten</p>
-      <p className="mt-0.5 text-sm text-stone-600">
+      <p className="mt-0.5 text-base text-onyx/70">
         Zum Beispiel Mittag, Abend und Getränke. Ab zwei Karten sehen Ihre Gäste oben die Auswahl; vorgewählt ist die Karte, die gerade zu Tag und Uhrzeit passt, sonst die erste.
         Welcher Bereich zu welcher Karte gehört, stellen Sie unten bei jedem Bereich ein.
       </p>
 
-      {menus.length === 1 && <p className="mt-2 text-sm text-amber-800">Mit nur einer Karte sehen Ihre Gäste keine Auswahl. Legen Sie eine zweite an.</p>}
+      {menus.length === 1 && <p className="mt-2 text-base text-amber-800">Mit nur einer Karte sehen Ihre Gäste keine Auswahl. Legen Sie eine zweite an.</p>}
 
       <ul className="mt-3 space-y-2">
         {menus.map((m, i) => (
@@ -137,23 +137,23 @@ export function MenusCard({ slug, venueName, maxMenus, menus }: { slug: string; 
                 onSubmit={(v) => run(() => updateMenu(slug, m.id, v), () => setEditing(null))}
               />
             ) : (
-              <div className="flex items-center gap-2 rounded-xl p-3 ring-1 ring-stone-200">
+              <div className="flex items-center gap-2 rounded-xl p-3 ring-1 ring-onyx/10">
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{m.name}</p>
-                  <p className="text-xs text-stone-500">
+                  <p className="text-sm text-onyx/60">
                     {formatSchedule({ id: m.id, name: m.name, position: i, active_days: m.days, time_from: m.from, time_to: m.to }) || "ohne Zeitplan"}
                     {" · "}
                     {m.sections} {m.sections === 1 ? "Bereich" : "Bereiche"}
                   </p>
                 </div>
-                <button type="button" aria-label="Karte nach oben" disabled={pending || i === 0} onClick={() => run(() => moveMenu(slug, m.id, -1))} className="h-9 w-9 rounded-lg text-stone-500 hover:bg-stone-100 disabled:opacity-30">↑</button>
-                <button type="button" aria-label="Karte nach unten" disabled={pending || i === menus.length - 1} onClick={() => run(() => moveMenu(slug, m.id, 1))} className="h-9 w-9 rounded-lg text-stone-500 hover:bg-stone-100 disabled:opacity-30">↓</button>
-                <button type="button" onClick={() => setEditing(m.id)} className="rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100">Bearbeiten</button>
+                <button type="button" aria-label="Karte nach oben" disabled={pending || i === 0} onClick={() => run(() => moveMenu(slug, m.id, -1))} className="h-9 w-9 rounded-lg text-onyx/60 hover:bg-onyx/5 disabled:opacity-30">↑</button>
+                <button type="button" aria-label="Karte nach unten" disabled={pending || i === menus.length - 1} onClick={() => run(() => moveMenu(slug, m.id, 1))} className="h-9 w-9 rounded-lg text-onyx/60 hover:bg-onyx/5 disabled:opacity-30">↓</button>
+                <button type="button" onClick={() => setEditing(m.id)} className="rounded-lg px-3 py-2 text-base font-medium text-onyx/80 hover:bg-onyx/5">Bearbeiten</button>
                 <button
                   type="button"
                   disabled={pending}
                   onClick={() => { if (confirm(`Karte „${m.name}“ löschen? Ihre Bereiche bleiben erhalten und erscheinen dann in allen Karten.`)) run(() => deleteMenu(slug, m.id)); }}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+                  className="rounded-lg px-3 py-2 text-base font-medium text-red-700 hover:bg-red-50"
                 >
                   Löschen
                 </button>
@@ -169,16 +169,16 @@ export function MenusCard({ slug, venueName, maxMenus, menus }: { slug: string; 
         </div>
       ) : (
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <button type="button" disabled={pending || full} onClick={() => setEditing("new")} className={`${btn} bg-stone-900 text-white disabled:opacity-40`}>+ Karte</button>
+          <button type="button" disabled={pending || full} onClick={() => setEditing("new")} className={`${btn} bg-onyx text-white disabled:opacity-40`}>+ Karte</button>
           {full && (
-            <span className="text-sm text-stone-500">
-              {maxMenus <= 1 ? `Mehr Karten gibt es mit Pro (bis zu ${PRO_MAX_MENUS}).` : `Es sind höchstens ${maxMenus} Karten möglich.`}
+            <span className="text-base text-onyx/60">
+              {maxMenus <= 1 ? `Mehr Karten gibt es mit dem Abo (bis zu ${PRO_MAX_MENUS}).` : `Es sind höchstens ${maxMenus} Karten möglich.`}
             </span>
           )}
         </div>
       )}
 
-      {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-3 text-base text-red-700">{error}</p>}
     </section>
   );
 }

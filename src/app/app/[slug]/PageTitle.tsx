@@ -13,7 +13,7 @@ const TITLES: { path: string; title: string; text?: string }[] = [
   { path: "aussehen", title: "Aussehen", text: "Darstellung, Farben und Logo. Die Vorschau zeigt Ihre echte Karte." },
   { path: "lokal", title: "Ihr Lokal", text: "Fotos, Text, Kontakt, Öffnungszeiten und Links — das sehen Gäste oben in der Karte und unter „Info“." },
   { path: "leistungen", title: "Leistungen", text: "Keine Zeit? Wir erledigen das für Sie — von Hand, innerhalb von 2 Werktagen nach Zahlung." },
-  { path: "konto", title: "Konto & Tarif" },
+  { path: "konto", title: "Konto & Abo" },
 ];
 
 export function PageTitle({ slug }: { slug: string }) {
@@ -27,8 +27,7 @@ export function PageTitle({ slug }: { slug: string }) {
   if (hit.path === "speisekarte/gericht") return null;
   return (
     <div className="mb-5 print:hidden">
-      <h1 className="text-2xl font-semibold tracking-tight">{hit.title}</h1>
-      {hit.text && <p className="mt-1 text-sm text-stone-600">{hit.text}</p>}
+      <h1 className="font-display text-4xl font-medium leading-tight text-onyx">{hit.title}</h1>
     </div>
   );
 }

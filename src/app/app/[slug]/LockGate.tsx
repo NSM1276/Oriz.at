@@ -11,14 +11,14 @@ export function LockGate({ slug, locked, children }: { slug: string; locked: boo
   const open = pathname.startsWith(`${base}/konto`) || pathname.startsWith(`${base}/leistungen`);
   if (!locked || open) return <>{children}</>;
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
-      <p className="text-xs font-medium uppercase tracking-widest text-stone-500">Testphase beendet</p>
-      <h1 className="mt-1 text-xl font-semibold">Ihre Karte bleibt online — zum Bearbeiten wählen Sie einen Tarif</h1>
-      <p className="mt-2 text-sm text-stone-600">
-        Gäste sehen Ihre Speisekarte weiterhin über die QR-Codes. Änderungen, Fotos, Tische und Service-Ruf sind bereit, sobald Ihr Tarif aktiv ist.
+    <section className="rounded-2xl bg-white p-6 ring-1 ring-onyx/10">
+      <p className="text-sm font-medium uppercase tracking-widest text-onyx/60">Testphase beendet</p>
+      <h1 className="mt-1 text-xl font-semibold">Ihre Karte bleibt online — zum Bearbeiten brauchen Sie das Abo</h1>
+      <p className="mt-2 text-base text-onyx/70">
+        Gäste sehen Ihre Speisekarte weiterhin über die QR-Codes. Änderungen, Fotos, Tische und Service-Ruf sind bereit, sobald Ihr Abo aktiv ist.
       </p>
-      <Link href={`${base}/konto`} className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-stone-900 px-5 text-sm font-medium text-white">
-        Tarif wählen
+      <Link href={`${base}/konto`} className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-onyx px-5 text-base font-medium text-white">
+        Abo bestellen
       </Link>
     </section>
   );

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 // to the guest menu, not to the tool that edits it.
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-stone-100 font-sans text-stone-900 [color-scheme:light]">
+    <div className="min-h-screen bg-parchment font-sans text-onyx [color-scheme:light]">
       {children}
     </div>
   );

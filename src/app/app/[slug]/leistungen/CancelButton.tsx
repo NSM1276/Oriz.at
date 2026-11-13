@@ -19,7 +19,7 @@ export function CancelButton({ slug, orderId }: { slug: string; orderId: string 
           router.refresh();
         });
       }}
-      className="text-sm text-stone-500 underline disabled:opacity-50"
+      className="text-base text-onyx/60 underline disabled:opacity-50"
     >
       Auftrag stornieren
     </button>

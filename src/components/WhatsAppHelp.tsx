@@ -3,9 +3,9 @@ import { whatsappUrl } from "@/lib/contact-info";
 /** A quiet "write to us" line for pages where an owner may get stuck. */
 export function WhatsAppHelp({ message, className = "" }: { message: string; className?: string }) {
   return (
-    <p className={`text-sm text-stone-600 ${className}`}>
+    <p className={`text-base text-onyx/70 ${className}`}>
       Fragen oder Hilfe nötig?{" "}
-      <a href={whatsappUrl(message)} target="_blank" rel="noreferrer" className="font-medium text-stone-900 underline">
+      <a href={whatsappUrl(message)} target="_blank" rel="noreferrer" className="font-medium text-onyx underline">
         Schreiben Sie uns auf WhatsApp
       </a>
     </p>

@@ -14,21 +14,21 @@ export default async function AppHome() {
 
   return (
     <main className="mx-auto max-w-xl px-4 pb-16 pt-8">
-      <p className="text-xs font-medium uppercase tracking-widest text-stone-500">ORIZ</p>
+      <p className="text-sm font-medium uppercase tracking-widest text-onyx/60">ORIZ</p>
       <h1 className="mt-1 text-2xl font-semibold">Ihre Lokale</h1>
 
-      <ul className="mt-6 divide-y divide-stone-200 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200">
+      <ul className="mt-6 divide-y divide-onyx/10 overflow-hidden rounded-2xl bg-white ring-1 ring-onyx/10">
         {venues.map((v) => (
           <li key={v.id}>
             <Link
               href={`/app/${v.slug}`}
-              className="flex items-center justify-between px-4 py-4 active:bg-stone-50"
+              className="flex items-center justify-between px-4 py-4 active:bg-onyx/5"
             >
               <span>
                 <span className="block font-medium">{v.name}</span>
-                <span className="block text-sm text-stone-500">oriz.at/{v.slug}</span>
+                <span className="block text-base text-onyx/60">oriz.at/{v.slug}</span>
               </span>
-              <span aria-hidden className="text-stone-400">›</span>
+              <span aria-hidden className="text-onyx/40">›</span>
             </Link>
           </li>
         ))}

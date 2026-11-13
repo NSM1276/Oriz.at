@@ -19,26 +19,26 @@ export default async function VenueLayout({
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-stone-200 bg-stone-100/90 backdrop-blur print:hidden">
+      <header className="sticky top-0 z-20 bg-onyx text-parchment print:hidden">
         <div className="mx-auto max-w-3xl px-4 pt-[max(env(safe-area-inset-top),12px)]">
-          <div className="flex items-center justify-between gap-3 pb-2">
+          <div className="flex items-center justify-between gap-3 pb-3">
             <div className="min-w-0">
               {venueCount > 1 ? (
-                <Link href="/app" className="text-xs font-medium uppercase tracking-widest text-stone-500">
+                <Link href="/app" className="text-sm font-semibold uppercase tracking-[0.18em] text-gold">
                   ‹ Alle Lokale
                 </Link>
               ) : (
-                <p className="text-xs font-medium uppercase tracking-widest text-stone-500">ORIZ</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gold">ORIZ</p>
               )}
-              <p className="truncate text-lg font-semibold">{venue.name}</p>
+              <p className="truncate font-display text-[26px] font-medium leading-tight">{venue.name}</p>
             </div>
             <a
               href={`/${venue.slug}`}
               target="_blank"
               rel="noreferrer"
-              className="shrink-0 rounded-full bg-white px-3 py-1.5 text-sm font-medium shadow-sm ring-1 ring-stone-200"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-gold/70 px-4 text-base font-semibold text-gold"
             >
-              Ansehen
+              Ansehen <span aria-hidden>↗</span>
             </a>
           </div>
           <div className="pb-1 sm:pb-3">

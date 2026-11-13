@@ -24,7 +24,7 @@ export function PublishToggle({ venueId, published }: { venueId: string; publish
             router.refresh();
           });
         }}
-        className="h-4 w-4 accent-stone-900"
+        className="h-4 w-4 accent-onyx"
       />
       {on ? "Öffentlich — Gäste sehen die Karte" : "Nicht öffentlich — nur das Team und wir"}
     </label>

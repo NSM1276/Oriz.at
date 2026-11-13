@@ -68,32 +68,32 @@ export default async function LokalPage({ params, searchParams }: { params: Prom
   return (
     <div className="space-y-4">
       {done < checks.length && (
-        <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200">
+        <section className="rounded-2xl bg-white p-5 ring-1 ring-onyx/10">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="text-xs font-medium uppercase tracking-widest text-stone-500">Ihr Lokal ist zu {Math.round((done / checks.length) * 100)} % vollständig</p>
-            <span className="shrink-0 whitespace-nowrap text-sm tabular-nums text-stone-600">{done} / {checks.length}</span>
+            <p className="text-sm font-medium uppercase tracking-widest text-onyx/60">Ihr Lokal ist zu {Math.round((done / checks.length) * 100)} % vollständig</p>
+            <span className="shrink-0 whitespace-nowrap text-base tabular-nums text-onyx/70">{done} / {checks.length}</span>
           </div>
           <div className="mt-3"><Progress value={done} max={checks.length} /></div>
-          <p className="mt-3 text-sm text-stone-600">
+          <p className="mt-3 text-base text-onyx/70">
             Es fehlt noch:{" "}
             {missing.map((c, i) => (
               <span key={c.key}>
                 {i > 0 && ", "}
-                <Link href={`${base}?teil=${c.part}`} className="font-medium text-stone-900 underline underline-offset-2">{c.label}</Link>
+                <Link href={`${base}?teil=${c.part}`} className="font-medium text-onyx underline underline-offset-2">{c.label}</Link>
               </span>
             ))}
           </p>
         </section>
       )}
 
-      <nav className="grid grid-cols-5 gap-1 rounded-2xl bg-white p-1 shadow-sm ring-1 ring-stone-200" aria-label="Bereiche des Lokals">
+      <nav className="grid grid-cols-5 gap-1 rounded-2xl bg-white p-1 ring-1 ring-onyx/10" aria-label="Bereiche des Lokals">
         {PARTS.map((p) => (
           <Link
             key={p.id}
             href={`${base}?teil=${p.id}`}
             aria-current={p.id === part ? "page" : undefined}
             scroll={false}
-            className={`relative flex min-h-10 items-center justify-center rounded-xl px-1 text-[13px] font-medium ${p.id === part ? "bg-stone-900 text-white" : "text-stone-700"}`}
+            className={`relative flex min-h-10 items-center justify-center rounded-xl px-1 text-sm font-medium ${p.id === part ? "bg-onyx text-white" : "text-onyx/80"}`}
           >
             {p.label}
             {checks.some((c) => c.part === p.id && !c.done) && <span aria-label="unvollständig" className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />}

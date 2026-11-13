@@ -8,7 +8,7 @@ export const SLUG_MAX = 40;
 const RESERVED = new Set([
   "admin", "api", "app", "auth", "c", "carta", "casa", "demo", "i", "s", "screen", "service", "t",
   "registrieren", "anmelden", "login", "logout", "signup", "register", "neu",
-  "preise", "pricing", "hilfe", "help", "support", "kontakt", "contact", "blog",
+  "hallo", "preise", "pricing", "hilfe", "help", "support", "kontakt", "contact", "blog",
   "impressum", "datenschutz", "agb", "privacy", "terms", "legal",
   "oriz", "www", "mail", "office", "static", "assets", "public", "images",
   "robots.txt", "sitemap.xml", "favicon.ico", "icon.svg", "opengraph-image",

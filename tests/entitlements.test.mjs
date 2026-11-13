@@ -1,84 +1,66 @@
 // tests/entitlements.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PLAN_PRICE_EUR, entitlementsFor, lockedText, upgradeMailto } from "../src/lib/entitlements.ts";
-import { translations } from "../src/lib/i18n.ts";
+import { PRO_MAX_MENUS, entitlementsFor, lockedText, standingOf, upgradeMailto } from "../src/lib/entitlements.ts";
 
 const NOW = new Date("2026-10-22T12:00:00Z");
 const sub = (plan, status, trial_ends_at = null) => ({ plan, status, trial_ends_at });
 
-test("starter: one menu, no Screen, no print design", () => {
-  const e = entitlementsFor(sub("starter", "active"), NOW);
-  assert.equal(e.tier, "starter");
-  assert.equal(e.screen, false);
-  assert.equal(e.maxMenus, 1);
-  assert.equal(e.printDesign, false);
-});
-
-test("pro: Screen, five menus, print design", () => {
-  const e = entitlementsFor(sub("pro", "active"), NOW);
-  assert.equal(e.tier, "pro");
-  assert.equal(e.screen, true);
-  assert.equal(e.maxMenus, 5);
-  assert.equal(e.printDesign, true);
-});
-
-test("a running trial has the Pro features even though the row says starter", () => {
-  const e = entitlementsFor(sub("starter", "trialing", "2026-11-01T00:00:00Z"), NOW);
-  assert.equal(e.tier, "trial");
-  assert.equal(e.label, "Testphase");
-  assert.equal(e.screen, true);
-  assert.equal(e.trialExpired, false);
-});
-
-test("an expired trial falls back to Starter and says so", () => {
-  const e = entitlementsFor(sub("starter", "trialing", "2026-10-01T00:00:00Z"), NOW);
-  assert.equal(e.tier, "starter");
-  assert.equal(e.screen, false);
-  assert.equal(e.trialExpired, true);
-});
-
-test("comped venues (ours) and unpaid-but-not-cancelled keep their plan", () => {
-  assert.equal(entitlementsFor(sub("pro", "comped"), NOW).screen, true);
-  assert.equal(entitlementsFor(sub("pro", "past_due"), NOW).screen, true);
-});
-
-test("a cancelled subscription drops to Starter, whatever the plan was", () => {
-  const e = entitlementsFor(sub("pro", "canceled"), NOW);
-  assert.equal(e.tier, "starter");
-  assert.equal(e.screen, false);
-});
-
-test("no subscription row: the smaller plan", () => {
-  assert.equal(entitlementsFor(null, NOW).screen, false);
-  assert.equal(entitlementsFor(undefined, NOW).maxMenus, 1);
-});
-
-test("the prices in the code match the website copy, in German and English", () => {
-  for (const lang of ["de", "en"]) {
-    const plans = translations[lang].pricing.plans;
-    const starter = plans.find((p) => p.plan === "starter");
-    const pro = plans.find((p) => p.plan === "pro");
-    assert.equal(starter.price, `€ ${PLAN_PRICE_EUR.starter}`, `${lang} starter`);
-    assert.equal(pro.price, `€ ${PLAN_PRICE_EUR.pro}`, `${lang} pro`);
+// One plan since 2026-11-12: old rows say "starter" or "pro", both now get everything.
+test("one plan: old starter and pro rows get the same features", () => {
+  for (const plan of ["starter", "pro"]) {
+    const e = entitlementsFor(sub(plan, "active"), NOW);
+    assert.equal(e.maxMenus, PRO_MAX_MENUS, plan);
+    assert.equal(e.printDesign, true, plan);
+    assert.equal(e.locked, false, plan);
+    assert.equal(e.label, "ORIZ", plan);
   }
 });
 
-test("the website does not promise what the product lacks", () => {
-  const text = JSON.stringify(translations.de.pricing) + JSON.stringify(translations.en.pricing);
-  assert.ok(!/bald|soon|20\+|Kreditkarte|credit card/i.test(text));
+test("a running trial has everything", () => {
+  const e = entitlementsFor(sub("starter", "trialing", "2026-11-01T00:00:00Z"), NOW);
+  assert.equal(e.tier, "trial");
+  assert.equal(e.label, "Testphase");
+  assert.equal(e.printDesign, true);
+  assert.equal(e.trialExpired, false);
 });
 
-test("locked texts and the upgrade mail", () => {
-  assert.match(lockedText("screen").title, /Pro/);
-  assert.match(upgradeMailto("Café Müller"), /^mailto:office@oriz\.at\?subject=Tarif%20Pro%20f%C3%BCr%20Caf%C3%A9%20M%C3%BCller$/);
+test("an expired trial closes the admin and says so", () => {
+  const e = entitlementsFor(sub("starter", "trialing", "2026-10-01T00:00:00Z"), NOW);
+  assert.equal(e.trialExpired, true);
+  assert.equal(e.locked, true);
 });
 
-import { PRO_MAX_MENUS } from "../src/lib/entitlements.ts";
+test("comped venues (ours) and unpaid-but-not-cancelled stay open", () => {
+  assert.equal(entitlementsFor(sub("pro", "comped"), NOW).locked, false);
+  assert.equal(entitlementsFor(sub("pro", "past_due"), NOW).locked, false);
+});
 
-test("the Pro plan on the website names the same number of menus as the code allows", () => {
-  const de = translations.de.pricing.plans.find((p) => p.plan === "pro").features.join(" | ");
-  const en = translations.en.pricing.plans.find((p) => p.plan === "pro").features.join(" | ");
-  assert.match(de, new RegExp(`Bis zu ${PRO_MAX_MENUS} Karten`));
-  assert.match(en, new RegExp(`Up to ${PRO_MAX_MENUS} menus`));
+test("a cancelled subscription closes the admin", () => {
+  assert.equal(entitlementsFor(sub("pro", "canceled"), NOW).locked, true);
+});
+
+test("no subscription row does not lock anyone out", () => {
+  assert.equal(entitlementsFor(null, NOW).locked, false);
+  assert.equal(entitlementsFor(undefined, NOW).maxMenus, PRO_MAX_MENUS);
+});
+
+test("standing for the platform admin's list", () => {
+  assert.deepEqual(standingOf(sub("pro", "trialing", "2026-10-25T12:00:00Z"), NOW), { kind: "trial", daysLeft: 3, label: "Testphase · noch 3 Tage" });
+  assert.equal(standingOf(sub("pro", "trialing", "2026-10-23T13:00:00Z"), NOW).label, "Testphase · noch 1 Tag");
+  assert.equal(standingOf(sub("pro", "trialing", "2026-10-22T20:00:00Z"), NOW).label, "Testphase · letzter Tag");
+  assert.equal(standingOf(sub("pro", "trialing", "2026-10-01T00:00:00Z"), NOW).kind, "trial_over");
+  assert.equal(standingOf(sub("pro", "active"), NOW).label, "Bezahlt");
+  assert.equal(standingOf(sub("pro", "comped"), NOW).kind, "free");
+  assert.equal(standingOf(sub("pro", "past_due"), NOW).kind, "due");
+  assert.equal(standingOf(sub("pro", "canceled"), NOW).kind, "ended");
+  assert.equal(standingOf(null, NOW).kind, "none");
+});
+
+test("owner-facing texts no longer speak of Starter or Pro", () => {
+  for (const f of ["screen", "menus", "printDesign"]) {
+    const t = lockedText(f);
+    assert.ok(!/(Starter|Pro)/.test(t.title + t.body), f);
+  }
+  assert.match(upgradeMailto("Café Müller"), /^mailto:office@oriz\.at\?subject=Abo%20f%C3%BCr%20Caf%C3%A9%20M%C3%BCller$/);
 });

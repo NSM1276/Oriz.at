@@ -48,8 +48,8 @@ test("reordering moves one place and stops at the ends", () => {
   assert.deepEqual(reorder(["a", "b"], "zzz", 1), ["a", "b"]);
 });
 
-test("plan limit: Starter has no extra menus, Pro up to five", () => {
-  assert.match(menuLimitProblem(0, 1), /Pro/);
+test("menu limit: a limit of one means no extra menus, the plan allows five", () => {
+  assert.match(menuLimitProblem(0, 1), /Abo/);
   assert.equal(menuLimitProblem(0, 5), null);
   assert.equal(menuLimitProblem(4, 5), null);
   assert.match(menuLimitProblem(5, 5), /Mehr als 5/);

@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { serviceClient } from "@/lib/auth";
 import { COLOR_PRESETS } from "@/lib/colorPresets";
-import { linesToImport, parseMenuText } from "@/lib/menu-parser";
+import { linesToImport, parseMenuText, type ImportSection } from "@/lib/menu-parser";
+import { parseMenuTable } from "@/lib/menu-table";
 import { requireOpenVenue } from "../../venue";
 
 export type StepResult = { ok: true } | { ok: false; error: string };
@@ -17,13 +18,26 @@ const MAX_PRICE_CENTS = 10_000_00;
 const MENU_THEMES = ["classic", "visual", "modern"] as const;
 type MenuTheme = (typeof MENU_THEMES)[number];
 
-/** Parses the pasted text here again — the browser preview is only a preview. */
-export async function importMenuText(slug: string, text: string): Promise<StepResult & { items?: number }> {
+type ImportDone = StepResult & { items?: number };
+
+/** Pasted text. Parsed here again — the browser preview is only a preview. */
+export async function importMenuText(slug: string, text: string): Promise<ImportDone> {
   const { venue } = await requireOpenVenue(slug);
   if (typeof text !== "string" || !text.trim()) return { ok: false, error: "Bitte die Speisekarte einfügen." };
   if (text.length > MAX_TEXT) return { ok: false, error: "Der Text ist zu lang. Bitte in Teilen einfügen." };
+  return saveImport(slug, venue.id, linesToImport(parseMenuText(text)).sections);
+}
 
-  const { sections } = linesToImport(parseMenuText(text));
+/** A table: the text of a CSV file, or the rows of an Excel sheet sent as tab-separated text. */
+export async function importMenuTable(slug: string, text: string): Promise<ImportDone> {
+  const { venue } = await requireOpenVenue(slug);
+  if (typeof text !== "string" || !text.trim()) return { ok: false, error: "Die Datei ist leer." };
+  if (text.length > MAX_TEXT * 4) return { ok: false, error: "Die Datei ist zu groß. Bitte in Teilen hochladen." };
+  return saveImport(slug, venue.id, parseMenuTable(text).sections);
+}
+
+async function saveImport(slug: string, venueId: string, sections: ImportSection[]): Promise<ImportDone> {
+  const venue = { id: venueId };
   const itemCount = sections.reduce((n, s) => n + s.items.length, 0);
   if (itemCount === 0) return { ok: false, error: "Keine Gerichte erkannt." };
   if (sections.length > MAX_SECTIONS || itemCount > MAX_ITEMS) {
@@ -33,9 +47,9 @@ export async function importMenuText(slug: string, text: string): Promise<StepRe
   const db = serviceClient();
   const { data: existing } = await db
     .from("sections")
-    .select("position")
+    .select("id, name, position")
     .eq("venue_id", venue.id)
-    .returns<{ position: number }[]>();
+    .returns<{ id: string; name: string; position: number }[]>();
   let sectionPosition = (existing ?? []).reduce((max, s) => Math.max(max, s.position), -1) + 1;
 
   // Add-only, like the super-admin importer: running it twice appends, never wipes.

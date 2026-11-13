@@ -81,7 +81,7 @@ export function AppNav({ slug, screenLocked = false, printLocked = false }: { sl
       {/* Phones: bottom bar. */}
       <nav
         aria-label="Bereiche"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white/95 backdrop-blur sm:hidden print:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 bg-onyx sm:hidden print:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="mx-auto flex max-w-3xl items-stretch">
@@ -90,7 +90,7 @@ export function AppNav({ slug, screenLocked = false, printLocked = false }: { sl
               key={t.href}
               href={t.href}
               aria-current={t.active ? "page" : undefined}
-              className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium ${t.active ? "text-stone-900" : "text-stone-500"}`}
+              className={`flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium ${t.active ? "text-gold" : "text-parchment/65"}`}
             >
               {t.icon}
               {t.label}
@@ -100,7 +100,7 @@ export function AppNav({ slug, screenLocked = false, printLocked = false }: { sl
             type="button"
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
-            className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium ${moreActive || open ? "text-stone-900" : "text-stone-500"}`}
+            className={`flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium ${moreActive || open ? "text-gold" : "text-parchment/65"}`}
           >
             <MoreIcon />
             Mehr
@@ -115,14 +115,14 @@ export function AppNav({ slug, screenLocked = false, printLocked = false }: { sl
             className="absolute inset-x-0 bottom-0 rounded-t-2xl bg-white p-3 shadow-xl"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}
           >
-            <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-stone-300" />
+            <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-onyx/25" />
             <ul className="grid grid-cols-2 gap-2">
               {more.map((t) => (
                 <li key={t.href}>
                   <Link
                     href={t.href}
                     aria-current={t.active ? "page" : undefined}
-                    className={`flex min-h-14 items-center rounded-xl px-4 text-base font-medium ring-1 ${t.active ? "bg-stone-900 text-white ring-stone-900" : "bg-stone-50 text-stone-800 ring-stone-200"}`}
+                    className={`flex min-h-14 items-center rounded-xl px-4 text-lg font-medium ring-1 ${t.active ? "bg-onyx text-gold ring-onyx" : "bg-parchment text-onyx ring-onyx/10"}`}
                   >
                     {t.label}
                     {pro(t)}
@@ -145,7 +145,7 @@ export function AppNav({ slug, screenLocked = false, printLocked = false }: { sl
             key={t.href}
             href={t.href}
             aria-current={t.active ? "page" : undefined}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${t.active ? "bg-stone-900 text-white" : "text-stone-600 hover:bg-stone-200"}`}
+            className={`whitespace-nowrap rounded-full px-4 py-2 text-base font-medium transition-colors ${t.active ? "bg-gold text-onyx" : "text-parchment/75 hover:bg-white/10"}`}
           >
             {t.label}
             {pro(t)}

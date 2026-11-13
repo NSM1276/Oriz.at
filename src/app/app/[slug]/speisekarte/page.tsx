@@ -20,7 +20,7 @@ export default async function MenuPage({ params }: { params: Promise<{ slug: str
     db.from("sections").select("id, name, position, translations, menu_id").eq("venue_id", venue.id).order("position").returns<EditorSection[]>(),
     db
       .from("items")
-      .select("id, section_id, name, price_cents, price_variants, allergens, diet_tags, image_url, is_active, position, translations")
+      .select("id, section_id, name, price_cents, price_variants, allergens, diet_tags, image_url, is_active, sold_out_until, position, translations")
       .eq("venue_id", venue.id)
       .order("position")
       .returns<EditorItem[]>(),

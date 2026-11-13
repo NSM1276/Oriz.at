@@ -20,13 +20,13 @@ export type TableRow = {
   position: number;
 };
 
-const card = "rounded-2xl bg-white shadow-sm ring-1 ring-stone-200";
+const card = "rounded-2xl bg-white ring-1 ring-onyx/10";
 const input =
-  "w-full rounded-xl border-0 bg-stone-100 px-3 py-2.5 text-base text-stone-900 outline-none ring-1 ring-stone-200 focus:ring-2 focus:ring-stone-900";
+  "w-full rounded-xl border-0 bg-onyx/5 px-3 py-2.5 text-base text-onyx outline-none ring-1 ring-onyx/10 focus:ring-2 focus:ring-onyx";
 const primaryBtn =
-  "rounded-xl bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50";
+  "rounded-xl bg-onyx px-4 py-2.5 text-base font-semibold text-white disabled:opacity-50";
 const ghostBtn =
-  "rounded-xl bg-stone-100 px-3 py-2 text-sm font-medium text-stone-800 ring-1 ring-stone-200 disabled:opacity-50";
+  "rounded-xl bg-onyx/5 px-3 py-2 text-base font-medium text-onyx ring-1 ring-onyx/10 disabled:opacity-50";
 
 export function TablesManager({ slug, tables }: { slug: string; tables: TableRow[] }) {
   const [pending, startTransition] = useTransition();
@@ -50,14 +50,14 @@ export function TablesManager({ slug, tables }: { slug: string; tables: TableRow
       <AddTables slug={slug} empty={tables.length === 0} pending={pending} run={run} />
 
       {error && (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-red-200">
+        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-base text-red-800 ring-1 ring-red-200">
           {error}
         </p>
       )}
 
       {tables.length > 0 && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-stone-600">
+          <p className="text-base text-onyx/70">
             {tables.length} {tables.length === 1 ? "Tisch" : "Tische"}
             {activeCount < tables.length && ` · ${tables.length - activeCount} ausgeschaltet`}
           </p>
@@ -70,11 +70,11 @@ export function TablesManager({ slug, tables }: { slug: string; tables: TableRow
       {zones.map((zone) => (
         <section key={zone || "-"}>
           {zones.length > 1 && (
-            <h2 className="mb-2 px-1 text-xs font-medium uppercase tracking-widest text-stone-500">
+            <h2 className="mb-2 px-1 text-sm font-medium uppercase tracking-widest text-onyx/60">
               {zone || "Ohne Bereich"}
             </h2>
           )}
-          <ul className={`${card} divide-y divide-stone-100 overflow-hidden`}>
+          <ul className={`${card} divide-y divide-onyx/10 overflow-hidden`}>
             {tables
               .filter((t) => (t.zone ?? "") === zone)
               .map((t) => (
@@ -116,7 +116,7 @@ function AddTables({ slug, empty, pending, run }: { slug: string; empty: boolean
     <form onSubmit={submit} className={`${card} p-5`}>
       <p className="font-semibold">{empty ? "Wie viele Tische haben Sie?" : "Tische hinzufügen"}</p>
       {empty && (
-        <p className="mt-1 text-sm text-stone-600">
+        <p className="mt-1 text-base text-onyx/70">
           Jeder Tisch bekommt einen eigenen QR-Code. Die Nummern können Sie danach umbenennen.
         </p>
       )}
@@ -124,7 +124,7 @@ function AddTables({ slug, empty, pending, run }: { slug: string; empty: boolean
       <div className="mt-4 grid grid-cols-2 gap-3">
         {mode === "count" ? (
           <label className="block">
-            <span className="mb-1 block text-xs font-medium text-stone-500">Anzahl</span>
+            <span className="mb-1 block text-sm font-medium text-onyx/60">Anzahl</span>
             <input
               className={input}
               type="number"
@@ -137,7 +137,7 @@ function AddTables({ slug, empty, pending, run }: { slug: string; empty: boolean
           </label>
         ) : (
           <label className="block">
-            <span className="mb-1 block text-xs font-medium text-stone-500">Name</span>
+            <span className="mb-1 block text-sm font-medium text-onyx/60">Name</span>
             <input
               className={input}
               value={label}
@@ -148,7 +148,7 @@ function AddTables({ slug, empty, pending, run }: { slug: string; empty: boolean
           </label>
         )}
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-stone-500">Bereich (optional)</span>
+          <span className="mb-1 block text-sm font-medium text-onyx/60">Bereich (optional)</span>
           <input
             className={input}
             value={zone}
@@ -166,7 +166,7 @@ function AddTables({ slug, empty, pending, run }: { slug: string; empty: boolean
         <button
           type="button"
           onClick={() => setMode(mode === "count" ? "named" : "count")}
-          className="text-sm font-medium text-stone-600 underline underline-offset-4"
+          className="text-base font-medium text-onyx/70 underline underline-offset-4"
         >
           {mode === "count" ? "Einen Tisch mit Namen anlegen" : "Mehrere nummerierte Tische anlegen"}
         </button>
@@ -200,29 +200,29 @@ function TableItem({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-stone-50"
+        className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-onyx/5"
       >
-        <span className="flex h-10 min-w-10 items-center justify-center rounded-xl bg-stone-100 px-2 text-base font-semibold tabular-nums">
+        <span className="flex h-10 min-w-10 items-center justify-center rounded-xl bg-onyx/5 px-2 text-base font-semibold tabular-nums">
           {table.label}
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate font-medium">{tableDisplayName(table.label)}</span>
-          <span className="block text-xs text-stone-500">
+          <span className="block text-sm text-onyx/60">
             {table.is_active ? `Code ${table.code}` : "Ausgeschaltet – QR-Code öffnet keine Tischansicht"}
           </span>
         </span>
-        <span aria-hidden className={`text-stone-400 transition-transform ${open ? "rotate-90" : ""}`}>›</span>
+        <span aria-hidden className={`text-onyx/40 transition-transform ${open ? "rotate-90" : ""}`}>›</span>
       </button>
 
       {open && (
-        <div className="space-y-4 border-t border-stone-100 bg-stone-50 px-4 py-4">
+        <div className="space-y-4 border-t border-onyx/10 bg-onyx/[0.03] px-4 py-4">
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-stone-500">Name</span>
+              <span className="mb-1 block text-sm font-medium text-onyx/60">Name</span>
               <input className={input} value={label} maxLength={40} onChange={(e) => setLabel(e.target.value)} />
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-stone-500">Bereich</span>
+              <span className="mb-1 block text-sm font-medium text-onyx/60">Bereich</span>
               <input className={input} value={zone} maxLength={40} onChange={(e) => setZone(e.target.value)} />
             </label>
           </div>
@@ -238,14 +238,14 @@ function TableItem({
           )}
 
           <label className="flex items-center justify-between gap-3">
-            <span className="text-sm">
+            <span className="text-base">
               <span className="block font-medium">Aktiv</span>
-              <span className="block text-stone-500">Ausgeschaltete Tische können nichts mehr auslösen.</span>
+              <span className="block text-onyx/60">Ausgeschaltete Tische können nichts mehr auslösen.</span>
             </span>
             <input
               type="checkbox"
               role="switch"
-              className="h-6 w-11 shrink-0 cursor-pointer accent-stone-900"
+              className="h-6 w-11 shrink-0 cursor-pointer accent-onyx"
               checked={table.is_active}
               disabled={pending}
               onChange={(e) => run(() => updateTable(slug, table.id, { isActive: e.target.checked }))}
@@ -276,7 +276,7 @@ function TableItem({
             <button
               type="button"
               disabled={pending}
-              className="rounded-xl px-3 py-2 text-sm font-medium text-red-700 disabled:opacity-50"
+              className="rounded-xl px-3 py-2 text-base font-medium text-red-700 disabled:opacity-50"
               onClick={() => {
                 if (confirm(`${tableDisplayName(table.label)} löschen?`)) run(() => deleteTable(slug, table.id));
               }}

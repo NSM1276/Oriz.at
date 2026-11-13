@@ -59,7 +59,9 @@ export async function proxy(request: NextRequest) {
 
   // Old links (oriz.at/belvedere, printed QR codes) move to the venue's own address. Signed-in
   // owners stay: their session lives on www.oriz.at, and they preview menus that are not public yet.
-  if ((host === "www.oriz.at" || host === "oriz.at") && !hasSession(request)) {
+  // The sample menu framed on the main page stays too: a frame cannot follow the visitor to another address bar.
+  const framed = request.headers.get("sec-fetch-dest") === "iframe";
+  if ((host === "www.oriz.at" || host === "oriz.at") && !hasSession(request) && !framed) {
     const moved = movedGuestPage(path);
     if (moved) return NextResponse.redirect(new URL(moved + request.nextUrl.search), 308);
   }

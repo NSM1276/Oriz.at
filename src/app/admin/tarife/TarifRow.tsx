@@ -13,11 +13,13 @@ const STATUS_LABEL: Record<SubStatus, string> = {
   canceled: "Beendet",
 };
 
-const field = "rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm";
+// One plan for everyone; rows keep the column, so new saves write "pro" (everything included).
+const PLAN: PlanId = "pro";
+
+const field = "rounded-lg border border-onyx/20 bg-white px-2 py-1.5 text-sm";
 
 export function TarifRow({
   venueId,
-  plan: initialPlan,
   status: initialStatus,
   trialEnd,
   languagesAll: initialLanguages,
@@ -29,24 +31,18 @@ export function TarifRow({
   languagesAll: boolean;
 }) {
   const router = useRouter();
-  const [plan, setPlan] = useState<PlanId>(initialPlan);
   const [status, setStatus] = useState<SubStatus>(initialStatus);
   const [end, setEnd] = useState(trialEnd ? trialEnd.slice(0, 10) : "");
   const [languagesAll, setLanguagesAll] = useState(initialLanguages);
   const [msg, setMsg] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const dirty =
-    plan !== initialPlan ||
     status !== initialStatus ||
     languagesAll !== initialLanguages ||
     (status === "trialing" && end !== (trialEnd ? trialEnd.slice(0, 10) : ""));
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
-      <select className={field} value={plan} onChange={(e) => setPlan(e.target.value as PlanId)} aria-label="Tarif">
-        <option value="starter">Starter</option>
-        <option value="pro">Pro</option>
-      </select>
       <select className={field} value={status} onChange={(e) => setStatus(e.target.value as SubStatus)} aria-label="Status">
         {(Object.keys(STATUS_LABEL) as SubStatus[]).map((s) => (
           <option key={s} value={s}>{STATUS_LABEL[s]}</option>
@@ -54,7 +50,7 @@ export function TarifRow({
       </select>
       {status === "trialing" && <input type="date" className={field} value={end} onChange={(e) => setEnd(e.target.value)} aria-label="Testphase bis" />}
       <label className="flex items-center gap-1.5 text-sm">
-        <input type="checkbox" checked={languagesAll} onChange={(e) => setLanguagesAll(e.target.checked)} className="h-4 w-4 accent-stone-900" />
+        <input type="checkbox" checked={languagesAll} onChange={(e) => setLanguagesAll(e.target.checked)} className="h-4 w-4 accent-onyx" />
         20+ Sprachen
       </label>
       <button
@@ -63,16 +59,16 @@ export function TarifRow({
         onClick={() =>
           start(async () => {
             setMsg(null);
-            const res = await setSubscription(venueId, plan, status, status === "trialing" && end ? `${end}T23:59:59Z` : null, languagesAll);
+            const res = await setSubscription(venueId, PLAN, status, status === "trialing" && end ? `${end}T23:59:59Z` : null, languagesAll);
             setMsg(res.ok ? "Gespeichert." : res.error);
             if (res.ok) router.refresh();
           })
         }
-        className="rounded-lg bg-stone-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
+        className="rounded-lg bg-onyx px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
       >
         Speichern
       </button>
-      {msg && <span className="text-sm text-stone-600">{msg}</span>}
+      {msg && <span className="text-sm text-onyx/70">{msg}</span>}
     </div>
   );
 }

@@ -95,14 +95,6 @@ function LoginForm() {
             Passwort vergessen?
           </Link>
         </div>
-        <div className="mt-3 text-center">
-          <Link
-            href="/registrieren"
-            className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 hover:text-onyx transition"
-          >
-            Neues Lokal registrieren
-          </Link>
-        </div>
       </form>
     </main>
   );

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { VenueCard } from "@/components/admin/VenueCard";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { VenueEditPanel } from "@/components/admin/VenueEditPanel";
 import { AddVenueModal } from "@/components/admin/AddVenueModal";
 import { QRModal } from "@/components/admin/QRModal";
-import { SuperAdminShell } from "@/components/admin/SuperAdminShell";
+import { AdminFrame, AdminTitle } from "@/app/admin/AdminFrame";
+import type { Standing } from "@/lib/entitlements";
+import { venueHost, venueUrl } from "@/lib/venue-host";
 import type { Venue } from "@/lib/supabase/types";
 
 type VenueSummary = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | "color_primary" | "logo_url" | "instagram_url" | "google_maps_url"> & {
@@ -22,93 +25,158 @@ type VenueSummary = Pick<Venue, "id" | "slug" | "name" | "about" | "color_bg" | 
   price_range?: string | null;
   opening_hours?: Record<string, [string, string][]> | null;
   gallery?: string[] | null;
+  published: boolean;
+  standing: Standing;
 };
 
-type Props = {
-  venues: VenueSummary[];
+type Props = { venues: VenueSummary[]; dueLeads: number; openOrders: number };
+
+// A trial that ends within this many days shows up under "Heute".
+const SOON_DAYS = 3;
+
+const TONE: Record<Standing["kind"], string> = {
+  trial: "bg-amber-100 text-amber-900",
+  trial_over: "bg-red-100 text-red-800",
+  paid: "bg-emerald-100 text-emerald-900",
+  free: "bg-onyx/5 text-onyx/75",
+  due: "bg-red-100 text-red-800",
+  ended: "bg-onyx/5 text-onyx/60",
+  none: "bg-onyx/5 text-onyx/60",
 };
 
-export function SuperAdminView({ venues: initial }: Props) {
-  const [venues, setVenues] = useState<VenueSummary[]>(initial);
+const card = "rounded-2xl bg-white ring-1 ring-onyx/10";
+const label = "text-sm font-semibold uppercase tracking-[0.14em] text-[#7A5C14]";
+
+function Tile({ value, title, href }: { value: number; title: string; href?: string }) {
+  const body = (
+    <>
+      <p className="font-display text-4xl font-medium leading-none tabular-nums">{value}</p>
+      <p className="mt-1.5 text-base font-medium leading-tight">{title}</p>
+    </>
+  );
+  return href ? <Link href={href} className={`${card} block p-4 active:bg-onyx/5`}>{body}</Link> : <div className={`${card} p-4`}>{body}</div>;
+}
+
+function TodoRow({ href, title, hint, warn }: { href: string; title: string; hint?: string; warn?: boolean }) {
+  return (
+    <Link href={href} className="flex min-h-14 items-center justify-between gap-3 px-5 py-3 active:bg-onyx/5">
+      <span className="min-w-0">
+        <span className={`block text-[17px] font-medium ${warn ? "text-red-700" : ""}`}>{title}</span>
+        {hint && <span className="block text-sm text-onyx/60">{hint}</span>}
+      </span>
+      <span aria-hidden className="text-xl text-onyx/40">›</span>
+    </Link>
+  );
+}
+
+export function SuperAdminView({ venues, dueLeads, openOrders }: Props) {
+  const router = useRouter();
   const [editingVenue, setEditingVenue] = useState<VenueSummary | null>(null);
   const [qrVenue, setQrVenue] = useState<VenueSummary | null>(null);
   const [addOpen, setAddOpen] = useState(false);
 
-  function handleSaved(updated: Pick<VenueSummary, "id" | "slug" | "name" | "about" | "color_bg" | "color_primary" | "plan">) {
-    setVenues(prev => prev.map(v => v.id === updated.id ? { ...v, ...updated } : v));
-    setEditingVenue(null);
-  }
-
-  function handleCreated(venue: VenueSummary) {
-    setVenues(prev => [...prev, venue]);
-    setAddOpen(false);
-  }
-
-  const total = venues.length;
-  const pro = venues.filter(v => v.plan === "pro").length;
-  const starter = venues.filter(v => v.plan === "starter").length;
-  const trial = venues.filter(v => v.plan === "trial").length;
+  const trials = venues.filter((v) => v.standing.kind === "trial");
+  const paying = venues.filter((v) => v.standing.kind === "paid");
+  const endingSoon = trials.filter((v) => v.standing.daysLeft !== null && v.standing.daysLeft <= SOON_DAYS);
+  const overdue = venues.filter((v) => v.standing.kind === "trial_over" || v.standing.kind === "due");
+  const nothing = dueLeads === 0 && openOrders === 0 && endingSoon.length === 0 && overdue.length === 0;
 
   return (
-    <SuperAdminShell>
-      <div className="px-6 md:px-10 py-10 max-w-6xl">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-10">
-          <div>
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">ORIZ · Super Admin</span>
-            <h1 className="font-display text-3xl text-onyx mt-1">All Venues</h1>
-          </div>
+    <AdminFrame>
+      <AdminTitle
+        title="Übersicht"
+        action={
           <button
+            type="button"
             onClick={() => setAddOpen(true)}
-            className="flex items-center gap-2 bg-onyx text-parchment font-sans text-[11px] tracking-regal uppercase px-4 py-2.5 hover:bg-onyx/85 transition-colors mt-1"
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-onyx px-4 text-base font-semibold text-parchment"
           >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            Add venue
+            + Lokal
           </button>
-        </div>
+        }
+      />
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-          {[
-            { label: "Total venues", value: total },
-            { label: "Pro", value: pro, dot: "#22c55e" },
-            { label: "Starter", value: starter, dot: "#C69B3C" },
-            { label: "Trial", value: trial, dot: "#94a3b8" },
-          ].map(stat => (
-            <div key={stat.label} className="border border-onyx/10 px-5 py-4 bg-white/40">
-              <div className="flex items-end gap-2">
-                <div className="font-display text-4xl text-onyx">{stat.value}</div>
-                {stat.dot && <div className="w-2 h-2 rounded-full mb-2" style={{ backgroundColor: stat.dot }} />}
-              </div>
-              <div className="font-sans text-[10px] tracking-regal uppercase text-onyx/50 mt-1">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Venue grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {venues.map(v => (
-            <VenueCard
-              key={v.id}
-              id={v.id}
-              name={v.name}
-              slug={v.slug}
-              colorBg={v.color_bg}
-              colorPrimary={v.color_primary}
-              plan={v.plan}
-              itemCount={v.itemCount}
-              onEdit={() => setEditingVenue(v)}
-              onQR={() => setQrVenue(v)}
-            />
-          ))}
-        </div>
+      <div className="grid grid-cols-3 gap-3">
+        <Tile value={venues.length} title="Lokale" />
+        <Tile value={trials.length} title="Im Test" href="/admin/tarife" />
+        <Tile value={paying.length} title="Bezahlt" href="/admin/tarife" />
       </div>
 
-      <VenueEditPanel venue={editingVenue} onClose={() => setEditingVenue(null)} onSaved={handleSaved} />
-      <AddVenueModal open={addOpen} onClose={() => setAddOpen(false)} onCreated={handleCreated} />
+      <section className={`${card} mt-5 overflow-hidden`}>
+        <p className={`${label} px-5 pt-4`}>Heute</p>
+        {nothing ? (
+          <p className="px-5 pb-5 pt-2 text-base text-onyx/65">Nichts offen.</p>
+        ) : (
+          <div className="mt-1 divide-y divide-onyx/10">
+            {dueLeads > 0 && <TodoRow href="/admin/vertrieb" title={`${dueLeads} ${dueLeads === 1 ? "Kontakt" : "Kontakte"} wieder melden`} hint="Heute oder überfällig" warn />}
+            {openOrders > 0 && <TodoRow href="/admin/auftraege" title={`${openOrders} ${openOrders === 1 ? "Auftrag" : "Aufträge"} erledigen`} hint="Bezahlt oder in Arbeit" />}
+            {endingSoon.map((v) => (
+              <TodoRow key={v.id} href="/admin/tarife" title={`${v.name}: Testphase endet bald`} hint={v.standing.label} />
+            ))}
+            {overdue.map((v) => (
+              <TodoRow key={v.id} href="/admin/tarife" title={`${v.name}: ${v.standing.label}`} hint="Anrufen und Abo besprechen" warn />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <p className={`${label} mt-7 mb-2`}>Lokale · {venues.length}</p>
+      <ul className={`${card} divide-y divide-onyx/10 overflow-hidden`}>
+        {venues.map((v) => (
+          <li key={v.id} className="px-4 py-4">
+            <div className="flex items-start gap-3">
+              <span
+                aria-hidden
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-display text-xl"
+                style={{ backgroundColor: v.color_bg ?? "#1a1a1a", color: v.color_primary ?? "#C69B3C" }}
+              >
+                {v.name.trim().charAt(0).toUpperCase()}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[17px] font-semibold leading-tight">{v.name}</p>
+                <p className="truncate text-sm text-onyx/60">
+                  {venueHost(v.slug)} · {v.itemCount} {v.itemCount === 1 ? "Gericht" : "Gerichte"}
+                  {!v.published && " · offline"}
+                </p>
+                <span className={`mt-1.5 inline-block rounded-full px-2.5 py-0.5 text-sm font-medium ${TONE[v.standing.kind]}`}>{v.standing.label}</span>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link href={`/app/${v.slug}`} className="inline-flex min-h-10 items-center rounded-full bg-onyx px-3.5 text-sm font-semibold text-parchment">
+                Verwalten
+              </Link>
+              <a href={venueUrl(v.slug)} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center rounded-full px-3.5 text-sm font-medium ring-1 ring-onyx/20">
+                Ansehen ↗
+              </a>
+              <button type="button" onClick={() => setQrVenue(v)} className="inline-flex min-h-10 items-center rounded-full px-3.5 text-sm font-medium ring-1 ring-onyx/20">
+                QR
+              </button>
+              <button type="button" onClick={() => setEditingVenue(v)} className="inline-flex min-h-10 items-center rounded-full px-3.5 text-sm font-medium ring-1 ring-onyx/20">
+                Daten
+              </button>
+            </div>
+          </li>
+        ))}
+        {venues.length === 0 && <li className="px-5 py-5 text-base text-onyx/65">Noch keine Lokale.</li>}
+      </ul>
+
+      <VenueEditPanel
+        venue={editingVenue}
+        onClose={() => setEditingVenue(null)}
+        onSaved={() => {
+          setEditingVenue(null);
+          router.refresh();
+        }}
+      />
+      <AddVenueModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onCreated={() => {
+          setAddOpen(false);
+          router.refresh();
+        }}
+      />
       <QRModal slug={qrVenue?.slug ?? null} name={qrVenue?.name ?? ""} onClose={() => setQrVenue(null)} />
-    </SuperAdminShell>
+    </AdminFrame>
   );
 }

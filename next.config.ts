@@ -18,6 +18,8 @@ const config: NextConfig = {
     return [
       { source: "/screen", destination: "/", permanent: false },
       { source: "/casa", destination: "/", permanent: false },
+      // The old plans page: its content now lives on the main page.
+      { source: "/carta", destination: "/#preis", permanent: true },
     ];
   },
 };

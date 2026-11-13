@@ -1,5 +1,7 @@
 {
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "crons": [
     {
       "path": "/api/demo/reset",
@@ -7,6 +9,10 @@
     },
     {
       "path": "/api/cron/photos-cleanup",
+      "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/sold-out-reset",
       "schedule": "30 3 * * *"
     }
   ]

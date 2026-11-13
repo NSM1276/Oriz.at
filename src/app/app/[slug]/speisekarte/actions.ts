@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { soldOutUntil, type SoldOutScope } from "@/lib/sold-out";
 import { serviceClient } from "@/lib/auth";
 import { cleanLocales, cleanSectionName, dishFromForm, type DishForm } from "@/lib/menu-edit";
 import { allowedLocales } from "@/lib/entitlements";
@@ -111,11 +112,16 @@ export async function deleteSection(slug: string, sectionId: string): Promise<Ac
 
 // ── Dishes ────────────────────────────────────────────────────────────────
 
-export async function setAvailable(slug: string, itemId: string, available: boolean): Promise<ActionResult> {
+/**
+ * Switches a dish on or off. Off has two forms (lib/sold-out.ts): "today" comes back by itself
+ * with the nightly run, "open" stays off until somebody switches it on again.
+ */
+export async function setAvailable(slug: string, itemId: string, available: boolean, scope: SoldOutScope = "open"): Promise<ActionResult> {
   const { venue, db } = await context(slug);
   const item = await itemOfVenue(db, venue.id, itemId);
   if (!item) return { ok: false, error: "Gericht nicht gefunden." };
-  const { error } = await db.from("items").update({ is_active: !!available }).eq("id", item.id);
+  const until = !available && scope === "today" ? soldOutUntil().toISOString() : null;
+  const { error } = await db.from("items").update({ is_active: !!available, sold_out_until: until }).eq("id", item.id);
   if (error) return { ok: false, error: "Konnte nicht gespeichert werden." };
   return done(slug);
 }
@@ -146,7 +152,7 @@ export async function saveDish(
     }
     const { error } = await db
       .from("items")
-      .update({ ...result.row, section_id: section.id, position })
+      .update({ ...result.row, section_id: section.id, position, ...(result.row.is_active ? { sold_out_until: null } : {}) })
       .eq("id", existing.id);
     if (error) return { ok: false, error: "Gericht konnte nicht gespeichert werden." };
     return done(slug, existing.id);

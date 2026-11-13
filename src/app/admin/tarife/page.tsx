@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getUser, isPlatformAdmin, serviceClient } from "@/lib/auth";
-import { entitlementsFor, type PlanId, type SubStatus } from "@/lib/entitlements";
+import { entitlementsFor, standingOf, type PlanId, type SubStatus } from "@/lib/entitlements";
 import { PublishToggle } from "./PublishToggle";
 import { TarifRow } from "./TarifRow";
+import { AdminFrame, AdminTitle } from "../AdminFrame";
 
 export const dynamic = "force-dynamic";
 
@@ -34,27 +34,22 @@ export default async function TarifePage() {
   const venues = (data ?? []).map((v) => ({ ...v, sub: Array.isArray(v.subscriptions) ? v.subscriptions[0] ?? null : v.subscriptions }));
 
   return (
-    <div className="min-h-screen bg-stone-100 font-sans text-stone-900 [color-scheme:light]">
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
-        <Link href="/admin" className="text-sm font-medium text-stone-600">‹ Admin</Link>
-        <h1 className="mt-2 text-2xl font-semibold">Tarife</h1>
-        <p className="mt-1 text-sm text-stone-600">
-          Hier schalten Sie Pro nach der Zahlung frei, bis Stripe das übernimmt. Eine Testphase hat die Pro-Funktionen, bis das Datum erreicht ist.
-        </p>
+    <AdminFrame>
+        <AdminTitle title="Abos" line="Nach der Zahlung auf „Bezahlt“ stellen. Die Testphase lässt sich hier verlängern." />
 
         <ul className="mt-6 space-y-3">
           {venues.map((v) => {
             const ent = entitlementsFor(v.sub);
             return (
-              <li key={v.id} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
+              <li key={v.id} className="rounded-2xl bg-white p-4 ring-1 ring-onyx/10">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="font-semibold">{v.name}</p>
-                  <p className="text-sm text-stone-500">
+                  <p className="text-sm text-onyx/60">
                     {v.slug} · seit {dateFmt.format(new Date(v.created_at))}
                   </p>
                 </div>
-                <p className="mt-0.5 text-sm text-stone-600">
-                  Gilt jetzt: {ent.tier === "trial" ? "Testphase (Pro-Funktionen)" : ent.label}
+                <p className="mt-0.5 text-sm text-onyx/70">
+                  Gilt jetzt: {standingOf(v.sub).label}
                   {ent.trialExpired && " · Testphase abgelaufen, Admin gesperrt"}
                   {ent.allLanguages && ent.tier !== "trial" && " · 20+ Sprachen"}
                 </p>
@@ -64,7 +59,6 @@ export default async function TarifePage() {
             );
           })}
         </ul>
-      </main>
-    </div>
+    </AdminFrame>
   );
 }

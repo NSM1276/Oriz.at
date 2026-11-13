@@ -59,7 +59,7 @@ export function StickerPicker({ venueName, tables, initialId }: { venueName: str
   }
 
   const chip = (active: boolean) =>
-    `rounded-xl px-3 py-2 text-sm font-medium transition-colors ${active ? "bg-stone-900 text-white" : "bg-white text-stone-800 ring-1 ring-stone-300"}`;
+    `rounded-xl px-3 py-2 text-sm font-medium transition-colors ${active ? "bg-onyx text-white" : "bg-white text-onyx ring-1 ring-onyx/20"}`;
 
   return (
     <div>
@@ -80,12 +80,12 @@ export function StickerPicker({ venueName, tables, initialId }: { venueName: str
       `}</style>
 
       <div className="flex flex-col gap-4 print:hidden">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 ring-1 ring-stone-200">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 ring-1 ring-onyx/10">
           <div>
             <p className="font-semibold">
               {stickers.length} Aufkleber · {sheets.length} {sheets.length === 1 ? "Blatt" : "Blätter"} A4
             </p>
-            <p className="text-sm text-stone-600">
+            <p className="text-sm text-onyx/70">
               {selected} von {tables.length} {tables.length === 1 ? "Tisch" : "Tischen"} ausgewählt
             </p>
           </div>
@@ -93,50 +93,50 @@ export function StickerPicker({ venueName, tables, initialId }: { venueName: str
             type="button"
             onClick={() => window.print()}
             disabled={stickers.length === 0}
-            className="min-h-11 rounded-xl bg-stone-900 px-5 text-sm font-semibold text-white disabled:opacity-40"
+            className="min-h-11 rounded-xl bg-onyx px-5 text-sm font-semibold text-white disabled:opacity-40"
           >
             Drucken
           </button>
         </div>
 
-        <div className="rounded-2xl bg-white p-4 ring-1 ring-stone-200">
-          <p className="text-xs font-medium uppercase tracking-widest text-stone-500">Größe</p>
+        <div className="rounded-2xl bg-white p-4 ring-1 ring-onyx/10">
+          <p className="text-xs font-medium uppercase tracking-widest text-onyx/60">Größe</p>
           <div className="mt-2 grid grid-cols-3 gap-2">
             {SIZES.map((s) => (
               <button key={s.id} type="button" onClick={() => setSizeId(s.id)} className={`${chip(s.id === sizeId)} flex flex-col items-center py-2.5`}>
                 <span>{s.name}</span>
-                <span className={`text-xs font-normal ${s.id === sizeId ? "text-white/70" : "text-stone-500"}`}>{s.hint}</span>
+                <span className={`text-xs font-normal ${s.id === sizeId ? "text-white/70" : "text-onyx/60"}`}>{s.hint}</span>
               </button>
             ))}
           </div>
 
-          <p className="mt-5 text-xs font-medium uppercase tracking-widest text-stone-500">Auswahl</p>
+          <p className="mt-5 text-xs font-medium uppercase tracking-widest text-onyx/60">Auswahl</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setAll(1)} className={chip(false)}>Alle</button>
             <button type="button" onClick={() => setAll(0)} className={chip(false)}>Keine</button>
-            <span className="ml-1 flex items-center gap-1.5 text-sm text-stone-600">
+            <span className="ml-1 flex items-center gap-1.5 text-sm text-onyx/70">
               Tisch
-              <input value={from} onChange={(e) => setFrom(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="1" aria-label="Von Tisch" className="h-10 w-14 rounded-lg px-2 text-center ring-1 ring-stone-300" />
+              <input value={from} onChange={(e) => setFrom(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="1" aria-label="Von Tisch" className="h-10 w-14 rounded-lg px-2 text-center ring-1 ring-onyx/20" />
               bis
-              <input value={to} onChange={(e) => setTo(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="10" aria-label="Bis Tisch" className="h-10 w-14 rounded-lg px-2 text-center ring-1 ring-stone-300" />
+              <input value={to} onChange={(e) => setTo(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="10" aria-label="Bis Tisch" className="h-10 w-14 rounded-lg px-2 text-center ring-1 ring-onyx/20" />
               <button type="button" onClick={pickRange} disabled={!rangeOk} className={`${chip(false)} disabled:opacity-40`}>Wählen</button>
             </span>
           </div>
           {selected > 0 && (
-            <div className="mt-3 flex items-center gap-2 text-sm text-stone-600">
+            <div className="mt-3 flex items-center gap-2 text-sm text-onyx/70">
               Stück für alle ausgewählten:
               <Stepper onMinus={() => copiesForSelected(-1)} onPlus={() => copiesForSelected(1)} />
             </div>
           )}
         </div>
 
-        <div className="rounded-2xl bg-white ring-1 ring-stone-200">
+        <div className="rounded-2xl bg-white ring-1 ring-onyx/10">
           {zones.map((zone) => (
             <div key={zone || "-"}>
               {zones.length > 1 && (
-                <p className="border-b border-stone-100 px-4 pb-2 pt-4 text-xs font-medium uppercase tracking-widest text-stone-500">{zone || "Ohne Bereich"}</p>
+                <p className="border-b border-onyx/10 px-4 pb-2 pt-4 text-xs font-medium uppercase tracking-widest text-onyx/60">{zone || "Ohne Bereich"}</p>
               )}
-              <ul className="divide-y divide-stone-100">
+              <ul className="divide-y divide-onyx/10">
                 {tables
                   .filter((t) => (t.zone ?? "") === zone)
                   .map((t) => {
@@ -144,8 +144,8 @@ export function StickerPicker({ venueName, tables, initialId }: { venueName: str
                     return (
                       <li key={t.id} className="flex items-center gap-3 px-4 py-2.5">
                         <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-3">
-                          <input type="checkbox" checked={n > 0} onChange={(e) => set(t.id, e.target.checked ? 1 : 0)} className="h-5 w-5 accent-stone-900" />
-                          <span className={`font-medium ${n > 0 ? "" : "text-stone-400"}`}>{tableDisplayName(t.label)}</span>
+                          <input type="checkbox" checked={n > 0} onChange={(e) => set(t.id, e.target.checked ? 1 : 0)} className="h-5 w-5 accent-onyx" />
+                          <span className={`font-medium ${n > 0 ? "" : "text-onyx/40"}`}>{tableDisplayName(t.label)}</span>
                         </label>
                         <Stepper value={n} onMinus={() => set(t.id, n - 1)} onPlus={() => set(t.id, n + 1)} />
                       </li>
@@ -156,7 +156,7 @@ export function StickerPicker({ venueName, tables, initialId }: { venueName: str
           ))}
         </div>
 
-        {sheets.length > 0 && <p className="text-xs font-medium uppercase tracking-widest text-stone-500">Vorschau — so wird gedruckt</p>}
+        {sheets.length > 0 && <p className="text-xs font-medium uppercase tracking-widest text-onyx/60">Vorschau — so wird gedruckt</p>}
       </div>
 
       <div className="sheets mt-3 flex flex-wrap gap-4">
@@ -172,14 +172,14 @@ export function StickerPicker({ venueName, tables, initialId }: { venueName: str
                   className="flex flex-col items-center justify-center text-center text-black"
                   style={{ border: "0.3mm solid #c8c4bf", borderRadius: "4mm", padding: "4mm", overflow: "hidden" }}
                 >
-                  <p style={{ fontSize: `${size.label * 0.42}mm`, letterSpacing: "0.2em" }} className="font-medium uppercase text-stone-500">
+                  <p style={{ fontSize: `${size.label * 0.42}mm`, letterSpacing: "0.2em" }} className="font-medium uppercase text-onyx/60">
                     {venueName}
                   </p>
                   <div style={{ width: `${size.qr}mm`, marginTop: "2mm" }} className="[&>svg]:h-auto [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: t.svg }} />
                   <p style={{ fontSize: `${size.label}mm`, marginTop: "1.5mm", lineHeight: 1.1 }} className="font-semibold">
                     {tableDisplayName(t.label)}
                   </p>
-                  <p style={{ fontSize: `${size.label * 0.38}mm`, marginTop: "1mm" }} className="text-stone-600">
+                  <p style={{ fontSize: `${size.label * 0.38}mm`, marginTop: "1mm" }} className="text-onyx/70">
                     Speisekarte &amp; Service · Menu &amp; service
                   </p>
                 </article>
@@ -193,7 +193,7 @@ export function StickerPicker({ venueName, tables, initialId }: { venueName: str
 }
 
 function Stepper({ value, onMinus, onPlus }: { value?: number; onMinus: () => void; onPlus: () => void }) {
-  const btn = "grid h-10 w-10 place-items-center rounded-lg text-lg font-medium ring-1 ring-stone-300 active:bg-stone-100";
+  const btn = "grid h-10 w-10 place-items-center rounded-lg text-lg font-medium ring-1 ring-onyx/20 active:bg-onyx/5";
   return (
     <span className="flex items-center gap-1.5">
       <button type="button" onClick={onMinus} aria-label="Weniger" className={btn}>−</button>

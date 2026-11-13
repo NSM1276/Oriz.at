@@ -30,11 +30,11 @@ export default async function SetupPage({
 
   const heading = (n: number, title: string, text: string) => (
     <div className="mb-6">
-      <p className="text-xs font-medium uppercase tracking-widest text-stone-500">
+      <p className="text-base font-semibold uppercase tracking-[0.14em] text-[#7A5C14]">
         {n <= 4 ? `Schritt ${n} von 4` : "Fertig"}
       </p>
-      <h1 className="mt-1 text-2xl font-semibold">{title}</h1>
-      <p className="mt-2 text-sm text-stone-600">{text}</p>
+      <h1 className="mt-1 font-display text-4xl font-medium leading-tight">{title}</h1>
+      {text && <p className="mt-2 text-base leading-snug text-onyx/70">{text}</p>}
     </div>
   );
 
@@ -42,8 +42,8 @@ export default async function SetupPage({
     const { count } = await db.from("items").select("id", { count: "exact", head: true }).eq("venue_id", venue.id);
     return (
       <>
-        {heading(2, "Speisekarte", "Fügen Sie Ihre Karte als Text ein — aus Word, PDF oder der alten Website. Überschriften werden Bereiche, Zeilen mit Preis werden Gerichte.")}
-        <MenuStep slug={venue.slug} existingItems={count ?? 0} nextHref={next("stil")} />
+        {heading(2, "Ihre Speisekarte", "Wie möchten Sie Ihre Gerichte eintragen?")}
+        <MenuStep slug={venue.slug} venueName={venue.name} existingItems={count ?? 0} nextHref={next("stil")} />
       </>
     );
   }
@@ -88,24 +88,24 @@ export default async function SetupPage({
           href={`/${venue.slug}`}
           target="_blank"
           rel="noreferrer"
-          className="block rounded-2xl bg-stone-900 p-5 text-white shadow-sm"
+          className="block rounded-2xl bg-onyx p-5 text-white"
         >
           <p className="font-semibold">Speisekarte ansehen</p>
-          <p className="mt-0.5 text-sm text-stone-300">So sehen Ihre Gäste die Karte am Handy.</p>
+          <p className="mt-0.5 text-base text-parchment/70">So sehen Ihre Gäste die Karte am Handy.</p>
         </a>
         <Link
           href={`/app/${venue.slug}/tische/drucken`}
-          className="block rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200"
+          className="block rounded-2xl bg-white p-5 ring-1 ring-onyx/10"
         >
           <p className="font-semibold">QR-Codes drucken</p>
-          <p className="mt-0.5 text-sm text-stone-600">Ein A4-Blatt mit Aufklebern für alle Tische.</p>
+          <p className="mt-0.5 text-base text-onyx/70">Ein A4-Blatt mit Aufklebern für alle Tische.</p>
         </Link>
         <Link
           href={`/app/${venue.slug}`}
-          className="block rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200"
+          className="block rounded-2xl bg-white p-5 ring-1 ring-onyx/10"
         >
           <p className="font-semibold">Zur Übersicht</p>
-          <p className="mt-0.5 text-sm text-stone-600">Tische, Abo und Speisekarte verwalten.</p>
+          <p className="mt-0.5 text-base text-onyx/70">Tische, Abo und Speisekarte verwalten.</p>
         </Link>
       </div>
     </>

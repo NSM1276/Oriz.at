@@ -19,8 +19,8 @@ import {
 } from "@/lib/services";
 import { startOrder, submitOrder } from "../actions";
 
-const card = "rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200";
-const input = "mt-1 w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base outline-none focus:border-stone-900";
+const card = "rounded-2xl bg-white p-5 ring-1 ring-onyx/10";
+const input = "mt-1 w-full rounded-xl border border-onyx/20 bg-white px-3 py-2.5 text-base outline-none focus:border-onyx";
 
 const sizeLabel = (bytes: number) => (bytes > 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
 
@@ -87,33 +87,33 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
   return (
     <form onSubmit={submit} className="space-y-4 pb-28">
       <div className="flex items-center justify-between">
-        <Link href={`/app/${slug}/leistungen`} className="text-sm font-medium text-stone-600">‹ Leistungen</Link>
+        <Link href={`/app/${slug}/leistungen`} className="text-base font-medium text-onyx/70">‹ Leistungen</Link>
       </div>
 
       <section className={card}>
         <h1 className="text-lg font-semibold">{SERVICE_INFO[kind].title}</h1>
-        <p className="mt-1 text-sm text-stone-600">{SERVICE_INFO[kind].short}</p>
+        <p className="mt-1 text-base text-onyx/70">{SERVICE_INFO[kind].short}</p>
       </section>
 
       <section className={card}>
-        <p className="text-sm font-medium">{kind === "photo_edit" ? `Fotos (mindestens ${PHOTO_MIN})` : "Ihre Speisekarte"}</p>
-        <p className="mt-0.5 text-sm text-stone-600">
+        <p className="text-base font-medium">{kind === "photo_edit" ? `Fotos (mindestens ${PHOTO_MIN})` : "Ihre Speisekarte"}</p>
+        <p className="mt-0.5 text-base text-onyx/70">
           {kind === "photo_edit"
             ? "Am besten von oben oder schräg, bei Tageslicht, ein Gericht pro Foto. JPG, PNG oder HEIC, bis 25 MB."
             : "Fotos der Seiten, PDF, Word oder Excel — bis 25 MB pro Datei. Oder einfach ein Link zu Ihrer Karte."}
         </p>
         <input ref={picker} type="file" multiple accept={accept} className="hidden" onChange={(e) => addFiles(e.target.files)} />
-        <button type="button" disabled={busy} onClick={() => picker.current?.click()} className="mt-3 w-full rounded-xl border-2 border-dashed border-stone-300 py-6 text-sm font-medium text-stone-700 disabled:opacity-50">
+        <button type="button" disabled={busy} onClick={() => picker.current?.click()} className="mt-3 w-full rounded-xl border-2 border-dashed border-onyx/20 py-6 text-base font-medium text-onyx/80 disabled:opacity-50">
           + Dateien auswählen
         </button>
         {files.length > 0 && (
-          <ul className="mt-3 divide-y divide-stone-100 text-sm">
+          <ul className="mt-3 divide-y divide-onyx/10 text-base">
             {files.map((f, i) => (
               <li key={`${f.name}:${f.size}`} className="flex items-center justify-between gap-3 py-2">
                 <span className="min-w-0 truncate">{f.name}</span>
-                <span className="flex shrink-0 items-center gap-2 text-stone-500">
+                <span className="flex shrink-0 items-center gap-2 text-onyx/60">
                   {sizeLabel(f.size)}
-                  <button type="button" disabled={busy} aria-label={`${f.name} entfernen`} onClick={() => setFiles((p) => p.filter((_, j) => j !== i))} className="h-8 w-8 rounded-lg hover:bg-stone-100">✕</button>
+                  <button type="button" disabled={busy} aria-label={`${f.name} entfernen`} onClick={() => setFiles((p) => p.filter((_, j) => j !== i))} className="h-8 w-8 rounded-lg hover:bg-onyx/5">✕</button>
                 </span>
               </li>
             ))}
@@ -121,7 +121,7 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
         )}
         {kind === "menu_setup" && (
           <label className="mt-4 block">
-            <span className="text-sm font-medium">Oder Link zu Ihrer Karte</span>
+            <span className="text-base font-medium">Oder Link zu Ihrer Karte</span>
             <input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} inputMode="url" placeholder="https://…" className={input} />
           </label>
         )}
@@ -130,10 +130,10 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
       {kind === "menu_setup" && (
         <section className={card}>
           <label className="block">
-            <span className="text-sm font-medium">Wie viele Gerichte hat Ihre Karte ungefähr?</span>
+            <span className="text-base font-medium">Wie viele Gerichte hat Ihre Karte ungefähr?</span>
             <input required value={dishes} onChange={(e) => setDishes(e.target.value.replace(/\D/g, "").slice(0, 3))} inputMode="numeric" placeholder="z. B. 60" className={input} />
           </label>
-          <p className="mt-1.5 text-sm text-stone-600">
+          <p className="mt-1.5 text-base text-onyx/70">
             Bis {MENU_SETUP_INCLUDED_DISHES} Gerichte sind im Preis enthalten, jedes weitere kostet {euro(MENU_SETUP_EXTRA_DISH_CENTS)}. Getränke zählen mit.
           </p>
         </section>
@@ -141,13 +141,13 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
 
       {kind === "menu_setup" && (
         <section className={card}>
-          <p className="text-sm font-medium">Übersetzungen dazu?</p>
-          <p className="mt-0.5 text-sm text-stone-600">Im Preis enthalten.</p>
+          <p className="text-base font-medium">Übersetzungen dazu?</p>
+          <p className="mt-0.5 text-base text-onyx/70">Im Preis enthalten.</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {PACKAGE_LOCALES.map((l) => {
               const on = languages.includes(l);
               return (
-                <button key={l} type="button" aria-pressed={on} onClick={() => setLanguages((ls) => (on ? ls.filter((x) => x !== l) : [...ls, l]))} className={`rounded-full px-3.5 py-2 text-sm ring-1 ${on ? "bg-stone-900 text-white ring-stone-900" : "bg-white text-stone-700 ring-stone-300"}`}>
+                <button key={l} type="button" aria-pressed={on} onClick={() => setLanguages((ls) => (on ? ls.filter((x) => x !== l) : [...ls, l]))} className={`rounded-full px-3.5 py-2 text-base ring-1 ${on ? "bg-onyx text-white ring-onyx" : "bg-white text-onyx/80 ring-onyx/20"}`}>
                   {LOCALE_NAMES[l]}
                 </button>
               );
@@ -158,39 +158,39 @@ export function OrderForm({ slug, kind, email }: { slug: string; kind: ServiceKi
 
       <section className={card}>
         <label className="block">
-          <span className="text-sm font-medium">Wünsche <span className="font-normal text-stone-500">(optional)</span></span>
+          <span className="text-base font-medium">Wünsche <span className="font-normal text-onyx/60">(optional)</span></span>
           <textarea rows={3} maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={kind === "photo_edit" ? "z. B. heller Holztisch als Hintergrund" : "z. B. Mittagsmenü als eigener Bereich"} className={input} />
         </label>
       </section>
 
       <section className={card}>
-        <p className="text-sm font-medium">Kontakt für Rückfragen</p>
+        <p className="text-base font-medium">Kontakt für Rückfragen</p>
         <label className="mt-3 block">
-          <span className="text-sm text-stone-600">Name</span>
+          <span className="text-base text-onyx/70">Name</span>
           <input value={contactName} onChange={(e) => setContactName(e.target.value)} autoComplete="name" className={input} />
         </label>
         <label className="mt-3 block">
-          <span className="text-sm text-stone-600">Telefon</span>
+          <span className="text-base text-onyx/70">Telefon</span>
           <input required value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} type="tel" autoComplete="tel" placeholder="+43 …" className={input} />
         </label>
         <label className="mt-3 block">
-          <span className="text-sm text-stone-600">E-Mail</span>
+          <span className="text-base text-onyx/70">E-Mail</span>
           <input required value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} type="email" autoComplete="email" className={input} />
         </label>
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-stone-100/95 px-4 pb-[max(env(safe-area-inset-bottom),12px)] pt-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-onyx/10 bg-parchment/95 px-4 pb-[max(env(safe-area-inset-bottom),12px)] pt-3 backdrop-blur">
         <div className="mx-auto max-w-3xl">
-          {error && <p className="mb-2 text-sm text-red-700">{error}</p>}
+          {error && <p className="mb-2 text-base text-red-700">{error}</p>}
           <div className="flex items-center gap-3">
-            <span className="min-w-0 flex-1 text-sm">
-              {price.ok ? <><span className="font-semibold">{euro(price.priceCents)}</span>{kind === "photo_edit" && <span className="text-stone-500"> · {price.quantity} Fotos</span>}</> : <span className="text-stone-500">{price.error}</span>}
+            <span className="min-w-0 flex-1 text-base">
+              {price.ok ? <><span className="font-semibold">{euro(price.priceCents)}</span>{kind === "photo_edit" && <span className="text-onyx/60"> · {price.quantity} Fotos</span>}</> : <span className="text-onyx/60">{price.error}</span>}
             </span>
-            <button type="submit" disabled={busy || !check.ok || !price.ok} className="rounded-xl bg-stone-900 px-6 py-3 font-medium text-white disabled:opacity-40">
+            <button type="submit" disabled={busy || !check.ok || !price.ok} className="rounded-xl bg-onyx px-6 py-3 font-medium text-white disabled:opacity-40">
               {progress ? `Wird gesendet… ${progress.done}/${progress.total}` : "Auftrag senden"}
             </button>
           </div>
-          <p className="mt-1 text-xs text-stone-500">Bezahlt wird erst danach — per Karte oder nach Absprache.</p>
+          <p className="mt-1 text-sm text-onyx/60">Bezahlt wird erst danach — per Karte oder nach Absprache.</p>
         </div>
       </div>
     </form>

@@ -8,8 +8,11 @@ import { foldForSearch, parseAllergens, parseDiet, parseVariants } from "@/lib/g
 import { LOCALE_NAMES, MENU_LOCALES, type MenuLocale } from "@/lib/menu-edit";
 import { PACKAGE_LOCALES } from "@/lib/locales";
 import { lockedText } from "@/lib/entitlements";
+import { whatsappUrl } from "@/lib/contact-info";
 import { createSection, deleteSection, moveSection, saveSection, setAvailable, setLocales } from "./actions";
 import { setSectionMenu } from "./menus-actions";
+import { RowPhoto } from "./RowPhoto";
+import { AVAILABILITY_LABEL, availabilityOf, type Availability } from "@/lib/sold-out";
 
 export type EditorSection = { id: string; name: string; position: number; translations: Record<string, { name?: string }> | null; menu_id: string | null };
 export type EditorItem = {
@@ -22,11 +25,13 @@ export type EditorItem = {
   diet_tags: unknown;
   image_url: string | null;
   is_active: boolean;
+  sold_out_until: string | null;
   position: number;
   translations: Record<string, { name?: string; description?: string }> | null;
 };
 
-const card = "rounded-2xl bg-white shadow-sm ring-1 ring-stone-200";
+const card = "rounded-2xl bg-white ring-1 ring-onyx/10";
+const panel = "overflow-hidden rounded-2xl bg-white ring-1 ring-onyx/10";
 // A search box appears once scrolling through the list stops being quick.
 const SEARCH_MIN_ITEMS = 30;
 
@@ -46,9 +51,9 @@ function Switch({ on, onChange, label, disabled }: { on: boolean; onChange: () =
       aria-label={label}
       disabled={disabled}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChange(); }}
-      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors disabled:opacity-50 ${on ? "bg-emerald-600" : "bg-stone-300"}`}
+      className={`relative h-8 w-14 shrink-0 rounded-full transition-colors disabled:opacity-50 ${on ? "bg-emerald-600" : "bg-onyx/25"}`}
     >
-      <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all ${on ? "left-[22px]" : "left-0.5"}`} />
+      <span className={`absolute top-0.5 h-7 w-7 rounded-full bg-white shadow transition-all ${on ? "left-[26px]" : "left-0.5"}`} />
     </button>
   );
 }
@@ -91,18 +96,18 @@ function SectionDialog({
         <p className="text-lg font-semibold">Bereich bearbeiten</p>
         <label className="mt-4 block">
           <span className="text-sm font-medium">Name</span>
-          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} required className="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2.5 text-base outline-none focus:border-stone-900" />
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} required className="mt-1 w-full rounded-xl border border-onyx/20 px-3 py-2.5 text-base outline-none focus:border-onyx" />
         </label>
         {locales.map((l) => (
           <label key={l} className="mt-3 block">
-            <span className="text-sm text-stone-600">{LOCALE_NAMES[l]}</span>
-            <input value={tr[l] ?? ""} placeholder={name} onChange={(e) => setTr((t) => ({ ...t, [l]: e.target.value }))} maxLength={80} className="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2.5 text-base outline-none focus:border-stone-900" />
+            <span className="text-sm text-onyx/70">{LOCALE_NAMES[l]}</span>
+            <input value={tr[l] ?? ""} placeholder={name} onChange={(e) => setTr((t) => ({ ...t, [l]: e.target.value }))} maxLength={80} className="mt-1 w-full rounded-xl border border-onyx/20 px-3 py-2.5 text-base outline-none focus:border-onyx" />
           </label>
         ))}
         {error && <p className="mt-3 text-sm text-red-700">{error}</p>}
         <div className="mt-5 flex gap-2">
-          <button type="submit" disabled={pending} className="flex-1 rounded-xl bg-stone-900 py-3 font-medium text-white disabled:opacity-50">Speichern</button>
-          <button type="button" onClick={onClose} className="rounded-xl px-4 py-3 text-stone-600">Abbrechen</button>
+          <button type="submit" disabled={pending} className="flex-1 rounded-xl bg-onyx py-3 font-medium text-white disabled:opacity-50">Speichern</button>
+          <button type="button" onClick={onClose} className="rounded-xl px-4 py-3 text-onyx/70">Abbrechen</button>
         </div>
         <button
           type="button"
@@ -146,13 +151,18 @@ export function MenuEditor({
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [availability, setAvailability] = useState<Record<string, boolean>>({});
+  const [availability, setAvailability] = useState<Record<string, Availability>>({});
+  // The dish being switched off: the sheet asks "today" or "until I switch it on".
+  const [asking, setAsking] = useState<EditorItem | null>(null);
   const [editing, setEditing] = useState<EditorSection | null>(null);
   const [newSection, setNewSection] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [query, setQuery] = useState("");
+  // Photos added from the list show at once, before the page data comes back.
+  const [photos, setPhotos] = useState<Record<string, string>>({});
 
-  const isAvailable = (it: EditorItem) => availability[it.id] ?? it.is_active;
+  const stateOf = (it: EditorItem): Availability => availability[it.id] ?? availabilityOf(it);
+  const isAvailable = (it: EditorItem) => stateOf(it) === "on";
   const unknownAllergens = items.filter((it) => parseAllergens(it.allergens) === null).length;
   const soldOut = items.filter((it) => !isAvailable(it)).length;
   const canSearch = items.length >= SEARCH_MIN_ITEMS;
@@ -172,11 +182,17 @@ export function MenuEditor({
     });
   }
 
-  function toggle(it: EditorItem) {
-    const next = !isAvailable(it);
-    // One tap, shown at once; rolled back if the server says no.
+  function setState(it: EditorItem, next: Availability) {
+    const before = stateOf(it);
+    // Shown at once; rolled back if the server says no.
     setAvailability((a) => ({ ...a, [it.id]: next }));
-    run(() => setAvailable(slug, it.id, next), () => setAvailability((a) => ({ ...a, [it.id]: !next })));
+    run(() => setAvailable(slug, it.id, next === "on", next === "today" ? "today" : "open"), () => setAvailability((a) => ({ ...a, [it.id]: before })));
+  }
+
+  // Switching on is one tap; switching off asks for how long.
+  function toggle(it: EditorItem) {
+    if (isAvailable(it)) setAsking(it);
+    else setState(it, "on");
   }
 
   function toggleLocale(l: MenuLocale) {
@@ -186,9 +202,9 @@ export function MenuEditor({
 
   const asideCards = (
     <>
-      <section className={`${card} p-5`}>
-        <p className="font-semibold">Sprachen der Karte</p>
-        <p className="mt-0.5 text-sm text-stone-600">Deutsch immer. Gäste wählen oben in der Karte; fehlende Übersetzungen erscheinen auf Deutsch.</p>
+      <section className={`${panel} p-5`}>
+        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#7A5C14]">Sprachen</p>
+        <p className="mt-1 text-base text-onyx/65">Deutsch ist immer an. Die Zahl zeigt, wie viele Gerichte übersetzt sind.</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {(allLanguages ? MENU_LOCALES : PACKAGE_LOCALES).map((l) => {
             const on = locales.includes(l);
@@ -200,53 +216,35 @@ export function MenuEditor({
                 aria-pressed={on}
                 disabled={pending}
                 onClick={() => toggleLocale(l)}
-                className={`rounded-full px-3.5 py-2 text-sm ring-1 transition ${on ? "bg-stone-900 text-white ring-stone-900" : "bg-white text-stone-700 ring-stone-300"}`}
+                className={`min-h-11 rounded-full px-4 text-base ring-1 transition ${on ? "bg-onyx text-parchment ring-onyx" : "bg-white text-onyx ring-onyx/20"}`}
               >
                 {LOCALE_NAMES[l]}
-                {on && items.length > 0 && <span className="ml-1.5 text-xs opacity-70">{done}/{items.length}</span>}
+                {on && items.length > 0 && <span className="ml-1.5 text-sm opacity-70">{done}/{items.length}</span>}
               </button>
             );
           })}
         </div>
-        {!allLanguages && (
-          <div className="mt-4 rounded-xl bg-stone-50 p-3 ring-1 ring-stone-200">
-            <p className="text-sm font-medium">{lockedText("languages").title}</p>
-            <p className="mt-0.5 text-sm text-stone-600">{lockedText("languages").body}</p>
-            <p className="mt-1 text-xs text-stone-500">{MENU_LOCALES.filter((l) => !PACKAGE_LOCALES.includes(l)).map((l) => LOCALE_NAMES[l]).join(", ")}</p>
-            <Link href={`/app/${slug}/konto`} className="mt-2 inline-block text-sm font-medium underline">Zum Zusatzpaket</Link>
-          </div>
-        )}
+        <p className="mt-3 text-base text-onyx/65">
+          Wir übersetzen Ihre Karte für Sie, auch in weitere Sprachen.{" "}
+          <a href={whatsappUrl("Guten Tag, bitte übersetzen Sie meine Speisekarte.")} target="_blank" rel="noreferrer" className="font-semibold text-onyx underline underline-offset-4">Anfragen</a>
+        </p>
       </section>
 
-      <section className={`${card} p-5`}>
-        <p className="font-semibold">Zum Drucken</p>
-        <p className="mt-0.5 text-sm text-stone-600">
-          Ihre Karte als PDF in A4, fertig für den Drucker — mit Datum „Stand“, Allergen-Legende und einem QR-Code zur aktuellen Online-Karte.
-          Gerichte, die gerade als ausverkauft markiert sind, stehen mit drauf.
-        </p>
-        {items.length === 0 ? (
-          <p className="mt-3 text-sm text-stone-500">Sobald Gerichte in der Karte stehen, können Sie sie hier drucken.</p>
-        ) : (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <a href={`/app/${slug}/speisekarte/pdf`} target="_blank" rel="noopener" className="inline-flex min-h-11 items-center rounded-xl bg-stone-900 px-5 text-sm font-medium text-white">
-              PDF öffnen
-            </a>
-            {locales.filter((l) => PACKAGE_LOCALES.includes(l)).map((l) => (
-              <a key={l} href={`/app/${slug}/speisekarte/pdf?lang=${l}`} target="_blank" rel="noopener" className="inline-flex min-h-11 items-center rounded-xl px-4 text-sm font-medium ring-1 ring-stone-300">
-                PDF · {LOCALE_NAMES[l]}
-              </a>
-            ))}
-          </div>
-        )}
-        {locales.some((l) => !PACKAGE_LOCALES.includes(l)) && (
-          <p className="mt-3 text-sm text-stone-500">
-            Gedruckt wird auf Deutsch, Englisch, Italienisch, Französisch und Spanisch. Die weiteren Sprachen gibt es in der Online-Karte.
-          </p>
-        )}
-        <p className="mt-3 text-sm text-stone-600">
-          Ihre Farben, Ihr Logo und Blatt für Blatt nachdrucken?{" "}
-          <Link href={`/app/${slug}/druck`} className="font-medium underline">Zum Druck-Design (Pro)</Link>
-        </p>
+      <section className={panel}>
+        <a href={`/app/${slug}/speisekarte/pdf`} target="_blank" rel="noopener" className="flex min-h-16 items-center justify-between gap-3 px-5 py-3 active:bg-onyx/5">
+          <span>
+            <span className="block text-[17px] font-semibold leading-snug">Karte drucken</span>
+            <span className="block text-base leading-snug text-onyx/60">PDF in A4, mit Allergenen und QR-Code</span>
+          </span>
+          <span aria-hidden className="text-xl text-onyx/40">↗</span>
+        </a>
+        <Link href={`/app/${slug}/druck`} className="flex min-h-16 items-center justify-between gap-3 border-t border-onyx/10 px-5 py-3 active:bg-onyx/5">
+          <span>
+            <span className="block text-[17px] font-semibold leading-snug">Druck-Design</span>
+            <span className="block text-base leading-snug text-onyx/60">Ihre Farben, Ihr Logo, andere Sprachen</span>
+          </span>
+          <span aria-hidden className="text-xl text-onyx/40">›</span>
+        </Link>
       </section>
 
       {menusSlot}
@@ -256,11 +254,20 @@ export function MenuEditor({
   return (
     <div className="space-y-4">
       {items.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-sm text-stone-600">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-base text-onyx/70">
           <span>{sections.length} {sections.length === 1 ? "Bereich" : "Bereiche"} · {items.length} {items.length === 1 ? "Gericht" : "Gerichte"}</span>
           {soldOut > 0 && <span className="font-medium text-red-700">{soldOut} ausverkauft</span>}
           <a href={`/${slug}`} target="_blank" rel="noreferrer" className="ml-auto font-medium underline">Als Gast ansehen</a>
         </div>
+      )}
+
+      {items.some((it) => !(photos[it.id] ?? it.image_url)) && (
+        <p className="px-1 text-base text-onyx/70">
+          Fotos: einfach auf das Kamerafeld beim Gericht tippen.{" "}
+          <a href={whatsappUrl("Guten Tag, ich möchte Fotos meiner Gerichte für die Karte schicken.")} target="_blank" rel="noreferrer" className="font-semibold text-onyx underline underline-offset-4">
+            Zu aufwendig? Schicken Sie uns Ihre Fotos.
+          </a>
+        </p>
       )}
 
       {canSearch && (
@@ -270,14 +277,14 @@ export function MenuEditor({
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Gericht suchen"
           aria-label="Gericht suchen"
-          className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base outline-none focus:border-stone-900"
+          className="w-full rounded-2xl border border-onyx/15 bg-white px-4 py-3.5 text-lg outline-none placeholder:text-onyx/45 focus:border-onyx"
         />
       )}
 
       {unknownAllergens > 0 && items.length > 0 && (
-        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
-          Bei {unknownAllergens} von {items.length} Gerichten fehlen die Allergene. Gäste sehen dort „Keine Angaben — bitte nachfragen“,
-          und der Allergenfilter erscheint erst, wenn die meisten Gerichte Angaben haben.
+        <p className="rounded-2xl bg-amber-50 px-4 py-3 text-base leading-snug text-amber-950 ring-1 ring-amber-200">
+          <strong className="font-semibold">{unknownAllergens} {unknownAllergens === 1 ? "Gericht" : "Gerichte"} ohne Allergene.</strong>{" "}
+          Gäste sehen dort „bitte nachfragen“. Tippen Sie ein Gericht an, um sie einzutragen.
         </p>
       )}
 
@@ -290,18 +297,18 @@ export function MenuEditor({
         if (tokens.length > 0 && list.length === 0) return null;
         const isCollapsed = tokens.length === 0 && collapsed.has(s.id);
         return (
-          <section key={s.id} className={card}>
-            <header className="flex items-center gap-2 border-b border-stone-100 px-4 py-3">
+          <section key={s.id} className={panel}>
+            <header className="flex items-center gap-1 border-b border-onyx/10 py-3 pl-4 pr-2">
               <button
                 type="button"
                 onClick={() => toggleCollapsed(s.id)}
                 aria-expanded={!isCollapsed}
                 className="flex min-w-0 flex-1 items-center gap-2 text-left"
               >
-                <span aria-hidden className={`shrink-0 text-stone-400 transition-transform ${isCollapsed ? "" : "rotate-90"}`}>›</span>
+                <span aria-hidden className={`shrink-0 text-xl text-onyx/40 transition-transform ${isCollapsed ? "" : "rotate-90"}`}>›</span>
                 <span className="min-w-0">
-                  <span className="block truncate font-semibold">{s.name}</span>
-                  <span className="block text-xs text-stone-500">{all.length} {all.length === 1 ? "Gericht" : "Gerichte"}</span>
+                  <span className="block truncate font-display text-[26px] font-medium leading-tight">{s.name}</span>
+                  <span className="block text-sm text-onyx/60">{all.length} {all.length === 1 ? "Gericht" : "Gerichte"}</span>
                 </span>
               </button>
               <div className="min-w-0">
@@ -311,7 +318,7 @@ export function MenuEditor({
                     disabled={pending}
                     value={s.menu_id ?? ""}
                     onChange={(e) => run(() => setSectionMenu(slug, s.id, e.target.value || null))}
-                    className="mt-1.5 max-w-full rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm"
+                    className="mt-1.5 max-w-full rounded-lg border border-onyx/20 bg-white px-2 py-1.5 text-sm"
                   >
                     <option value="">In allen Karten</option>
                     {menus.map((m) => (
@@ -320,47 +327,48 @@ export function MenuEditor({
                   </select>
                 )}
               </div>
-              <button type="button" aria-label="Bereich nach oben" disabled={pending || si === 0} onClick={() => run(() => moveSection(slug, s.id, -1))} className="h-9 w-9 rounded-lg text-stone-500 hover:bg-stone-100 disabled:opacity-30">↑</button>
-              <button type="button" aria-label="Bereich nach unten" disabled={pending || si === sections.length - 1} onClick={() => run(() => moveSection(slug, s.id, 1))} className="h-9 w-9 rounded-lg text-stone-500 hover:bg-stone-100 disabled:opacity-30">↓</button>
-              <button type="button" onClick={() => setEditing(s)} className="rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100">Bearbeiten</button>
+              <button type="button" aria-label="Bereich nach oben" disabled={pending || si === 0} onClick={() => run(() => moveSection(slug, s.id, -1))} className="h-11 w-9 rounded-lg text-lg text-onyx/55 hover:bg-onyx/5 disabled:opacity-25">↑</button>
+              <button type="button" aria-label="Bereich nach unten" disabled={pending || si === sections.length - 1} onClick={() => run(() => moveSection(slug, s.id, 1))} className="h-11 w-9 rounded-lg text-lg text-onyx/55 hover:bg-onyx/5 disabled:opacity-25">↓</button>
+              <button type="button" onClick={() => setEditing(s)} className="min-h-11 rounded-lg px-2.5 text-base font-medium text-onyx/75 hover:bg-onyx/5">Ändern</button>
             </header>
 
             {!isCollapsed && (<>
-            <ul className="divide-y divide-stone-100">
+            <ul className="divide-y divide-onyx/10">
               {list.map((it) => {
                 const allergens = parseAllergens(it.allergens);
                 const diet = parseDiet(it.diet_tags);
                 const on = isAvailable(it);
                 return (
-                  <li key={it.id} id={`item-${it.id}`} className="flex items-center gap-3 px-4 py-3">
-                    <Link href={`/app/${slug}/speisekarte/gericht/${it.id}`} className="flex min-w-0 flex-1 items-center gap-3">
-                      {it.image_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={it.image_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
-                      ) : (
-                        <span className="h-12 w-12 shrink-0 rounded-lg bg-stone-100" aria-hidden />
-                      )}
-                      <span className="min-w-0">
-                        <span className={`block truncate font-medium ${on ? "" : "text-stone-400 line-through"}`}>{it.name}</span>
-                        <span className="block truncate text-sm text-stone-500">
-                          {priceSummary(it, currency)}
+                  <li key={it.id} id={`item-${it.id}`} className="flex items-center gap-3 px-4 py-3.5">
+                    <RowPhoto
+                      itemId={it.id}
+                      name={it.name}
+                      url={photos[it.id] ?? it.image_url}
+                      href={`/app/${slug}/speisekarte/gericht/${it.id}`}
+                      onUploaded={(url) => { setPhotos((p) => ({ ...p, [it.id]: url })); router.refresh(); }}
+                    />
+                    <Link href={`/app/${slug}/speisekarte/gericht/${it.id}`} className="min-w-0 flex-1 py-1">
+                      <span className={`block text-[17px] font-semibold leading-snug ${on ? "" : "text-onyx/40 line-through"}`}>{it.name}</span>
+                      <span className="mt-0.5 block truncate text-base">
+                        <span className="font-medium text-[#7A5C14]">{priceSummary(it, currency)}</span>
+                        <span className="text-onyx/60">
                           {allergens && allergens.length > 0 && ` · ${allergens.join(" ")}`}
                           {diet.has("vegan") ? " · vegan" : diet.has("vegetarisch") ? " · vegetarisch" : ""}
                         </span>
-                        {allergens === null && <span className="block text-xs text-amber-700">Allergene fehlen</span>}
                       </span>
+                      {allergens === null && <span className="block text-sm text-amber-700">Allergene fehlen</span>}
                     </Link>
-                    <span className="flex shrink-0 flex-col items-center gap-0.5">
+                    <span className="flex shrink-0 flex-col items-center gap-1">
                       <Switch on={on} onChange={() => toggle(it)} label={on ? `${it.name}: verfügbar` : `${it.name}: ausverkauft`} />
-                      <span className={`text-[10px] ${on ? "text-stone-500" : "font-semibold text-red-700"}`}>{on ? "verfügbar" : "aus"}</span>
+                      <span className={`text-xs ${on ? "text-onyx/60" : "font-semibold text-red-700"}`}>{AVAILABILITY_LABEL[stateOf(it)]}</span>
                     </span>
                   </li>
                 );
               })}
             </ul>
 
-            <Link href={`/app/${slug}/speisekarte/gericht/neu?bereich=${s.id}`} className="block border-t border-stone-100 px-4 py-3 text-sm font-medium text-stone-700 hover:bg-stone-50">
-              + Gericht
+            <Link href={`/app/${slug}/speisekarte/gericht/neu?bereich=${s.id}`} className="flex min-h-14 items-center gap-2 border-t border-onyx/10 px-4 text-[17px] font-semibold text-[#7A5C14] hover:bg-onyx/[0.03]">
+              <span aria-hidden className="text-2xl leading-none">+</span> Gericht hinzufügen
             </Link>
             </>)}
           </section>
@@ -368,22 +376,45 @@ export function MenuEditor({
       })}
 
       {tokens.length > 0 && items.filter(matchesQuery).length === 0 && (
-        <p className="px-1 text-sm text-stone-600">Kein Gericht passt zu „{query}“.</p>
+        <p className="px-1 text-sm text-onyx/70">Kein Gericht passt zu „{query}“.</p>
       )}
 
       <form
         onSubmit={(e) => { e.preventDefault(); const n = newSection; run(() => createSection(slug, n)); setNewSection(""); }}
-        className={`${card} flex gap-2 p-3`}
+        className={`${panel} flex gap-2 p-3`}
       >
-        <input value={newSection} onChange={(e) => setNewSection(e.target.value)} maxLength={80} placeholder="Neuer Bereich, z. B. Desserts" className="min-w-0 flex-1 rounded-xl border border-stone-300 px-3 py-2.5 text-base outline-none focus:border-stone-900" />
-        <button type="submit" disabled={pending || !newSection.trim()} className="shrink-0 rounded-xl bg-stone-900 px-4 font-medium text-white disabled:opacity-40">Anlegen</button>
+        <input value={newSection} onChange={(e) => setNewSection(e.target.value)} maxLength={80} placeholder="Neuer Bereich, z. B. Desserts" aria-label="Neuer Bereich" className="min-w-0 flex-1 rounded-xl border border-onyx/20 px-3.5 py-3 text-lg outline-none placeholder:text-onyx/40 focus:border-onyx" />
+        <button type="submit" disabled={pending || !newSection.trim()} className="min-h-12 shrink-0 rounded-xl bg-onyx px-5 text-base font-semibold text-parchment disabled:opacity-40">Hinzufügen</button>
       </form>
 
-      <Link href={`/app/${slug}/start`} className="block text-center text-sm text-stone-600 underline">
-        Mehrere Gerichte auf einmal als Text einfügen
+      <Link href={`/app/${slug}/start`} className={`${panel} flex min-h-16 items-center justify-between gap-3 px-5 py-3 active:bg-onyx/5`}>
+        <span>
+          <span className="block text-[17px] font-semibold leading-snug">Viele Gerichte auf einmal</span>
+          <span className="block text-base leading-snug text-onyx/60">Text einfügen oder Datei hochladen</span>
+        </span>
+        <span aria-hidden className="text-xl text-onyx/40">›</span>
       </Link>
 
       {asideCards}
+
+      {asking && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={`${asking.name} ausschalten`}>
+          <button type="button" aria-label="Schließen" className="absolute inset-0 bg-black/45" onClick={() => setAsking(null)} />
+          <div className="relative w-full max-w-md rounded-t-3xl bg-white p-5 pb-[max(env(safe-area-inset-bottom),20px)] sm:rounded-3xl">
+            <p className="font-display text-3xl font-medium leading-tight">{asking.name}</p>
+            <p className="mt-1 text-base text-onyx/70">Gäste sehen das Gericht weiter, aber grau und als „nicht verfügbar“.</p>
+            <button type="button" onClick={() => { setState(asking, "today"); setAsking(null); }} className="mt-5 flex min-h-16 w-full flex-col items-start justify-center rounded-2xl bg-onyx px-5 text-left text-parchment">
+              <span className="text-lg font-semibold">Heute aus</span>
+              <span className="text-sm text-parchment/75">Morgen früh ist es von selbst wieder da.</span>
+            </button>
+            <button type="button" onClick={() => { setState(asking, "open"); setAsking(null); }} className="mt-3 flex min-h-16 w-full flex-col items-start justify-center rounded-2xl px-5 text-left ring-1 ring-onyx/20">
+              <span className="text-lg font-semibold">Aus, bis ich es einschalte</span>
+              <span className="text-sm text-onyx/65">Zum Beispiel außerhalb der Saison.</span>
+            </button>
+            <button type="button" onClick={() => setAsking(null)} className="mt-2 min-h-12 w-full text-base font-medium text-onyx/70">Abbrechen</button>
+          </div>
+        </div>
+      )}
 
       {editing && (
         <SectionDialog

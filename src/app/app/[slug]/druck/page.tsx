@@ -14,7 +14,7 @@ import { PACKAGE_LOCALES } from "@/lib/locales";
 
 export const dynamic = "force-dynamic";
 
-// Print design (Pro): the look, which sections sit on which sheet, and what needs reprinting.
+// Print design: the look, which sections sit on which sheet, and what needs reprinting.
 export default async function DruckPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ lang?: string }> }) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const { venue } = await requireVenue(slug);
@@ -25,8 +25,8 @@ export default async function DruckPage({ params, searchParams }: { params: Prom
   if (!ctx) notFound();
   if (ctx.sheets.length === 0) {
     return (
-      <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
-        <p className="text-stone-600">Sobald Gerichte in Ihrer Karte stehen, können Sie hier Blätter zum Drucken gestalten.</p>
+      <section className="rounded-2xl bg-white p-6 ring-1 ring-onyx/10">
+        <p className="text-onyx/70">Sobald Gerichte in Ihrer Karte stehen, können Sie hier Blätter zum Drucken gestalten.</p>
       </section>
     );
   }

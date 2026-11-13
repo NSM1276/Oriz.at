@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { SuperAdminView } from "@/components/admin/SuperAdminView";
 import { RoleHub } from "@/components/admin/RoleHub";
 import type { Item, Section, Venue } from "@/lib/supabase/types";
-import { isPlatformAdmin, memberVenues } from "@/lib/auth";
+import { isPlatformAdmin, memberVenues, serviceClient } from "@/lib/auth";
+import { standingOf, type Subscription } from "@/lib/entitlements";
 
 export const revalidate = 0;
 
@@ -35,12 +36,22 @@ export default async function AdminPage() {
     redirect("/app");
   }
 
-  // Platform admins: the venue list and the Casa / leads tools.
-  const { data: venues } = await supabase
-    .from("venues")
-    .select("id, slug, name, about, color_bg, color_primary, logo_url, logo_svg, plan, menu_theme, instagram_url, google_maps_url, phone, address, website_url, google_review_url, tripadvisor_url, facebook_url, price_range, opening_hours, gallery, sections(id, items(id))")
-    .order("created_at", { ascending: true })
-    .returns<VenueRow[]>();
+  // Platform admins: today's to-dos, then every venue with its subscription.
+  const db = serviceClient();
+  const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Vienna" }).format(new Date());
+  const [{ data: venues }, { data: subs }, { count: dueLeads }, { count: openOrders }] = await Promise.all([
+    supabase
+      .from("venues")
+      .select("id, slug, name, about, color_bg, color_primary, logo_url, logo_svg, plan, menu_theme, instagram_url, google_maps_url, phone, address, website_url, google_review_url, tripadvisor_url, facebook_url, price_range, opening_hours, gallery, published, sections(id, items(id))")
+      .order("created_at", { ascending: false })
+      .returns<(VenueRow & { published: boolean })[]>(),
+    db.from("subscriptions").select("*").returns<(Subscription & { venue_id: string })[]>(),
+    db.schema("casa").from("leads").select("id", { count: "exact", head: true })
+      .lte("follow_up_on", today).not("status", "in", "(kunde,kein_interesse)"),
+    db.from("service_orders").select("id", { count: "exact", head: true }).in("status", ["bezahlt", "in_arbeit"]),
+  ]);
+  const subOf = new Map((subs ?? []).map((s) => [s.venue_id, s]));
+  const now = new Date();
 
   const list = (venues ?? []).map(v => ({
     id: v.id,
@@ -65,7 +76,9 @@ export default async function AdminPage() {
     opening_hours: (v as { opening_hours?: Record<string, [string, string][]> | null }).opening_hours ?? null,
     gallery: (v as { gallery?: string[] | null }).gallery ?? null,
     itemCount: v.sections?.reduce((acc, s) => acc + (s.items?.length ?? 0), 0) ?? 0,
+    published: v.published,
+    standing: standingOf(subOf.get(v.id) ?? null, now),
   }));
 
-  return <SuperAdminView venues={list} />;
+  return <SuperAdminView venues={list} dueLeads={dueLeads ?? 0} openOrders={openOrders ?? 0} />;
 }

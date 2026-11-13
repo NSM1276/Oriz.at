@@ -37,7 +37,7 @@ export function OrderControls({ orderId, status, note, hasEmail }: { orderId: st
   const moves = MOVES.filter((m) => canMove(status, m.to));
 
   return (
-    <div className="mt-4 border-t border-stone-100 pt-4">
+    <div className="mt-4 border-t border-onyx/10 pt-4">
       {moves.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           {moves.map((m) => (
@@ -46,20 +46,20 @@ export function OrderControls({ orderId, status, note, hasEmail }: { orderId: st
               type="button"
               disabled={pending}
               onClick={() => move(m.to)}
-              className={`rounded-xl px-4 py-2 text-sm font-medium disabled:opacity-50 ${m.primary ? "bg-stone-900 text-white" : m.to === "storniert" ? "text-red-700 ring-1 ring-red-200" : "ring-1 ring-stone-300"}`}
+              className={`rounded-xl px-4 py-2 text-sm font-medium disabled:opacity-50 ${m.primary ? "bg-onyx text-white" : m.to === "storniert" ? "text-red-700 ring-1 ring-red-200" : "ring-1 ring-onyx/20"}`}
             >
               {m.label}
             </button>
           ))}
           {hasEmail && (
-            <label className="ml-auto flex items-center gap-2 text-sm text-stone-600">
+            <label className="ml-auto flex items-center gap-2 text-sm text-onyx/70">
               <input type="checkbox" checked={notify} onChange={(e) => setNotify(e.target.checked)} />
               Kunden informieren
             </label>
           )}
         </div>
       )}
-      {message && <p className="mt-2 text-sm text-stone-700">{message}</p>}
+      {message && <p className="mt-2 text-sm text-onyx/80">{message}</p>}
       <form
         className="mt-3 flex gap-2"
         onSubmit={(e) => {
@@ -70,8 +70,8 @@ export function OrderControls({ orderId, status, note, hasEmail }: { orderId: st
           });
         }}
       >
-        <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Interne Notiz (z. B. Überweisung am …)" className="min-w-0 flex-1 rounded-xl border border-stone-300 px-3 py-2 text-sm outline-none focus:border-stone-900" />
-        <button type="submit" disabled={pending} className="rounded-xl px-3 py-2 text-sm font-medium ring-1 ring-stone-300 disabled:opacity-50">Speichern</button>
+        <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Interne Notiz (z. B. Überweisung am …)" className="min-w-0 flex-1 rounded-xl border border-onyx/20 px-3 py-2 text-sm outline-none focus:border-onyx" />
+        <button type="submit" disabled={pending} className="rounded-xl px-3 py-2 text-sm font-medium ring-1 ring-onyx/20 disabled:opacity-50">Speichern</button>
       </form>
     </div>
   );

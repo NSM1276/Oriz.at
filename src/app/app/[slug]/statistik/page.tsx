@@ -18,8 +18,8 @@ import { Delta, StatTile } from "../ui";
 
 export const dynamic = "force-dynamic";
 
-const card = "rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200";
-const label = "text-xs font-medium uppercase tracking-widest text-stone-500";
+const card = "rounded-2xl bg-white p-5 ring-1 ring-onyx/10";
+const label = "text-sm font-medium uppercase tracking-widest text-onyx/60";
 const dayFmt = new Intl.DateTimeFormat("de-AT", { weekday: "short", day: "numeric", month: "numeric", timeZone: "UTC" });
 const nf = new Intl.NumberFormat("de-AT");
 
@@ -74,13 +74,13 @@ export default async function StatsPage({ params, searchParams }: { params: Prom
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-end gap-3">
-        <nav className="flex gap-1 rounded-full bg-white p-1 shadow-sm ring-1 ring-stone-200" aria-label="Zeitraum">
+        <nav className="flex gap-1 rounded-full bg-white p-1 ring-1 ring-onyx/10" aria-label="Zeitraum">
           {STAT_PERIODS.map((p) => (
             <Link
               key={p}
               href={`/app/${venue.slug}/statistik?tage=${p}`}
               aria-current={p === period ? "page" : undefined}
-              className={`rounded-full px-3.5 py-1.5 text-sm font-medium ${p === period ? "bg-stone-900 text-white" : "text-stone-600"}`}
+              className={`rounded-full px-3.5 py-1.5 text-base font-medium ${p === period ? "bg-onyx text-white" : "text-onyx/70"}`}
             >
               {p} Tage
             </Link>
@@ -89,7 +89,7 @@ export default async function StatsPage({ params, searchParams }: { params: Prom
       </div>
 
       {nothingYet && (
-        <p className="rounded-xl bg-stone-50 px-4 py-3 text-sm text-stone-600 ring-1 ring-stone-200">
+        <p className="rounded-xl bg-onyx/[0.03] px-4 py-3 text-base text-onyx/70 ring-1 ring-onyx/10">
           Noch keine Zahlen in diesem Zeitraum. Sobald Gäste Ihre Karte öffnen, erscheinen sie hier — gezählt wird ab dem 24. Oktober 2026.
         </p>
       )}
@@ -104,24 +104,24 @@ export default async function StatsPage({ params, searchParams }: { params: Prom
       <section className={card}>
         <p className={label}>Karte geöffnet pro Tag</p>
         {views.busiestDay && (
-          <p className="mt-1 text-sm text-stone-600">
+          <p className="mt-1 text-base text-onyx/70">
             Stärkster Tag: {dayFmt.format(new Date(`${views.busiestDay.day}T00:00:00Z`))} mit {nf.format(views.busiestDay.n)}
           </p>
         )}
         <div className="mt-4 flex h-40 items-end gap-[2px]" role="img" aria-label={`Aufrufe pro Tag, insgesamt ${views.total}`}>
           {views.perDay.map((d) => (
             <div key={d.day} className="group relative flex h-full flex-1 flex-col justify-end" title={`${dayFmt.format(new Date(`${d.day}T00:00:00Z`))}: ${d.n}`}>
-              <div className="w-full rounded-t-sm bg-stone-900" style={{ height: `${(d.n / maxDay) * 100}%`, minHeight: d.n > 0 ? 3 : 0 }} />
+              <div className="w-full rounded-t-sm bg-onyx" style={{ height: `${(d.n / maxDay) * 100}%`, minHeight: d.n > 0 ? 3 : 0 }} />
             </div>
           ))}
         </div>
         {showDayLabels && (
-          <div className="mt-1 flex justify-between text-[11px] text-stone-500">
+          <div className="mt-1 flex justify-between text-xs text-onyx/60">
             <span>{dayFmt.format(new Date(`${days[0]}T00:00:00Z`))}</span>
             <span>heute</span>
           </div>
         )}
-        <p className="mt-3 text-xs text-stone-500">
+        <p className="mt-3 text-sm text-onyx/60">
           Jeder Aufruf der Karte zählt einmal. Gezählt wird nur, wie oft — keine Daten über Ihre Gäste.
         </p>
       </section>
@@ -130,13 +130,13 @@ export default async function StatsPage({ params, searchParams }: { params: Prom
         <section className={card}>
           <p className={label}>Service-Rufe</p>
           {callSummary.total === 0 ? (
-            <p className="mt-2 text-sm text-stone-600">
+            <p className="mt-2 text-base text-onyx/70">
               Keine Rufe in diesem Zeitraum.{" "}
               <Link href={`/app/${venue.slug}/service`} className="underline">Service-Ruf einstellen</Link>
             </p>
           ) : (
             <>
-              <ul className="mt-3 space-y-2 text-sm">
+              <ul className="mt-3 space-y-2 text-base">
                 {(["order", "bill", "help"] as const).map((k) => (
                   <li key={k} className="flex justify-between">
                     <span>{KIND_LABEL_DE[k]}</span>
@@ -144,7 +144,7 @@ export default async function StatsPage({ params, searchParams }: { params: Prom
                   </li>
                 ))}
               </ul>
-              <div className="mt-4 space-y-1 border-t border-stone-100 pt-3 text-sm text-stone-600">
+              <div className="mt-4 space-y-1 border-t border-onyx/10 pt-3 text-base text-onyx/70">
                 {callSummary.withinTwoMinutes !== null && (
                   <p>{Math.round(callSummary.withinTwoMinutes * 100)} % innerhalb von 2 Minuten angenommen</p>
                 )}
@@ -159,12 +159,12 @@ export default async function StatsPage({ params, searchParams }: { params: Prom
         <section className={card}>
           <p className={label}>Tische</p>
           {views.byTable.length === 0 ? (
-            <p className="mt-2 text-sm text-stone-600">
+            <p className="mt-2 text-base text-onyx/70">
               Noch keine Aufrufe über Tisch-QR-Codes.{" "}
               <Link href={`/app/${venue.slug}/tische`} className="underline">QR-Codes drucken</Link>
             </p>
           ) : (
-            <ul className="mt-3 space-y-2 text-sm">
+            <ul className="mt-3 space-y-2 text-base">
               {views.byTable.slice(0, 8).map((t) => (
                 <li key={t.ref} className="flex justify-between gap-3">
                   <span className="truncate">{tableName.get(t.ref) ?? "Gelöschter Tisch"}</span>
@@ -174,7 +174,7 @@ export default async function StatsPage({ params, searchParams }: { params: Prom
             </ul>
           )}
           {views.noTable > 0 && (
-            <p className="mt-3 border-t border-stone-100 pt-3 text-sm text-stone-600">
+            <p className="mt-3 border-t border-onyx/10 pt-3 text-base text-onyx/70">
               Ohne Tisch (Link, Google, Website): <span className="font-medium tabular-nums">{nf.format(views.noTable)}</span>
             </p>
           )}
@@ -183,19 +183,19 @@ export default async function StatsPage({ params, searchParams }: { params: Prom
 
       <section className={card}>
         <p className={label}>Beliebteste Gerichte</p>
-        <p className="mt-1 text-sm text-stone-600">Wie oft Gäste ein Gericht angetippt haben, um mehr zu sehen.</p>
+        <p className="mt-1 text-base text-onyx/70">Wie oft Gäste ein Gericht angetippt haben, um mehr zu sehen.</p>
         {dishes.length === 0 ? (
-          <p className="mt-3 text-sm text-stone-500">Noch keine Daten.</p>
+          <p className="mt-3 text-base text-onyx/60">Noch keine Daten.</p>
         ) : (
           <ol className="mt-4 space-y-2.5">
             {dishes.map((d, i) => (
-              <li key={d.ref} className="text-sm">
+              <li key={d.ref} className="text-base">
                 <div className="flex justify-between gap-3">
-                  <span className="truncate"><span className="mr-2 tabular-nums text-stone-400">{i + 1}.</span>{itemName.get(d.ref) ?? "Gelöschtes Gericht"}</span>
+                  <span className="truncate"><span className="mr-2 tabular-nums text-onyx/40">{i + 1}.</span>{itemName.get(d.ref) ?? "Gelöschtes Gericht"}</span>
                   <span className="font-medium tabular-nums">{nf.format(d.n)}</span>
                 </div>
-                <div className="mt-1 h-1.5 rounded-full bg-stone-100">
-                  <div className="h-1.5 rounded-full bg-stone-900" style={{ width: `${(d.n / maxDish) * 100}%` }} />
+                <div className="mt-1 h-1.5 rounded-full bg-onyx/5">
+                  <div className="h-1.5 rounded-full bg-onyx" style={{ width: `${(d.n / maxDish) * 100}%` }} />
                 </div>
               </li>
             ))}

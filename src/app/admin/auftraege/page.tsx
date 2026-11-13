@@ -5,6 +5,7 @@ import { emailConfigured } from "@/lib/email";
 import { SERVICE_INFO, STATUS_LABEL, euro, type OrderStatus, type ServiceKind } from "@/lib/services";
 import { InvoiceBox } from "./InvoiceBox";
 import { OrderControls } from "./OrderControls";
+import { AdminFrame, AdminTitle } from "../AdminFrame";
 
 export const dynamic = "force-dynamic";
 
@@ -58,60 +59,57 @@ export default async function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 font-sans text-stone-900 [color-scheme:light]">
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
-        <Link href="/admin" className="text-sm font-medium text-stone-600">‹ Admin</Link>
-        <h1 className="mt-2 text-2xl font-semibold">Aufträge</h1>
-        <p className="mt-1 text-sm text-stone-600">Einrichtung und Fotobearbeitung — von Hand. Kunden bekommen bei „Bezahlt“, „In Arbeit“ und „Fertig“ eine E-Mail.</p>
+    <AdminFrame>
+        <AdminTitle title="Aufträge" line="Einrichtung und Fotos. Bei „Bezahlt“, „In Arbeit“ und „Fertig“ bekommt der Kunde eine E-Mail." />
         {!emailConfigured() && (
           <p className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
             E-Mail ist noch nicht eingerichtet (RESEND_API_KEY, EMAIL_FROM) — Kunden bitte selbst anrufen oder anschreiben.
           </p>
         )}
 
-        {orders.length === 0 && <p className="mt-8 rounded-2xl bg-white p-6 text-stone-600 ring-1 ring-stone-200">Noch keine Aufträge.</p>}
+        {orders.length === 0 && <p className="mt-8 rounded-2xl bg-white p-6 text-onyx/70 ring-1 ring-onyx/10">Noch keine Aufträge.</p>}
 
         {GROUPS.map((g) => {
           const list = orders.filter((o) => g.statuses.includes(o.status));
           if (list.length === 0) return null;
           return (
             <section key={g.title} className="mt-6">
-              <p className="text-xs font-medium uppercase tracking-widest text-stone-500">{g.title} · {list.length}</p>
+              <p className="text-xs font-medium uppercase tracking-widest text-onyx/60">{g.title} · {list.length}</p>
               <div className="mt-2 space-y-3">
                 {list.map((o) => (
-                  <article key={o.id} id={o.id} className="scroll-mt-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200">
+                  <article key={o.id} id={o.id} className="scroll-mt-4 rounded-2xl bg-white p-5 ring-1 ring-onyx/10">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0">
                         <p className="font-semibold">{o.venues.name}</p>
-                        <p className="text-sm text-stone-600">
+                        <p className="text-sm text-onyx/70">
                           {SERVICE_INFO[o.kind].title} · {o.kind === "photo_edit" ? `${o.quantity} Fotos · ` : ""}{euro(o.price_cents)}
                         </p>
                       </div>
-                      <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium">{STATUS_LABEL[o.status]}</span>
+                      <span className="rounded-full bg-onyx/5 px-2.5 py-1 text-xs font-medium">{STATUS_LABEL[o.status]}</span>
                     </div>
 
                     <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-                      <dt className="text-stone-500">Kontakt</dt>
+                      <dt className="text-onyx/60">Kontakt</dt>
                       <dd className="min-w-0">
                         {o.contact_name && <span className="block">{o.contact_name}</span>}
                         {o.contact_phone && <a className="block underline" href={`tel:${o.contact_phone.replace(/\s+/g, "")}`}>{o.contact_phone}</a>}
                         {o.contact_email && <a className="block truncate underline" href={`mailto:${o.contact_email}`}>{o.contact_email}</a>}
                       </dd>
-                      <dt className="text-stone-500">Eingang</dt>
+                      <dt className="text-onyx/60">Eingang</dt>
                       <dd>{o.submitted_at ? dateFmt.format(new Date(o.submitted_at)) : "—"}{o.paid_at && ` · bezahlt ${dateFmt.format(new Date(o.paid_at))}`}{o.done_at && ` · fertig ${dateFmt.format(new Date(o.done_at))}`}</dd>
-                      {o.languages.length > 0 && (<><dt className="text-stone-500">Sprachen</dt><dd>{o.languages.join(", ").toUpperCase()}</dd></>)}
-                      {o.link_url && (<><dt className="text-stone-500">Link</dt><dd className="min-w-0 truncate"><a className="underline" href={o.link_url} target="_blank" rel="noreferrer noopener">{o.link_url}</a></dd></>)}
-                      {o.notes && (<><dt className="text-stone-500">Wünsche</dt><dd className="whitespace-pre-line">{o.notes}</dd></>)}
+                      {o.languages.length > 0 && (<><dt className="text-onyx/60">Sprachen</dt><dd>{o.languages.join(", ").toUpperCase()}</dd></>)}
+                      {o.link_url && (<><dt className="text-onyx/60">Link</dt><dd className="min-w-0 truncate"><a className="underline" href={o.link_url} target="_blank" rel="noreferrer noopener">{o.link_url}</a></dd></>)}
+                      {o.notes && (<><dt className="text-onyx/60">Wünsche</dt><dd className="whitespace-pre-line">{o.notes}</dd></>)}
                     </dl>
 
                     {o.files.length > 0 && o.status !== "storniert" && (
-                      <ul className="mt-3 divide-y divide-stone-100 rounded-xl bg-stone-50 px-3 text-sm">
+                      <ul className="mt-3 divide-y divide-onyx/10 rounded-xl bg-onyx/[0.03] px-3 text-sm">
                         {o.files.map((f) => (
                           <li key={f.path} className="flex items-center justify-between gap-3 py-2">
                             <span className="min-w-0 truncate">{f.name}</span>
-                            <span className="flex shrink-0 items-center gap-3 text-stone-500">
+                            <span className="flex shrink-0 items-center gap-3 text-onyx/60">
                               {size(f.size)}
-                              {links.get(f.path) ? <a className="font-medium text-stone-900 underline" href={links.get(f.path)}>Laden</a> : "—"}
+                              {links.get(f.path) ? <a className="font-medium text-onyx underline" href={links.get(f.path)}>Laden</a> : "—"}
                             </span>
                           </li>
                         ))}
@@ -137,7 +135,6 @@ export default async function OrdersPage() {
             </section>
           );
         })}
-      </main>
-    </div>
+    </AdminFrame>
   );
 }

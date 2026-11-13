@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getUser, isPlatformAdmin, serviceClient } from "@/lib/auth";
 import { LEAD_STATUS_LABEL, isLeadStatus, waLink, type LeadStatus } from "@/lib/contact-info";
-import { AddLeadForm, LeadEdit } from "./LeadControls";
+import { inviteState } from "@/lib/invite";
+import { AdminFrame, AdminTitle } from "../AdminFrame";
+import { AddLeadForm, InviteButton, LeadEdit } from "./LeadControls";
 
 export const dynamic = "force-dynamic";
 
@@ -31,22 +32,32 @@ export default async function SalesPage() {
     .order("created_at", { ascending: false })
     .limit(500)
     .returns<Lead[]>();
+  // The newest invitation of each contact: open, used (account exists) or expired.
+  const { data: invites } = await serviceClient()
+    .from("signup_invites")
+    .select("lead_id, used_at, expires_at, created_at")
+    .not("lead_id", "is", null)
+    .order("created_at", { ascending: true })
+    .returns<{ lead_id: string; used_at: string | null; expires_at: string }[]>();
+  const inviteOf = new Map<string, "open" | "used" | "expired">();
+  for (const i of invites ?? []) {
+    const st = inviteState(i);
+    if (st !== "missing" && inviteOf.get(i.lead_id) !== "used") inviteOf.set(i.lead_id, st);
+  }
   const today = todayVienna();
   const leads = (data ?? []).slice().sort((a, b) => rank(a) - rank(b) || (a.follow_up_on ?? "9").localeCompare(b.follow_up_on ?? "9"));
   const due = leads.filter((l) => l.follow_up_on && l.follow_up_on <= today && !closed(l.status)).length;
 
   return (
-    <div className="min-h-screen bg-stone-100 font-sans text-stone-900 [color-scheme:light]">
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
-        <Link href="/admin" className="text-sm font-medium text-stone-600">‹ Admin</Link>
-        <h1 className="mt-2 text-2xl font-semibold">Vertrieb</h1>
-        <p className="mt-1 text-sm text-stone-600">
-          Kontakte vom Markt und Anfragen vom Formular. {leads.length} {leads.length === 1 ? "Eintrag" : "Einträge"}{due > 0 && <> · <span className="font-medium text-red-700">{due} heute oder überfällig</span></>}
-        </p>
+    <AdminFrame>
+        <AdminTitle
+          title="Vertrieb"
+          line={<>{leads.length} {leads.length === 1 ? "Kontakt" : "Kontakte"}{due > 0 && <> · <span className="font-medium text-red-700">{due} heute melden</span></>}</>}
+        />
 
         <AddLeadForm />
 
-        {leads.length === 0 && <p className="mt-6 rounded-2xl bg-white p-6 text-stone-600 ring-1 ring-stone-200">Noch keine Kontakte.</p>}
+        {leads.length === 0 && <p className="mt-6 rounded-2xl bg-white p-6 text-onyx/70 ring-1 ring-onyx/10">Noch keine Kontakte.</p>}
 
         <div className="mt-5 space-y-3">
           {leads.map((l) => {
@@ -54,15 +65,15 @@ export default async function SalesPage() {
             const wa = waLink(l.phone);
             const overdue = !!l.follow_up_on && l.follow_up_on <= today && !closed(status);
             return (
-              <article key={l.id} className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ${overdue ? "ring-red-300" : "ring-stone-200"}`}>
+              <article key={l.id} className={`rounded-2xl bg-white p-5 ring-1 ${overdue ? "ring-red-300" : "ring-onyx/10"}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="font-semibold">{l.property_name || l.contact_name || "—"}</p>
-                    <p className="text-sm text-stone-500">
+                    <p className="text-sm text-onyx/60">
                       {[l.property_type, SOURCE_LABEL[l.source ?? ""] ?? l.source, l.created_at ? dateFmt.format(new Date(l.created_at)) : null].filter(Boolean).join(" · ")}
                     </p>
                   </div>
-                  <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium">{LEAD_STATUS_LABEL[status]}</span>
+                  <span className="rounded-full bg-onyx/5 px-2.5 py-1 text-xs font-medium">{LEAD_STATUS_LABEL[status]}</span>
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
@@ -72,15 +83,15 @@ export default async function SalesPage() {
                   {l.email && <a className="truncate underline" href={`mailto:${l.email}`}>{l.email}</a>}
                   {l.website && <a className="truncate underline" href={l.website} target="_blank" rel="noreferrer noopener">Website</a>}
                 </div>
-                {l.message && <p className="mt-2 whitespace-pre-line text-sm text-stone-600">{l.message}</p>}
+                {l.message && <p className="mt-2 whitespace-pre-line text-sm text-onyx/70">{l.message}</p>}
                 {overdue && <p className="mt-2 text-sm font-medium text-red-700">Wieder melden: {l.follow_up_on}</p>}
 
+                <InviteButton leadId={l.id} state={inviteOf.get(l.id) ?? null} />
                 <LeadEdit id={l.id} status={status} followUpOn={l.follow_up_on} note={l.note ?? ""} />
               </article>
             );
           })}
         </div>
-      </main>
-    </div>
+    </AdminFrame>
   );
 }

@@ -7,9 +7,9 @@ import { checkSlug, createVenue } from "./actions";
 
 type SlugState = { kind: "idle" | "checking" | "ok" } | { kind: "error"; message: string };
 
-export function NewVenueForm() {
+export function NewVenueForm({ initialName = "" }: { initialName?: string }) {
   const router = useRouter();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initialName);
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
   const [slugState, setSlugState] = useState<SlugState>({ kind: "idle" });
@@ -46,9 +46,9 @@ export function NewVenueForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
+    <form onSubmit={onSubmit} className="mt-8 space-y-5 rounded-2xl bg-white p-6 ring-1 ring-onyx/10">
       <label className="block">
-        <span className="text-sm font-medium">Name des Lokals</span>
+        <span className="text-base font-medium">Name des Lokals</span>
         <input
           required
           maxLength={80}
@@ -56,14 +56,13 @@ export function NewVenueForm() {
           placeholder="z. B. Gasthaus zur Linde"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-stone-300 bg-white px-3 py-3 text-base outline-none focus:border-stone-900"
+          className="mt-1 w-full rounded-xl border border-onyx/20 bg-white px-3 py-3 text-base outline-none focus:border-onyx"
         />
       </label>
 
       <label className="block">
-        <span className="text-sm font-medium">Adresse der Speisekarte</span>
-        <div className="mt-1 flex items-center rounded-xl border border-stone-300 bg-white focus-within:border-stone-900">
-          <span className="pl-3 text-base text-stone-500">oriz.at/</span>
+        <span className="text-base font-medium">Adresse der Speisekarte</span>
+        <div className="mt-1 flex items-center rounded-xl border border-onyx/20 bg-white focus-within:border-onyx">
           <input
             required
             maxLength={40}
@@ -72,12 +71,13 @@ export function NewVenueForm() {
             spellCheck={false}
             value={slug}
             onChange={(e) => { setSlugEdited(true); setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-")); }}
-            className="min-w-0 flex-1 bg-transparent py-3 pr-3 text-base outline-none"
+            className="min-w-0 flex-1 bg-transparent py-3 pl-3 text-base outline-none"
           />
+          <span className="pr-3 text-base text-onyx/60">.oriz.at</span>
         </div>
         <span
           aria-live="polite"
-          className={`mt-1 block text-xs ${slugState.kind === "error" ? "text-red-700" : slugState.kind === "ok" ? "text-emerald-700" : "text-stone-500"}`}
+          className={`mt-1 block text-sm ${slugState.kind === "error" ? "text-red-700" : slugState.kind === "ok" ? "text-emerald-700" : "text-onyx/60"}`}
         >
           {slugState.kind === "error" && slugState.message}
           {slugState.kind === "ok" && "Frei."}
@@ -86,12 +86,12 @@ export function NewVenueForm() {
         </span>
       </label>
 
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-base text-red-700">{error}</p>}
 
       <button
         type="submit"
         disabled={pending || slugState.kind !== "ok"}
-        className="w-full rounded-xl bg-stone-900 py-3 font-medium text-white disabled:opacity-50"
+        className="w-full rounded-xl bg-onyx py-3 font-medium text-white disabled:opacity-50"
       >
         {pending ? "Wird angelegt…" : "Weiter"}
       </button>
