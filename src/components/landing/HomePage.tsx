@@ -3,7 +3,7 @@ import { LegalLinks } from "@/components/landing/LegalLinks";
 import { whatsappUrl } from "@/lib/contact-info";
 import type { HomeCopy } from "@/lib/home-copy";
 import { PRICE_MONTH_CENTS } from "@/lib/offer";
-import { PERSON, personInitials, personName, phoneHref } from "@/lib/person";
+import { PERSON, personName, phoneHref } from "@/lib/person";
 import { jsonLdScript } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
 import { venueUrl } from "@/lib/venue-host";
@@ -235,9 +235,10 @@ export function HomePage({ c }: { c: HomeCopy }) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={PERSON.photo} alt={personName} className="h-24 w-24 shrink-0 rounded-full object-cover md:h-28 md:w-28" />
               ) : (
-                <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-onyx font-display text-4xl text-gold md:h-28 md:w-28" aria-hidden>
-                  {personInitials}
-                </span>
+                <span className="grid h-24 w-24 md:h-28 md:w-28 shrink-0 place-items-center rounded-2xl bg-onyx p-4" aria-hidden>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/oriz-mark-dark.svg" alt="" className="h-full w-full" />
+            </span>
               )}
               <p>
                 <span className="block font-display text-3xl font-medium md:text-4xl">{personName}</span>

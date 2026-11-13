@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { whatsappUrl } from "@/lib/contact-info";
-import { PERSON, personInitials, personName, phoneHref } from "@/lib/person";
+import { PERSON, personName, phoneHref } from "@/lib/person";
 import { PRICE_MONTH, PRICE_YEAR, TRIAL_DAYS } from "@/lib/offer";
 import { venueUrl } from "@/lib/venue-host";
 
@@ -56,8 +56,9 @@ export default function HalloPage() {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={PERSON.photo} alt={personName} className="h-24 w-24 shrink-0 rounded-full object-cover" />
           ) : (
-            <span className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-onyx font-display text-4xl text-gold" aria-hidden>
-              {personInitials}
+            <span className="grid h-24 w-24 shrink-0 place-items-center rounded-2xl bg-onyx p-4" aria-hidden>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/oriz-mark-dark.svg" alt="" className="h-full w-full" />
             </span>
           )}
           <div>
