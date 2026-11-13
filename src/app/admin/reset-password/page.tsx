@@ -73,24 +73,24 @@ export default function ResetPasswordPage() {
     <main className="min-h-screen flex flex-col items-center justify-center px-6">
       <h1 className="font-display text-4xl text-onyx">ORIZ</h1>
       <div className="hairline w-16 my-6" />
-      <p className="font-sans text-xs tracking-regal uppercase text-onyx/60">
+      <p className="text-xl font-medium text-onyx">
         Neues Passwort setzen
       </p>
 
       {state === "checking" && (
-        <p className="font-sans text-onyx/40 mt-8">
+        <p className="text-lg text-onyx/70 mt-8">
           Einen Moment …
         </p>
       )}
 
       {state === "no-session" && (
         <div className="mt-8 max-w-sm text-center">
-          <p className="font-sans text-onyx/60 leading-relaxed">
+          <p className="text-lg text-onyx/75 leading-relaxed">
             Der Reset-Link ist ungültig oder abgelaufen.
           </p>
           <Link
             href="/admin/forgot-password"
-            className="mt-8 inline-block font-sans text-[11px] tracking-regal uppercase text-onyx border border-onyx px-5 py-2.5 hover:bg-onyx hover:text-parchment transition"
+            className="mt-8 inline-block inline-flex min-h-12 items-center rounded-xl bg-onyx px-5 text-base font-semibold text-parchment transition hover:opacity-90"
           >
             Neuen Link anfordern
           </Link>
@@ -100,7 +100,7 @@ export default function ResetPasswordPage() {
       {(state === "ready" || state === "saving" || state === "error") && (
         <form onSubmit={onSubmit} className="mt-10 w-full max-w-sm">
           <label className="block">
-            <span className="font-sans text-[11px] tracking-regal uppercase text-onyx/60">
+            <span className="text-base font-medium text-onyx">
               Neues Passwort
             </span>
             <div className="relative">
@@ -111,7 +111,7 @@ export default function ResetPasswordPage() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 w-full bg-transparent border-b border-onyx/40 focus:border-gold outline-none py-2 font-sans text-onyx pr-8"
+                className="mt-2 block min-h-12 w-full rounded-xl bg-white px-4 text-lg text-onyx outline-none ring-1 ring-onyx/20 focus:ring-2 focus:ring-onyx pr-8"
               />
               <button
                 type="button"
@@ -129,7 +129,7 @@ export default function ResetPasswordPage() {
           </label>
 
           <label className="block mt-6">
-            <span className="font-sans text-[11px] tracking-regal uppercase text-onyx/60">
+            <span className="text-base font-medium text-onyx">
               Bestätigen
             </span>
             <div className="relative">
@@ -140,7 +140,7 @@ export default function ResetPasswordPage() {
                 autoComplete="new-password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                className="mt-2 w-full bg-transparent border-b border-onyx/40 focus:border-gold outline-none py-2 font-sans text-onyx pr-8"
+                className="mt-2 block min-h-12 w-full rounded-xl bg-white px-4 text-lg text-onyx outline-none ring-1 ring-onyx/20 focus:ring-2 focus:ring-onyx pr-8"
               />
             </div>
           </label>
@@ -148,19 +148,19 @@ export default function ResetPasswordPage() {
           <button
             type="submit"
             disabled={state === "saving"}
-            className="mt-8 w-full font-sans text-[11px] tracking-regal uppercase text-onyx border border-onyx py-3 hover:bg-onyx hover:text-parchment transition disabled:opacity-50"
+            className="mt-8 min-h-14 w-full rounded-xl bg-onyx text-lg font-semibold text-parchment transition hover:opacity-90 disabled:opacity-50"
           >
             {state === "saving" ? "Speichern…" : "Passwort speichern"}
           </button>
 
           {errorMsg && (
-            <p className="font-sans text-sm text-red-700 mt-4">{errorMsg}</p>
+            <p className="text-base font-medium text-red-700 mt-4">{errorMsg}</p>
           )}
         </form>
       )}
 
       {state === "done" && (
-        <p className="font-sans text-onyx/60 mt-8">
+        <p className="text-lg text-onyx/75 mt-8">
           Passwort gespeichert. Sie werden weitergeleitet …
         </p>
       )}

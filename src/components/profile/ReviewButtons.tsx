@@ -22,7 +22,7 @@ export function ReviewButtons({ googleUrl, tripadvisorUrl, facebookUrl, muted, b
   return (
     <section className="mt-12 text-center">
       <h2
-        className="mb-4 font-sans text-[11px] tracking-regal uppercase"
+        className="mb-4 font-sans text-[13px] tracking-regal uppercase"
         style={{ color: muted }}
       >
         Bewerten Sie uns
@@ -34,7 +34,7 @@ export function ReviewButtons({ googleUrl, tripadvisorUrl, facebookUrl, muted, b
             href={b.url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 font-sans text-[12px] tracking-wide transition-opacity hover:opacity-80 active:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2.5 font-sans text-[14px] tracking-wide transition-opacity hover:opacity-80 active:opacity-60"
             style={{
               border: `1px solid ${border}`,
               color: text,

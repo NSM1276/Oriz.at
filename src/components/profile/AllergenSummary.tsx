@@ -29,7 +29,7 @@ export function AllergenSummary({ allergens, t }: AllergenSummaryProps) {
   return (
     <section>
       <h2
-        className="mb-3 font-sans text-[11px] tracking-regal uppercase text-center"
+        className="mb-3 font-sans text-[13px] tracking-regal uppercase text-center"
         style={{ color: t.muted }}
       >
         Allergene
@@ -42,7 +42,7 @@ export function AllergenSummary({ allergens, t }: AllergenSummaryProps) {
           return (
             <span
               key={key}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-sans text-[11px] tracking-wide"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-sans text-[13px] tracking-wide"
               style={{
                 color: t.dim,
                 border: `1px solid ${t.border}`,
@@ -58,7 +58,7 @@ export function AllergenSummary({ allergens, t }: AllergenSummaryProps) {
         })}
       </div>
       <p
-        className="mt-3 text-center font-sans text-[10px]"
+        className="mt-3 text-center font-sans text-[12px]"
         style={{ color: t.muted }}
       >
         Allergene können in einzelnen Speisen enthalten sein. Bitte fragen Sie unser Personal.

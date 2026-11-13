@@ -28,7 +28,7 @@ function hasAnyHours(hours: ProfileProps["venue"]["opening_hours"]): boolean {
 function CardLabel({ children }: { children: React.ReactNode }) {
   return (
     <h2
-      className="font-sans text-[11px] tracking-regal uppercase mb-4"
+      className="font-sans text-[13px] tracking-regal uppercase mb-4"
       style={{ color: "var(--color-muted)" }}
     >
       {children}
@@ -67,7 +67,7 @@ export function ProfileVisual({ venue, t, allergens = [], events = [] }: Profile
         {/* 1. Back link */}
         <Link
           href={`/${venue.slug}`}
-          className="inline-flex items-center gap-1 font-sans text-[12px] tracking-regal uppercase transition-opacity hover:opacity-70"
+          className="inline-flex items-center gap-1 font-sans text-[14px] tracking-regal uppercase transition-opacity hover:opacity-70"
           style={{ color: t.accent }}
         >
           ← Zur Speisekarte
@@ -86,15 +86,16 @@ export function ProfileVisual({ venue, t, allergens = [], events = [] }: Profile
             textColor={t.text}
             isDarkBg={t.isDark}
           />
+          {/* Without a logo file the logo above already is the name: keep the heading for screen readers only. */}
           <h1
-            className="font-display mt-6 text-3xl md:text-4xl"
+            className={venue.logo_url || venue.logo_svg ? "font-display mt-6 text-3xl md:text-4xl" : "sr-only"}
             style={{ color: t.text }}
           >
             {venue.name}
           </h1>
           {venue.price_range ? (
             <span
-              className="mt-4 inline-block rounded-full px-4 py-1.5 font-sans text-[12px] tracking-regal"
+              className="mt-4 inline-block rounded-full px-4 py-1.5 font-sans text-[14px] tracking-regal"
               style={{
                 color: t.accent,
                 border: `1px solid ${t.accent}`,
@@ -152,7 +153,7 @@ export function ProfileVisual({ venue, t, allergens = [], events = [] }: Profile
                 {events.map((ev) => (
                   <div key={ev.id} className="border-b pb-3 last:border-0 last:pb-0" style={{ borderColor: t.border }}>
                     <p className="font-display text-lg" style={{ color: t.text }}>{ev.title}</p>
-                    <p className="font-sans text-[12px] mt-0.5" style={{ color: t.dim }}>
+                    <p className="font-sans text-[14px] mt-0.5" style={{ color: t.dim }}>
                       {new Date(ev.event_date).toLocaleDateString("de-AT", { day: "numeric", month: "short", year: "numeric" })}
                       {ev.time_start ? ` · ${ev.time_start.slice(0, 5)}` : ""}
                       {ev.duration_hours != null ? ` · ${String(ev.duration_hours).replace(".", ",")} Std.` : ""}
@@ -317,7 +318,7 @@ export function ProfileVisual({ venue, t, allergens = [], events = [] }: Profile
         {/* 10. Footer */}
         <footer className="mt-10 text-center">
           <span
-            className="font-sans text-[11px] tracking-regal uppercase"
+            className="font-sans text-[13px] tracking-regal uppercase"
             style={{ color: t.muted }}
           >
             Powered by ORIZ

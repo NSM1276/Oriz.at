@@ -31,7 +31,7 @@ export function SuperAdminCasaList({ initial }: Props) {
     <>
       <header className="border-b border-onyx/8 px-6 py-5 flex items-center justify-between">
         <div>
-          <span className="font-sans text-[10px] tracking-regal uppercase text-gold">
+          <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">
             ORIZ · Casa
           </span>
           <h1 className="font-display text-2xl font-light mt-1">
@@ -39,12 +39,12 @@ export function SuperAdminCasaList({ initial }: Props) {
           </h1>
         </div>
         <div className="flex items-center gap-4">
-          <span className="font-sans text-[10px] tracking-regal uppercase text-onyx/30">
+          <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">
             {list.length} {list.length === 1 ? "Eintrag" : "Einträge"}
           </span>
           <button
             onClick={() => setAddOpen(true)}
-            className="flex items-center gap-2 bg-onyx text-parchment font-sans text-[11px] tracking-regal uppercase px-4 py-2.5 hover:bg-onyx/85 transition-colors"
+            className="flex items-center gap-2 bg-onyx text-parchment font-sans text-[13px] font-medium uppercase tracking-wide px-4 py-2.5 hover:bg-onyx/85 transition-colors"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
               <path
@@ -67,7 +67,7 @@ export function SuperAdminCasaList({ initial }: Props) {
           </p>
           <button
             onClick={() => setAddOpen(true)}
-            className="mt-6 font-sans text-[10px] tracking-regal uppercase text-gold border border-gold/50 px-4 py-2 hover:bg-gold hover:text-onyx transition"
+            className="mt-6 font-sans text-[13px] font-medium uppercase tracking-wide text-gold border border-gold/50 px-4 py-2 hover:bg-gold hover:text-onyx transition"
           >
             Erste Unterkunft anlegen
           </button>
@@ -93,13 +93,13 @@ export function SuperAdminCasaList({ initial }: Props) {
                   <div className="flex items-start justify-between">
                     <div>
                       <span
-                        className="font-sans text-[10px] tracking-regal uppercase"
+                        className="font-sans text-[13px] font-medium uppercase tracking-wide"
                         style={{ color: accent }}
                       >
                         Casa
                       </span>
                       {p.city && (
-                        <span className="font-sans text-[10px] tracking-regal uppercase text-parchment/40 ml-3">
+                        <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-parchment/40 ml-3">
                           {p.city}
                         </span>
                       )}
@@ -137,7 +137,7 @@ export function SuperAdminCasaList({ initial }: Props) {
                     <div className="flex items-center justify-between gap-3">
                       <Link
                         href={`/admin/casa/${p.slug}`}
-                        className="font-sans text-[10px] tracking-regal uppercase text-parchment/55 hover:text-parchment transition-colors"
+                        className="font-sans text-[13px] font-medium uppercase tracking-wide text-parchment/55 hover:text-parchment transition-colors"
                       >
                         Inhalt →
                       </Link>
@@ -145,7 +145,7 @@ export function SuperAdminCasaList({ initial }: Props) {
                         href={`/casa/${p.slug}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="font-sans text-[10px] tracking-regal uppercase"
+                        className="font-sans text-[13px] font-medium uppercase tracking-wide"
                         style={{ color: accent }}
                       >
                         Karte ↗

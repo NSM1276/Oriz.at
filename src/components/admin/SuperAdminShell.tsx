@@ -22,7 +22,7 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
         {/* Logo */}
         <div className="px-6 py-7 border-b border-white/10">
           <span className="font-display text-2xl text-parchment tracking-wide">ORIZ</span>
-          <p className="font-sans text-[10px] tracking-regal uppercase text-gold mt-0.5">Super Admin</p>
+          <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold mt-0.5">Super Admin</p>
         </div>
 
         {/* Nav */}

@@ -4,7 +4,7 @@ export function Gallery({ images, name }: { images: string[]; name: string }) {
   return (
     <section>
       <h2
-        className="font-sans text-[11px] tracking-regal uppercase mb-4 text-center"
+        className="font-sans text-[13px] tracking-regal uppercase mb-4 text-center"
         style={{ color: "var(--color-muted)" }}
       >
         Galerie

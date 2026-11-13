@@ -31,10 +31,10 @@ export function QRModal({ slug, name, onClose }: Props) {
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-onyx/10">
             <div>
-              <span className="font-sans text-[10px] tracking-regal uppercase text-gold">QR Code</span>
+              <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">QR-Code</span>
               <h2 className="font-display text-lg text-onyx mt-0.5 truncate">{name}</h2>
             </div>
-            <button onClick={onClose} className="text-onyx/40 hover:text-onyx transition-colors p-1">
+            <button onClick={onClose} className="text-onyx/60 hover:text-onyx transition-colors p-1">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -50,14 +50,14 @@ export function QRModal({ slug, name, onClose }: Props) {
 
             {/* URL */}
             <div className="w-full">
-              <label className="block font-sans text-[10px] tracking-regal uppercase text-onyx/50 mb-1.5">Menu URL</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/50 mb-1.5">Adresse der Karte</label>
               <div className="flex items-center gap-2">
                 <input readOnly value={url}
-                  className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-3 py-2 text-onyx/70 focus:outline-none"
+                  className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx/70 focus:outline-none"
                   onClick={e => (e.target as HTMLInputElement).select()} />
                 <button
                   onClick={() => navigator.clipboard.writeText(url)}
-                  className="font-sans text-[10px] tracking-regal uppercase text-onyx/50 border border-onyx/20 px-3 py-2 hover:border-onyx/40 hover:text-onyx transition-colors whitespace-nowrap">
+                  className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/50 border border-onyx/20 px-3 py-2 hover:border-onyx/40 hover:text-onyx transition-colors whitespace-nowrap">
                   Copy
                 </button>
               </div>
@@ -66,14 +66,14 @@ export function QRModal({ slug, name, onClose }: Props) {
 
           <div className="px-6 pb-6 space-y-2">
             <button onClick={handleDownload}
-              className="w-full bg-onyx text-parchment font-sans text-[11px] tracking-regal uppercase py-3 hover:bg-onyx/85 transition-colors">
+              className="w-full bg-onyx text-parchment font-sans text-[13px] font-medium uppercase tracking-wide py-3 hover:bg-onyx/85 transition-colors">
               Nur QR · PNG ↓
             </button>
             <a
               href={`/admin/qr/carta/${slug}`}
               target="_blank"
               rel="noreferrer"
-              className="block text-center w-full font-sans text-[11px] tracking-regal uppercase py-3 border border-onyx text-onyx hover:bg-onyx hover:text-parchment transition-colors"
+              className="block text-center w-full font-sans text-[13px] font-medium uppercase tracking-wide py-3 border border-onyx text-onyx hover:bg-onyx hover:text-parchment transition-colors"
             >
               Druckfertige Karte (A6) ↗
             </a>

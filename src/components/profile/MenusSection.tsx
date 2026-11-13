@@ -16,7 +16,7 @@ export function MenusSection({
     <div style={{ marginTop: 32 }}>
       <p
         style={{
-          fontSize: 11,
+          fontSize: 13,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
           color: t.accent,
@@ -56,7 +56,7 @@ export function MenusSection({
                   {isActive && (
                     <span
                       style={{
-                        fontSize: 10,
+                        fontSize: 12,
                         letterSpacing: "0.08em",
                         textTransform: "uppercase",
                         color: t.accent,
@@ -70,7 +70,7 @@ export function MenusSection({
                   )}
                 </div>
                 {schedule && (
-                  <div style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>
+                  <div style={{ color: t.muted, fontSize: 14, marginTop: 2 }}>
                     {schedule}
                   </div>
                 )}

@@ -21,7 +21,7 @@ export function AboutText({ text }: { text: string }) {
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-3 font-sans text-[11px] tracking-regal uppercase transition-opacity hover:opacity-70"
+          className="mt-3 font-sans text-[13px] tracking-regal uppercase transition-opacity hover:opacity-70"
           style={{ color: "var(--accent)", background: "none", border: "none", cursor: "pointer" }}
         >
           {expanded ? "Weniger" : "Mehr lesen"}

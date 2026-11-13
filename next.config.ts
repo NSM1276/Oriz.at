@@ -14,6 +14,20 @@ const config: NextConfig = {
   },
   // ORIZ is the digital menu only for now. Screen and Casa stay in the code (and their
   // venue pages keep working) but their sales pages lead home until we bring them back.
+  // Basic browser protections on every response. Our own pages may frame each other (the sample
+  // menu on the main page, the preview in the owner app); other sites may not frame us.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self' https://oriz.at https://*.oriz.at" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       { source: "/screen", destination: "/", permanent: false },

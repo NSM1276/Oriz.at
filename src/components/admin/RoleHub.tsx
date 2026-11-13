@@ -14,7 +14,7 @@ export function RoleHub({ user, carta, casa }: Props) {
     <main className="min-h-screen bg-parchment text-onyx flex flex-col">
       <header className="border-b border-onyx/8 px-6 py-5 flex items-center justify-between">
         <div>
-          <span className="font-sans text-[10px] tracking-regal uppercase text-gold">
+          <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">
             ORIZ · Mein Bereich
           </span>
           <h1 className="font-display text-2xl font-medium mt-1">{user}</h1>
@@ -35,14 +35,14 @@ export function RoleHub({ user, carta, casa }: Props) {
                 href="/app"
                 className="group block bg-onyx text-parchment p-10 transition-transform hover:-translate-y-1"
               >
-                <span className="font-sans text-[10px] tracking-regal uppercase text-gold">
+                <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">
                   Carta
                 </span>
                 <h2 className="font-display text-2xl mt-3 mb-6 font-medium">
                   Digitale Speisekarte
                 </h2>
                 <div className="w-10 h-px bg-gold/40 mb-5 transition-all group-hover:w-full group-hover:bg-gold/80" />
-                <span className="font-sans text-[10px] tracking-regal uppercase text-parchment/50">
+                <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-parchment/50">
                   /{v.slug} →
                 </span>
               </Link>
@@ -54,14 +54,14 @@ export function RoleHub({ user, carta, casa }: Props) {
                 href={`/admin/casa/${p.slug}`}
                 className="group block bg-onyx text-parchment p-10 transition-transform hover:-translate-y-1"
               >
-                <span className="font-sans text-[10px] tracking-regal uppercase text-gold">
+                <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">
                   Casa
                 </span>
                 <h2 className="font-display text-2xl mt-3 mb-6 font-medium">
                   Digitale Begrüßungskarte
                 </h2>
                 <div className="w-10 h-px bg-gold/40 mb-5 transition-all group-hover:w-full group-hover:bg-gold/80" />
-                <span className="font-sans text-[10px] tracking-regal uppercase text-parchment/50">
+                <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-parchment/50">
                   /casa/{p.slug} →
                 </span>
               </Link>

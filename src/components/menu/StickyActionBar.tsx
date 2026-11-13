@@ -78,10 +78,10 @@ const actionClassName =
 function ActionLabel({ children, theme }: { children: string; theme: Theme }) {
   return (
     <span
-      className="font-sans tracking-regal uppercase"
+      className="font-sans font-medium uppercase"
       style={{
-        fontSize: "9px",
-        letterSpacing: theme === "modern" ? "0.18em" : undefined,
+        fontSize: "12px",
+        letterSpacing: theme === "modern" ? "0.08em" : "0.06em",
       }}
     >
       {children}

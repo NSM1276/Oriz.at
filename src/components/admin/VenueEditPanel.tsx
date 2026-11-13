@@ -342,10 +342,10 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-onyx/10">
           <div>
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">Editing</span>
+            <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">Bearbeiten</span>
             <h2 className="font-display text-xl text-onyx mt-0.5">{venue?.name ?? ""}</h2>
           </div>
-          <button onClick={onClose} className="text-onyx/40 hover:text-onyx transition-colors p-1" aria-label="Close">
+          <button onClick={onClose} className="text-onyx/60 hover:text-onyx transition-colors p-1" aria-label="Close">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
@@ -362,7 +362,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Background color */}
           <div>
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Background color</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Hintergrundfarbe</label>
             <div className="flex items-center gap-3">
               <input type="color" value={colorBg} onChange={e => setColorBg(e.target.value)} className="w-9 h-9 cursor-pointer border border-onyx/20 bg-transparent p-0.5" />
               <input type="text" value={colorBg} onChange={e => setColorBg(e.target.value)} className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold" placeholder="#1a1a1a" />
@@ -371,7 +371,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Accent color */}
           <div>
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Accent color</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Akzentfarbe</label>
             <div className="flex items-center gap-3">
               <input type="color" value={colorPrimary} onChange={e => setColorPrimary(e.target.value)} className="w-9 h-9 cursor-pointer border border-onyx/20 bg-transparent p-0.5" />
               <input type="text" value={colorPrimary} onChange={e => setColorPrimary(e.target.value)} className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold" placeholder="#C69B3C" />
@@ -380,11 +380,11 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Plan */}
           <div>
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Plan</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Tarif (alt)</label>
             <div className="flex gap-2">
               {PLANS.map(p => (
                 <button key={p} onClick={() => setPlan(p)}
-                  className={`flex-1 font-sans text-[11px] tracking-regal uppercase py-2 border transition-colors ${plan === p ? "border-gold bg-gold text-onyx" : "border-onyx/15 text-onyx/60 hover:border-onyx/30"}`}>
+                  className={`flex-1 font-sans text-[13px] font-medium uppercase tracking-wide py-2 border transition-colors ${plan === p ? "border-gold bg-gold text-onyx" : "border-onyx/15 text-onyx/60 hover:border-onyx/30"}`}>
                   {p.charAt(0).toUpperCase() + p.slice(1)}
                 </button>
               ))}
@@ -393,17 +393,17 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Menu Theme */}
           <div>
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Menu Theme</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Darstellung der Karte</label>
             <div className="flex gap-2">
               {([
-                { value: "classic", label: "Classic", hint: "Elegant list" },
-                { value: "visual",  label: "Visual",  hint: "Photo grid" },
+                { value: "classic", label: "Classic", hint: "Elegante Liste" },
+                { value: "visual",  label: "Visual",  hint: "Fotos zuerst" },
                 { value: "modern",  label: "Modern",  hint: "Editorial" },
               ] as { value: MenuTheme; label: string; hint: string }[]).map(t => (
                 <button key={t.value} type="button" onClick={() => setMenuTheme(t.value)}
-                  className={`flex-1 font-sans text-[11px] tracking-regal uppercase py-2 border transition-colors flex flex-col items-center gap-0.5 ${menuTheme === t.value ? "border-gold bg-gold text-onyx" : "border-onyx/15 text-onyx/60 hover:border-onyx/30"}`}>
+                  className={`flex-1 font-sans text-[13px] font-medium uppercase tracking-wide py-2 border transition-colors flex flex-col items-center gap-0.5 ${menuTheme === t.value ? "border-gold bg-gold text-onyx" : "border-onyx/15 text-onyx/60 hover:border-onyx/30"}`}>
                   {t.label}
-                  <span className={`text-[9px] normal-case tracking-normal ${menuTheme === t.value ? "text-onyx/60" : "text-onyx/30"}`}>{t.hint}</span>
+                  <span className={`text-[13px] normal-case tracking-normal ${menuTheme === t.value ? "text-onyx/60" : "text-onyx/60"}`}>{t.hint}</span>
                 </button>
               ))}
             </div>
@@ -411,27 +411,27 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Name */}
           <div>
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Venue name</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Name des Lokals</label>
             <input type="text" value={name} onChange={e => setName(e.target.value)}
               className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold" />
           </div>
 
           {/* About */}
           <div>
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">About</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Über das Lokal</label>
             <textarea value={about} onChange={e => setAbout(e.target.value)} rows={2}
               className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold resize-none" />
           </div>
 
           {/* ── Logo section ────────────────────────────────────── */}
           <div className="border-t border-onyx/10 pt-6">
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-3">Logo</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-3">Logo</label>
 
             {/* Swatches — show pending preview or saved logo */}
             {hasDisplayLogo && (
               <div className="mb-3">
                 {isPending && (
-                  <p className="font-sans text-[9px] tracking-regal uppercase text-gold mb-2">
+                  <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold mb-2">
                     Vorschau — noch nicht gespeichert
                   </p>
                 )}
@@ -444,7 +444,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
               </div>
             )}
 
-            <p className="font-sans text-[10px] text-onyx/40 mb-3 leading-snug">
+            <p className="font-sans text-[13px] text-onyx/60 mb-3 leading-snug">
               SVG empfohlen — passt sich automatisch der Farbe an. PNG mit
               transparentem Hintergrund auch ok.
             </p>
@@ -465,7 +465,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
                   type="button"
                   onClick={handleLogoUploadConfirm}
                   disabled={uploadingLogo}
-                  className="font-sans text-[10px] tracking-regal uppercase bg-onyx text-parchment px-4 py-2.5 hover:bg-onyx/85 transition disabled:opacity-50"
+                  className="font-sans text-[13px] font-medium uppercase tracking-wide bg-onyx text-parchment px-4 py-2.5 hover:bg-onyx/85 transition disabled:opacity-50"
                 >
                   {uploadingLogo ? "Wird gespeichert…" : "Logo speichern"}
                 </button>
@@ -473,7 +473,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
                   type="button"
                   onClick={clearPending}
                   disabled={uploadingLogo}
-                  className="font-sans text-[10px] tracking-regal uppercase text-onyx/60 border border-onyx/20 px-4 py-2.5 hover:border-onyx hover:text-onyx transition disabled:opacity-50"
+                  className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 border border-onyx/20 px-4 py-2.5 hover:border-onyx hover:text-onyx transition disabled:opacity-50"
                 >
                   Abbrechen
                 </button>
@@ -484,7 +484,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
                 <button
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
-                  className="font-sans text-[10px] tracking-regal uppercase text-onyx/60 border border-dashed border-onyx/30 px-4 py-3 hover:border-onyx hover:text-onyx transition"
+                  className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 border border-dashed border-onyx/30 px-4 py-3 hover:border-onyx hover:text-onyx transition"
                 >
                   {hasLogo ? "+ Logo ersetzen" : "+ Logo hinzufügen"}
                 </button>
@@ -493,7 +493,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
                     type="button"
                     onClick={handleDeleteLogo}
                     disabled={deletingLogo}
-                    className="font-sans text-[10px] tracking-regal uppercase text-red-700/70 border border-red-700/30 px-3 py-2 hover:bg-red-700 hover:text-white transition disabled:opacity-50"
+                    className="font-sans text-[13px] font-medium uppercase tracking-wide text-red-700/70 border border-red-700/30 px-3 py-2 hover:bg-red-700 hover:text-white transition disabled:opacity-50"
                   >
                     {deletingLogo ? "…" : "Entfernen"}
                   </button>
@@ -504,10 +504,10 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Social links */}
           <div className="border-t border-onyx/10 pt-6 space-y-4">
-            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">Social & Location</p>
+            <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">Social & Location</p>
 
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">
                 <svg className="inline mr-1.5 mb-0.5" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                 </svg>
@@ -519,7 +519,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
             </div>
 
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">
                 <svg className="inline mr-1.5 mb-0.5" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
@@ -533,21 +533,21 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Contact */}
           <div className="border-t border-onyx/10 pt-6 space-y-4">
-            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">Kontakt</p>
+            <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">Kontakt</p>
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Telefon</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Telefon</label>
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                 placeholder="+43 1 234567" />
             </div>
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Adresse</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Adresse</label>
               <input type="text" value={address} onChange={e => setAddress(e.target.value)}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                 placeholder="Naschmarkt Stand 217, 1060 Wien" />
             </div>
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Website</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Website</label>
               <input type="url" value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                 placeholder="https://restaurant.at" />
@@ -556,21 +556,21 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Reviews */}
           <div className="border-t border-onyx/10 pt-6 space-y-4">
-            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">Bewertungen</p>
+            <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">Bewertungen</p>
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Google Review URL</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Google-Bewertung (Link)</label>
               <input type="url" value={googleReview} onChange={e => setGoogleReview(e.target.value)}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                 placeholder="https://g.page/r/..." />
             </div>
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">TripAdvisor URL</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">TripAdvisor (Link)</label>
               <input type="url" value={tripadvisor} onChange={e => setTripadvisor(e.target.value)}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                 placeholder="https://tripadvisor.com/..." />
             </div>
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Facebook URL</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Facebook (Link)</label>
               <input type="url" value={facebookUrl} onChange={e => setFacebookUrl(e.target.value)}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                 placeholder="https://facebook.com/..." />
@@ -579,7 +579,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Price range */}
           <div className="border-t border-onyx/10 pt-6">
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-3">Preisklasse</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-3">Preisklasse</label>
             <div className="flex gap-2">
               {["€", "€€", "€€€", "€€€€"].map(p => (
                 <button key={p} type="button" onClick={() => setPriceRange(priceRange === p ? "" : p)}
@@ -592,7 +592,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Opening hours */}
           <div className="border-t border-onyx/10 pt-6">
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-3">Öffnungszeiten</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-3">Öffnungszeiten</label>
             <div className="space-y-2">
               {WEEKDAYS.map(d => {
                 const slot = hours[d.key];
@@ -600,21 +600,21 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
                   <div key={d.key} className="flex items-center gap-2">
                     <button type="button"
                       onClick={() => setHours(h => ({ ...h, [d.key]: { ...h[d.key], open: !h[d.key].open } }))}
-                      className={`w-8 h-8 flex-shrink-0 flex items-center justify-center border text-[10px] font-sans tracking-regal transition-colors ${slot.open ? "bg-onyx text-parchment border-onyx" : "border-onyx/20 text-onyx/40"}`}>
+                      className={`w-8 h-8 flex-shrink-0 flex items-center justify-center border text-[13px] font-sans tracking-regal transition-colors ${slot.open ? "bg-onyx text-parchment border-onyx" : "border-onyx/20 text-onyx/60"}`}>
                       {d.label}
                     </button>
                     {slot.open ? (
                       <>
                         <input type="time" value={slot.from}
                           onChange={e => setHours(h => ({ ...h, [d.key]: { ...h[d.key], from: e.target.value } }))}
-                          className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-2 py-1.5 text-onyx focus:outline-none focus:border-gold" />
-                        <span className="text-onyx/30 text-xs">–</span>
+                          className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-2 py-1.5 text-onyx focus:outline-none focus:border-gold" />
+                        <span className="text-onyx/60 text-sm">–</span>
                         <input type="time" value={slot.to}
                           onChange={e => setHours(h => ({ ...h, [d.key]: { ...h[d.key], to: e.target.value } }))}
-                          className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-2 py-1.5 text-onyx focus:outline-none focus:border-gold" />
+                          className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-2 py-1.5 text-onyx focus:outline-none focus:border-gold" />
                       </>
                     ) : (
-                      <span className="font-sans text-xs text-onyx/30">Geschlossen</span>
+                      <span className="font-sans text-sm text-onyx/60">Geschlossen</span>
                     )}
                   </div>
                 );
@@ -624,24 +624,24 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Gallery */}
           <div className="border-t border-onyx/10 pt-6">
-            <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-3">Galerie (URLs)</label>
+            <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-3">Galerie (URLs)</label>
             <div className="space-y-2 mb-3">
               {gallery.map((url, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <span className="flex-1 font-sans text-xs text-onyx/60 truncate">{url}</span>
+                  <span className="flex-1 font-sans text-sm text-onyx/60 truncate">{url}</span>
                   <button type="button" onClick={() => setGallery(g => g.filter((_, j) => j !== i))}
-                    className="text-onyx/30 hover:text-red-600 transition-colors flex-shrink-0 text-xs">✕</button>
+                    className="text-onyx/60 hover:text-red-600 transition-colors flex-shrink-0 text-sm">✕</button>
                 </div>
               ))}
-              {gallery.length === 0 && <p className="font-sans text-xs text-onyx/30">Keine Bilder</p>}
+              {gallery.length === 0 && <p className="font-sans text-sm text-onyx/60">Keine Bilder</p>}
             </div>
             <div className="flex gap-2">
               <input type="url" value={galleryInput} onChange={e => setGalleryInput(e.target.value)}
                 placeholder="https://..."
-                className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold" />
+                className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold" />
               <button type="button"
                 onClick={() => { if (galleryInput.trim()) { setGallery(g => [...g, galleryInput.trim()]); setGalleryInput(""); } }}
-                className="font-sans text-[10px] tracking-regal uppercase text-onyx border border-onyx/20 px-3 py-2 hover:border-onyx transition-colors">
+                className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx border border-onyx/20 px-3 py-2 hover:border-onyx transition-colors">
                 + Add
               </button>
             </div>
@@ -649,48 +649,48 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
 
           {/* Owner assignment */}
           <div className="border-t border-onyx/10 pt-6 space-y-3">
-            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">Venue Owner</p>
+            <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">Inhaber-Konto</p>
             {ownerCurrent && (
-              <p className="font-sans text-xs text-onyx/60">
-                Current: <span className="text-onyx font-medium">{ownerCurrent}</span>
+              <p className="font-sans text-sm text-onyx/60">
+                Aktuell: <span className="text-onyx font-medium">{ownerCurrent}</span>
               </p>
             )}
             {!ownerCurrent && (
-              <p className="font-sans text-xs text-onyx/40">No owner assigned yet</p>
+              <p className="font-sans text-sm text-onyx/60">Noch kein Inhaber zugeordnet</p>
             )}
             <div className="flex gap-2">
               <input
                 type="email"
                 value={ownerEmail}
                 onChange={e => setOwnerEmail(e.target.value)}
-                placeholder="client@email.com"
+                placeholder="inhaber@lokal.at"
                 className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
               />
               <button
                 type="button"
                 onClick={handleAssignOwner}
                 disabled={ownerSaving}
-                className="bg-onyx text-parchment font-sans text-[11px] tracking-regal uppercase px-4 py-2 hover:bg-onyx/85 transition-colors disabled:opacity-40 whitespace-nowrap"
+                className="bg-onyx text-parchment font-sans text-[13px] font-medium uppercase tracking-wide px-4 py-2 hover:bg-onyx/85 transition-colors disabled:opacity-40 whitespace-nowrap"
               >
-                {ownerSaving ? "…" : ownerEmail.trim() ? "Assign" : "Clear"}
+                {ownerSaving ? "…" : ownerEmail.trim() ? "Zuordnen" : "Entfernen"}
               </button>
             </div>
-            {ownerError && <p className="font-sans text-xs text-red-600">{ownerError}</p>}
-            {ownerSuccess && <p className="font-sans text-xs text-green-700">Owner updated ✓</p>}
+            {ownerError && <p className="font-sans text-sm text-red-600">{ownerError}</p>}
+            {ownerSuccess && <p className="font-sans text-sm text-green-700">Inhaber gespeichert ✓</p>}
           </div>
 
-          {error && <p className="font-sans text-xs text-red-600">{error}</p>}
+          {error && <p className="font-sans text-sm text-red-600">{error}</p>}
         </div>
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-onyx/10 space-y-3">
           <button onClick={handleSave} disabled={saving}
-            className="w-full bg-onyx text-parchment font-sans text-[12px] tracking-regal uppercase py-3 hover:bg-onyx/85 transition-colors disabled:opacity-50">
-            {saving ? "Saving…" : "Save changes"}
+            className="w-full bg-onyx text-parchment font-sans text-sm font-semibold uppercase tracking-wide py-3 hover:bg-onyx/85 transition-colors disabled:opacity-50">
+            {saving ? "Speichert…" : "Speichern"}
           </button>
           {venue && (
             <a href={`/${venue.slug}`} target="_blank" rel="noreferrer"
-              className="block text-center font-sans text-[11px] tracking-regal uppercase text-gold hover:text-gold/80 transition-colors">
+              className="block text-center font-sans text-[13px] font-medium uppercase tracking-wide text-gold hover:text-gold/80 transition-colors">
               Open menu ↗
             </a>
           )}
@@ -723,7 +723,7 @@ function LogoSwatch({
           isDarkBg={isDarkBg}
         />
       </div>
-      <span className="font-sans text-[9px] tracking-regal uppercase text-onyx/40">{label}</span>
+      <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">{label}</span>
     </div>
   );
 }

@@ -53,7 +53,7 @@ export default async function AdminLeadsPage() {
       {/* Header */}
       <header className="border-b border-onyx/8 px-6 py-5 flex items-center justify-between">
         <div>
-          <span className="font-sans text-[10px] tracking-regal uppercase text-gold">
+          <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">
             ORIZ · Casa
           </span>
           <h1 className="font-display text-2xl font-medium mt-1">Lead-Inbox</h1>
@@ -61,11 +61,11 @@ export default async function AdminLeadsPage() {
         <div className="flex items-center gap-5">
           <Link
             href="/admin"
-            className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 hover:text-gold transition-colors"
+            className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 hover:text-gold transition-colors"
           >
             ← Admin
           </Link>
-          <span className="font-sans text-[10px] tracking-regal uppercase text-onyx/30">
+          <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">
             {list.length} {list.length === 1 ? "Eintrag" : "Einträge"}
           </span>
         </div>
@@ -87,7 +87,7 @@ export default async function AdminLeadsPage() {
           <p className="font-display text-2xl text-onyx/50">
             Noch keine Anfragen.
           </p>
-          <p className="font-sans text-xs text-onyx/35 mt-4 tracking-wide">
+          <p className="font-sans text-sm text-onyx/35 mt-4 tracking-wide">
             Sobald jemand das Casa-Formular abschickt, erscheint die Anfrage
             hier.
           </p>
@@ -108,12 +108,12 @@ export default async function AdminLeadsPage() {
                     {l.property_name || "—"}
                   </h2>
                   {l.property_type && (
-                    <span className="font-sans text-[10px] tracking-regal uppercase text-gold">
+                    <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">
                       {l.property_type}
                     </span>
                   )}
                 </div>
-                <time className="font-sans text-[10px] tracking-wide text-onyx/40 shrink-0">
+                <time className="font-sans text-[13px] tracking-wide text-onyx/60 shrink-0">
                   {fmtDate(l.created_at)}
                 </time>
               </header>
@@ -142,7 +142,7 @@ export default async function AdminLeadsPage() {
 
               {l.message && (
                 <div className="mt-5 pt-5 border-t border-onyx/8">
-                  <span className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 block mb-2">
+                  <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 block mb-2">
                     Nachricht
                   </span>
                   <p className="font-sans text-onyx/70 leading-relaxed whitespace-pre-wrap">
@@ -172,7 +172,7 @@ function Field({
   if (!value) return null;
   return (
     <div>
-      <span className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 block">
+      <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 block">
         {label}
       </span>
       {href ? (

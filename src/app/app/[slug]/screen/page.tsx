@@ -22,7 +22,7 @@ export default async function ScreenPage({ params }: { params: Promise<{ slug: s
     .returns<(Section & { items: Item[] })[]>();
 
   return (
-    <section className="rounded-2xl bg-white p-5 ring-1 ring-onyx/10" style={NEUTRAL_VARS}>
+    <section className="overflow-x-auto rounded-2xl bg-white p-5 ring-1 ring-onyx/10" style={NEUTRAL_VARS}>
       <OwnerScreenTab venueId={venue.id} slug={venue.slug} sections={sections ?? []} {...NEUTRAL} />
     </section>
   );

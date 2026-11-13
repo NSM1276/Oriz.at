@@ -48,7 +48,7 @@ export function LanguageSwitcher({
     backgroundColor: active ? accent : "transparent",
     color: active ? "#0A0A0A" : text,
     fontFamily: "var(--font-inter, sans-serif)",
-    fontSize: 11,
+    fontSize: 13,
     letterSpacing: "0.08em",
     fontWeight: active ? 600 : 400,
     cursor: "pointer",
@@ -75,7 +75,7 @@ export function LanguageSwitcher({
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
           <circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" strokeLinecap="round" />
         </svg>
-        <span style={{ letterSpacing: "0.02em", fontSize: 12 }}>{LOCALE_NATIVE[locale] ?? localeShort(locale)}</span>
+        <span style={{ letterSpacing: "0.02em", fontSize: 14 }}>{LOCALE_NATIVE[locale] ?? localeShort(locale)}</span>
       </button>
 
       {/* Into <body>: the menu around the button can be zoomed (larger text), which would scale the sheet too. */}
@@ -103,7 +103,7 @@ export function LanguageSwitcher({
                         className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left font-sans text-base"
                         style={{ backgroundColor: active ? "color-mix(in srgb, var(--accent) 14%, transparent)" : "transparent", fontWeight: active ? 600 : 400 }}
                       >
-                        <span className="w-9 shrink-0 text-[11px] uppercase tracking-wider" style={{ color: "var(--color-muted)" }}>{localeShort(code)}</span>
+                        <span className="w-9 shrink-0 text-[13px] uppercase tracking-wider" style={{ color: "var(--color-muted)" }}>{localeShort(code)}</span>
                         <span className="min-w-0 flex-1 truncate">{LOCALE_NATIVE[code] ?? code}</span>
                       </button>
                     </li>

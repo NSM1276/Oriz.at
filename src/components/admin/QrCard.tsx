@@ -72,7 +72,7 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
             print-color-adjust: exact !important;
           }
         }
-        html, body { background: ${screenBg}; margin: 0; padding: 0; transition: background 0.25s; }
+        html, body { background: ${screenBg}; margin: 0; padding: 0; transition: background 0.25s; overflow-x: hidden; }
         .print-sheet { display: none; }
 
         /* ── Row 1 ── */
@@ -81,7 +81,7 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
         .tb-row2 { display: flex; align-items: center; justify-content: space-between; gap: 8px;
                    border-top: 1px solid rgba(245,240,236,0.08); padding-top: 8px; margin-top: 2px; }
         .tb-sizes { display: flex; gap: 0; }
-        .tb-size-btn { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+        .tb-size-btn { font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
                        padding: 5px 12px; cursor: pointer; font-family: inherit;
                        border: 1px solid rgba(245,240,236,0.18); border-right: none;
                        background: transparent; color: rgba(245,240,236,0.5);
@@ -96,7 +96,9 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
           .tb-print { display: none; }
           .tb-save  { display: inline-flex !important; }
           .tb-close { display: none; }
-          .tb-size-btn { padding: 5px 8px; font-size: 9px; }
+          .tb-row2 { flex-wrap: wrap; }
+          .tb-sizes { flex-wrap: wrap; row-gap: 4px; max-width: 100%; }
+          .tb-size-btn { padding: 6px 9px; font-size: 12px; letter-spacing: 0.04em; border-right: 1px solid rgba(245,240,236,0.18); }
         }
       `}</style>
 
@@ -115,10 +117,10 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
         <div className="tb-row1">
           {/* Brand */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#C69B3C", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 13, letterSpacing: "0.2em", textTransform: "uppercase", color: "#C69B3C", whiteSpace: "nowrap" }}>
               ORIZ · Druckvorschau
             </span>
-            <span style={{ fontSize: 10, color: "rgba(245,240,236,0.32)", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 13, color: "rgba(245,240,236,0.32)", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
               {size.w === 190 ? "A4" : `${size.w} × ${size.h} mm`} · {count}×
             </span>
           </div>
@@ -151,7 +153,7 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
               onClick={() => window.print()}
               className="tb-print"
               style={{
-                fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase",
+                fontSize: 13, letterSpacing: "0.18em", textTransform: "uppercase",
                 padding: "8px 16px", background: "#C69B3C", color: "#0A0A0A",
                 border: "none", cursor: "pointer", fontFamily: "inherit",
                 minHeight: 40, whiteSpace: "nowrap",
@@ -166,7 +168,7 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
               download={`qr-${preset.id}.png`}
               className="tb-save"
               style={{
-                fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase",
+                fontSize: 13, letterSpacing: "0.18em", textTransform: "uppercase",
                 padding: "8px 16px", background: "#C69B3C", color: "#0A0A0A",
                 minHeight: 40, whiteSpace: "nowrap", textDecoration: "none",
                 alignItems: "center",
@@ -179,7 +181,7 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
               onClick={() => window.close()}
               className="tb-close"
               style={{
-                fontSize: 11, padding: "8px 12px", background: "transparent",
+                fontSize: 13, padding: "8px 12px", background: "transparent",
                 color: "rgba(245,240,236,0.5)", border: "1px solid rgba(245,240,236,0.25)",
                 cursor: "pointer", fontFamily: "inherit", minHeight: 40,
               }}
@@ -205,7 +207,7 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
               </button>
             ))}
           </div>
-          <span style={{ fontSize: 10, color: "rgba(245,240,236,0.28)", letterSpacing: "0.05em" }}>
+          <span style={{ fontSize: 13, color: "rgba(245,240,236,0.28)", letterSpacing: "0.05em" }}>
             {preset.label}
           </span>
         </div>

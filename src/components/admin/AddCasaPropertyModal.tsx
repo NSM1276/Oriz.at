@@ -154,7 +154,7 @@ export function AddCasaPropertyModal({ open, onClose, onCreated }: Props) {
           </Field>
 
           {error && (
-            <p className="font-sans text-xs text-red-600 leading-snug">
+            <p className="font-sans text-sm text-red-600 leading-snug">
               {error}
             </p>
           )}
@@ -164,14 +164,14 @@ export function AddCasaPropertyModal({ open, onClose, onCreated }: Props) {
           <button
             onClick={handleClose}
             disabled={saving}
-            className="flex-1 font-sans text-[11px] tracking-regal uppercase text-onyx/50 border border-onyx/20 py-3 hover:border-onyx hover:text-onyx transition disabled:opacity-50"
+            className="flex-1 font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/50 border border-onyx/20 py-3 hover:border-onyx hover:text-onyx transition disabled:opacity-50"
           >
             Abbrechen
           </button>
           <button
             onClick={handleCreate}
             disabled={saving}
-            className="flex-1 font-sans text-[11px] tracking-regal uppercase text-parchment bg-onyx py-3 hover:bg-onyx/85 transition disabled:opacity-50"
+            className="flex-1 font-sans text-[13px] font-medium uppercase tracking-wide text-parchment bg-onyx py-3 hover:bg-onyx/85 transition disabled:opacity-50"
           >
             {saving ? "Anlegen…" : "Anlegen"}
           </button>
@@ -195,12 +195,12 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">
+      <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">
         {label}
       </label>
       {children}
       {hint && (
-        <p className="font-sans text-[10px] text-onyx/40 mt-1">{hint}</p>
+        <p className="font-sans text-[13px] text-onyx/60 mt-1">{hint}</p>
       )}
     </div>
   );

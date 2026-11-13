@@ -74,10 +74,10 @@ export function AddVenueModal({ open, onClose, onCreated }: Props) {
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-onyx/10">
             <div>
-              <span className="font-sans text-[10px] tracking-regal uppercase text-gold">New venue</span>
-              <h2 className="font-display text-xl text-onyx mt-0.5">Add restaurant</h2>
+              <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">Neues Lokal</span>
+              <h2 className="font-display text-xl text-onyx mt-0.5">Lokal anlegen</h2>
             </div>
-            <button onClick={onClose} className="text-onyx/40 hover:text-onyx transition-colors p-1">
+            <button onClick={onClose} className="text-onyx/60 hover:text-onyx transition-colors p-1">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -88,12 +88,12 @@ export function AddVenueModal({ open, onClose, onCreated }: Props) {
             {/* Live preview */}
             <div className="h-14 w-full relative overflow-hidden border border-onyx/10" style={{ backgroundColor: colorBg }}>
               <div className="absolute bottom-0 left-0 right-0 h-1" style={{ backgroundColor: colorPrimary }} />
-              <span className="absolute bottom-3 left-3 font-display text-sm text-parchment drop-shadow">{name || "Restaurant name"}</span>
+              <span className="absolute bottom-3 left-3 font-display text-sm text-parchment drop-shadow">{name || "Name des Lokals"}</span>
             </div>
 
             {/* Name */}
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Name</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Name</label>
               <input type="text" value={name} onChange={e => handleNameChange(e.target.value)}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                 placeholder="Zum Goldenen Hirschen" />
@@ -101,9 +101,9 @@ export function AddVenueModal({ open, onClose, onCreated }: Props) {
 
             {/* Slug */}
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">URL slug</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Adresse (name.oriz.at)</label>
               <div className="flex items-center">
-                <span className="font-sans text-xs text-onyx/40 bg-onyx/5 border border-r-0 border-onyx/15 px-3 py-2">oriz.at/</span>
+                <span className="font-sans text-sm text-onyx/60 bg-onyx/5 border border-r-0 border-onyx/15 px-3 py-2">oriz.at/</span>
                 <input type="text" value={slug} onChange={e => setSlug(e.target.value)}
                   className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold"
                   placeholder="zum-goldenen-hirschen" />
@@ -113,36 +113,36 @@ export function AddVenueModal({ open, onClose, onCreated }: Props) {
             {/* Colors */}
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Background</label>
+                <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Hintergrund</label>
                 <div className="flex items-center gap-2">
                   <input type="color" value={colorBg} onChange={e => setColorBg(e.target.value)}
                     className="w-9 h-9 cursor-pointer border border-onyx/20 p-0.5" />
                   <input type="text" value={colorBg} onChange={e => setColorBg(e.target.value)}
-                    className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-2 py-2 text-onyx focus:outline-none focus:border-gold" />
+                    className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-2 py-2 text-onyx focus:outline-none focus:border-gold" />
                 </div>
               </div>
               <div className="flex-1">
-                <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Accent</label>
+                <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Akzent</label>
                 <div className="flex items-center gap-2">
                   <input type="color" value={colorPrimary} onChange={e => setColorPrimary(e.target.value)}
                     className="w-9 h-9 cursor-pointer border border-onyx/20 p-0.5" />
                   <input type="text" value={colorPrimary} onChange={e => setColorPrimary(e.target.value)}
-                    className="flex-1 font-sans text-xs bg-white border border-onyx/15 px-2 py-2 text-onyx focus:outline-none focus:border-gold" />
+                    className="flex-1 font-sans text-sm bg-white border border-onyx/15 px-2 py-2 text-onyx focus:outline-none focus:border-gold" />
                 </div>
               </div>
             </div>
 
             {/* About */}
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">About (optional)</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">About (optional)</label>
               <textarea value={about} onChange={e => setAbout(e.target.value)} rows={2}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold resize-none"
-                placeholder="Short description…" />
+                placeholder="Kurze Beschreibung…" />
             </div>
 
             {/* Currency */}
             <div>
-              <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">Currency</label>
+              <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">Währung</label>
               <select value={currency} onChange={e => setCurrency(e.target.value)}
                 className="w-full font-sans text-sm bg-white border border-onyx/15 px-3 py-2 text-onyx focus:outline-none focus:border-gold">
                 <option value="EUR">EUR — Euro</option>
@@ -152,17 +152,17 @@ export function AddVenueModal({ open, onClose, onCreated }: Props) {
               </select>
             </div>
 
-            {error && <p className="font-sans text-xs text-red-600">{error}</p>}
+            {error && <p className="font-sans text-sm text-red-600">{error}</p>}
           </div>
 
           <div className="px-6 pb-6 flex gap-3">
             <button onClick={onClose}
-              className="flex-1 font-sans text-[11px] tracking-regal uppercase text-onyx/50 border border-onyx/20 py-3 hover:border-onyx/40 transition-colors">
+              className="flex-1 font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/50 border border-onyx/20 py-3 hover:border-onyx/40 transition-colors">
               Cancel
             </button>
             <button onClick={handleCreate} disabled={saving || !name || !slug}
-              className="flex-1 bg-onyx text-parchment font-sans text-[11px] tracking-regal uppercase py-3 hover:bg-onyx/85 transition-colors disabled:opacity-40">
-              {saving ? "Creating…" : "Create venue"}
+              className="flex-1 bg-onyx text-parchment font-sans text-[13px] font-medium uppercase tracking-wide py-3 hover:bg-onyx/85 transition-colors disabled:opacity-40">
+              {saving ? "Wird angelegt…" : "Lokal anlegen"}
             </button>
           </div>
         </div>

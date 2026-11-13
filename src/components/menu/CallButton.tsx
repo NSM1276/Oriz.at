@@ -183,7 +183,7 @@ export function CallButton({
             <div className="mx-auto mb-4 h-1 w-10 rounded-full opacity-25" style={{ backgroundColor: text }} />
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color }}>{tableText(tableLabel, locale)}</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em]" style={{ color }}>{tableText(tableLabel, locale)}</p>
                 <p className="mt-1 text-xl font-semibold">{t.title}</p>
               </div>
               <button
@@ -230,7 +230,7 @@ export function CallButton({
                       {sending === kind ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Icon d={ICONS[kind]} size={22} />}
                     </span>
                     <span className="text-[15px] font-semibold leading-tight">{t[kind][0]}</span>
-                    <span className="text-xs leading-snug opacity-70">{t[kind][1]}</span>
+                    <span className="text-sm leading-snug opacity-70">{t[kind][1]}</span>
                   </button>
                 ))}
               </div>

@@ -116,7 +116,7 @@ export function ProfileModern({ venue, t, allergens = [], events = [] }: Profile
         {/* 1. Back link */}
         <Link
           href={`/${venue.slug}`}
-          className="font-sans text-[11px] tracking-regal uppercase transition-opacity hover:opacity-60"
+          className="font-sans text-[13px] tracking-regal uppercase transition-opacity hover:opacity-60"
           style={{ color: t.accent }}
         >
           ← Zur Speisekarte
@@ -136,7 +136,7 @@ export function ProfileModern({ venue, t, allergens = [], events = [] }: Profile
             isDarkBg={t.isDark}
           />
           <h1
-            className="font-display font-medium mt-6"
+            className={venue.logo_url || venue.logo_svg ? "font-display font-medium mt-6" : "sr-only"}
             style={{
               fontSize: "clamp(2rem, 8vw, 3.25rem)",
               color: t.text,
@@ -148,7 +148,7 @@ export function ProfileModern({ venue, t, allergens = [], events = [] }: Profile
           </h1>
           {venue.price_range && (
             <span
-              className="inline-block font-sans text-[11px] tracking-regal uppercase mt-4"
+              className="inline-block font-sans text-[13px] tracking-regal uppercase mt-4"
               style={{ color: t.accent }}
             >
               {venue.price_range}
@@ -156,7 +156,7 @@ export function ProfileModern({ venue, t, allergens = [], events = [] }: Profile
           )}
           <div className="mt-7 flex items-center gap-4">
             <span
-              className="font-sans text-[10px] tracking-regal uppercase"
+              className="font-sans text-[12px] tracking-regal uppercase"
               style={{ color: t.muted }}
             >
               Information
@@ -247,7 +247,7 @@ export function ProfileModern({ venue, t, allergens = [], events = [] }: Profile
               {events.map((ev) => (
                 <div key={ev.id} className="border-b pb-3 last:border-0 last:pb-0" style={{ borderColor: t.border }}>
                   <p className="font-sans text-sm font-medium" style={{ color: t.text }}>{ev.title}</p>
-                  <p className="font-sans text-[11px] mt-0.5" style={{ color: t.dim }}>
+                  <p className="font-sans text-[13px] mt-0.5" style={{ color: t.dim }}>
                     {new Date(ev.event_date).toLocaleDateString("de-AT", { day: "numeric", month: "short", year: "numeric" })}
                     {ev.time_start ? ` · ${ev.time_start.slice(0, 5)}` : ""}
                     {ev.duration_hours != null ? ` · ${String(ev.duration_hours).replace(".", ",")} Std.` : ""}
@@ -323,7 +323,7 @@ export function ProfileModern({ venue, t, allergens = [], events = [] }: Profile
         <div className="mt-24">
           <Link
             href={`/${venue.slug}`}
-            className="inline-flex items-center justify-center w-full py-4 font-sans text-[12px] tracking-regal uppercase transition-opacity hover:opacity-90"
+            className="inline-flex items-center justify-center w-full py-4 font-sans text-[14px] tracking-regal uppercase transition-opacity hover:opacity-90"
             style={{ backgroundColor: t.accent, color: ctaTextColor }}
           >
             Zur Speisekarte
@@ -334,7 +334,7 @@ export function ProfileModern({ venue, t, allergens = [], events = [] }: Profile
         <footer className="mt-16 flex flex-col gap-4">
           <div className="h-px w-full" style={{ backgroundColor: t.border }} />
           <span
-            className="font-sans text-[11px] tracking-regal uppercase"
+            className="font-sans text-[13px] tracking-regal uppercase"
             style={{ color: t.muted }}
           >
             Powered by ORIZ

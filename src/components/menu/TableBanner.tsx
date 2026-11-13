@@ -5,7 +5,7 @@ import { tableText } from "@/lib/call-i18n";
 export function TableBanner({ label, locale, bg, accent }: { label: string; locale: string; bg: string | null; accent: string | null }) {
   return (
     <div
-      className="flex items-center justify-center gap-2 px-4 py-2 font-sans text-xs font-medium uppercase tracking-[0.18em]"
+      className="flex items-center justify-center gap-2 px-4 py-2 font-sans text-sm font-medium uppercase tracking-[0.18em]"
       style={{
         backgroundColor: bg ?? "#F5F0EC",
         color: accent ?? "#C69B3C",

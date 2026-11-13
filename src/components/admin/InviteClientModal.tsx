@@ -111,7 +111,7 @@ export function InviteClientModal({ open, onClose, onCreated }: Props) {
             </div>
             <button
               onClick={handleClose}
-              className="w-full font-sans text-[11px] tracking-regal uppercase text-parchment bg-onyx py-3 hover:bg-onyx/85 transition"
+              className="w-full font-sans text-[13px] font-medium uppercase tracking-wide text-parchment bg-onyx py-3 hover:bg-onyx/85 transition"
             >
               Fertig
             </button>
@@ -121,7 +121,7 @@ export function InviteClientModal({ open, onClose, onCreated }: Props) {
             <div className="space-y-4">
               {/* Product chooser */}
               <div>
-                <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">
+                <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">
                   Produkt
                 </label>
                 <div className="flex gap-2">
@@ -135,7 +135,7 @@ export function InviteClientModal({ open, onClose, onCreated }: Props) {
                       key={opt.v}
                       type="button"
                       onClick={() => setProduct(opt.v)}
-                      className={`flex-1 font-sans text-[11px] tracking-regal uppercase py-2 border transition-colors ${
+                      className={`flex-1 font-sans text-[13px] font-medium uppercase tracking-wide py-2 border transition-colors ${
                         product === opt.v
                           ? "border-gold bg-gold text-onyx"
                           : "border-onyx/15 text-onyx/60 hover:border-onyx/30"
@@ -198,7 +198,7 @@ export function InviteClientModal({ open, onClose, onCreated }: Props) {
               </Field>
 
               {error && (
-                <p className="font-sans text-xs text-red-600 leading-snug">
+                <p className="font-sans text-sm text-red-600 leading-snug">
                   {error}
                 </p>
               )}
@@ -208,14 +208,14 @@ export function InviteClientModal({ open, onClose, onCreated }: Props) {
               <button
                 onClick={handleClose}
                 disabled={saving}
-                className="flex-1 font-sans text-[11px] tracking-regal uppercase text-onyx/50 border border-onyx/20 py-3 hover:border-onyx hover:text-onyx transition disabled:opacity-50"
+                className="flex-1 font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/50 border border-onyx/20 py-3 hover:border-onyx hover:text-onyx transition disabled:opacity-50"
               >
                 Abbrechen
               </button>
               <button
                 onClick={handleInvite}
                 disabled={saving}
-                className="flex-1 font-sans text-[11px] tracking-regal uppercase text-parchment bg-onyx py-3 hover:bg-onyx/85 transition disabled:opacity-50"
+                className="flex-1 font-sans text-[13px] font-medium uppercase tracking-wide text-parchment bg-onyx py-3 hover:bg-onyx/85 transition disabled:opacity-50"
               >
                 {saving ? "Einladen…" : "Einladen"}
               </button>
@@ -241,12 +241,12 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">
+      <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">
         {label}
       </label>
       {children}
       {hint && (
-        <p className="font-sans text-[10px] text-onyx/40 mt-1">{hint}</p>
+        <p className="font-sans text-[13px] text-onyx/60 mt-1">{hint}</p>
       )}
     </div>
   );

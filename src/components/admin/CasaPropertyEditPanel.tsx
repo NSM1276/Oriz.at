@@ -134,7 +134,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-onyx/10">
           <div>
-            <span className="font-sans text-[10px] tracking-regal uppercase text-gold">
+            <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-gold">
               Editing · Casa
             </span>
             <h2 className="font-display text-xl text-onyx mt-0.5">
@@ -143,7 +143,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="text-onyx/40 hover:text-onyx transition-colors p-1"
+            className="text-onyx/60 hover:text-onyx transition-colors p-1"
             aria-label="Close"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -222,7 +222,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
           </Field>
 
           <div className="border-t border-onyx/10 pt-6">
-            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 mb-4">
+            <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-4">
               Farbe &amp; Stil
             </p>
             <div className="flex flex-wrap gap-2 mb-3">
@@ -247,7 +247,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
               })}
             </div>
             {findPreset(colorBg) && (
-              <p className="font-sans text-[10px] tracking-regal uppercase mb-4" style={{ color: colorPrimary }}>
+              <p className="font-sans text-[13px] font-medium uppercase tracking-wide mb-4" style={{ color: colorPrimary }}>
                 {findPreset(colorBg)?.label}
               </p>
             )}
@@ -257,12 +257,12 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
 
           {/* Logo */}
           <div className="border-t border-onyx/10 pt-6">
-            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40 mb-3">
+            <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-3">
               Logo
             </p>
             {property && (property.logo_svg || property.logo_url) && (
               <div className="mb-4 space-y-3">
-                <p className="font-sans text-[9px] tracking-regal uppercase text-onyx/40">
+                <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">
                   Vorschau auf 3 Hintergründen:
                 </p>
                 <div className="flex gap-2 flex-wrap">
@@ -273,7 +273,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
                 </div>
               </div>
             )}
-            <p className="font-sans text-[10px] text-onyx/40 mb-3 leading-snug">
+            <p className="font-sans text-[13px] text-onyx/60 mb-3 leading-snug">
               SVG empfohlen (passt sich automatisch der Farbe an). PNG/JPG
               werden als-ist angezeigt.
             </p>
@@ -298,7 +298,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
               <button
                 onClick={handleRemoveLogo}
                 disabled={removingLogo}
-                className="mt-3 font-sans text-[10px] tracking-regal uppercase text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+                className="mt-3 font-sans text-[13px] font-medium uppercase tracking-wide text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
               >
                 {removingLogo ? "Entfernen…" : "Logo entfernen"}
               </button>
@@ -306,7 +306,7 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
           </div>
 
           <div className="border-t border-onyx/10 pt-6 space-y-4">
-            <p className="font-sans text-[10px] tracking-regal uppercase text-onyx/40">
+            <p className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">
               Links &amp; Kontakt
             </p>
             <Field label="Website">
@@ -363,14 +363,14 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
             </Field>
           </div>
 
-          {error && <p className="font-sans text-xs text-red-600">{error}</p>}
+          {error && <p className="font-sans text-sm text-red-600">{error}</p>}
         </div>
 
         <div className="px-6 py-4 border-t border-onyx/10 space-y-3">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full bg-onyx text-parchment font-sans text-[12px] tracking-regal uppercase py-3 hover:bg-onyx/85 transition-colors disabled:opacity-50"
+            className="w-full bg-onyx text-parchment font-sans text-sm font-semibold uppercase tracking-wide py-3 hover:bg-onyx/85 transition-colors disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save changes"}
           </button>
@@ -380,13 +380,13 @@ export function CasaPropertyEditPanel({ property, onClose, onSaved }: Props) {
                 href={`/casa/${slug || property.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex-1 text-center font-sans text-[10px] tracking-regal uppercase text-onyx/60 border border-onyx/15 py-2 hover:border-gold hover:text-gold transition-colors"
+                className="flex-1 text-center font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 border border-onyx/15 py-2 hover:border-gold hover:text-gold transition-colors"
               >
                 Karte ↗
               </a>
               <a
                 href={`/admin/casa/${slug || property.slug}`}
-                className="flex-1 text-center font-sans text-[10px] tracking-regal uppercase text-onyx/60 border border-onyx/15 py-2 hover:border-gold hover:text-gold transition-colors"
+                className="flex-1 text-center font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 border border-onyx/15 py-2 hover:border-gold hover:text-gold transition-colors"
               >
                 Inhalt bearbeiten →
               </a>
@@ -412,12 +412,12 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">
+      <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">
         {label}
       </label>
       {children}
       {hint && (
-        <p className="font-sans text-[10px] text-onyx/30 mt-1">{hint}</p>
+        <p className="font-sans text-[13px] text-onyx/60 mt-1">{hint}</p>
       )}
     </div>
   );
@@ -456,7 +456,7 @@ function PreviewSwatch({
           height={32}
         />
       </div>
-      <span className="font-sans text-[9px] tracking-regal uppercase text-onyx/40">
+      <span className="font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60">
         {label}
       </span>
     </div>
@@ -474,7 +474,7 @@ function ColorField({
 }) {
   return (
     <div>
-      <label className="block font-sans text-[11px] tracking-regal uppercase text-onyx/60 mb-2">
+      <label className="block font-sans text-[13px] font-medium uppercase tracking-wide text-onyx/60 mb-2">
         {label}
       </label>
       <div className="flex items-center gap-3">

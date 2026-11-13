@@ -36,7 +36,7 @@ export function OpeningHoursSection({ hours }: { hours: OpeningHours }) {
   return (
     <section className="text-center">
       <h2
-        className="font-sans text-[11px] tracking-regal uppercase mb-3"
+        className="font-sans text-[13px] tracking-regal uppercase mb-3"
         style={{ color: "var(--color-muted)" }}
       >
         Öffnungszeiten
@@ -58,7 +58,7 @@ export function OpeningHoursSection({ hours }: { hours: OpeningHours }) {
       >
         <span>{todayLabel}</span>
         <span
-          className="font-sans text-xs align-middle transition-transform duration-300"
+          className="font-sans text-sm align-middle transition-transform duration-300"
           style={{
             color: "var(--accent)",
             display: "inline-block",
@@ -94,7 +94,7 @@ export function OpeningHoursSection({ hours }: { hours: OpeningHours }) {
                 }}
               >
                 <span
-                  className="tracking-regal uppercase text-[11px]"
+                  className="tracking-regal uppercase text-[13px]"
                   style={isToday ? { color: "var(--accent)" } : undefined}
                 >
                   {LABELS[day]}
