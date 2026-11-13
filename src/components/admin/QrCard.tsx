@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { COLOR_PRESETS, findPreset, type ColorPreset } from "@/lib/colorPresets";
 
 type Props = {
@@ -48,8 +48,17 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
     : "1px solid rgba(10,10,10,0.08)";
   const screenBg  = dark ? "#111111" : "#E5E0DA";
 
-  // Screen scale: aim for ~160mm wide preview
-  const SCALE = size.id === "a4" ? 1.2 : Math.min(3.5, 160 / size.w);
+  // Screen scale: aim for ~160mm wide preview, but never wider than the screen (phones).
+  const [screenW, setScreenW] = useState<number | null>(null);
+  useEffect(() => {
+    const read = () => setScreenW(window.innerWidth);
+    read();
+    window.addEventListener("resize", read);
+    return () => window.removeEventListener("resize", read);
+  }, []);
+  const wanted = size.id === "a4" ? 1.2 : Math.min(3.5, 160 / size.w);
+  const MM = 96 / 25.4; // CSS pixels per millimetre
+  const SCALE = screenW ? Math.min(wanted, (screenW - 40) / (size.w * MM)) : wanted;
 
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=900x900&margin=0&color=${qrFg}&bgcolor=${qrBg}&data=${encodeURIComponent(url)}`;
   const cardDownload = `/api/qr-card-image?slug=${encodeURIComponent(url.replace(/^https?:\/\/oriz\.at\//, "").replace(/^https:\/\/([^.]+)\.oriz\.at$/, "$1"))}&name=${encodeURIComponent(name)}&dark=${dark ? "1" : "0"}&accent=${encodeURIComponent(accent)}&kind=${kind}`;
@@ -98,6 +107,7 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
           .tb-close { display: none; }
           .tb-row2 { flex-wrap: wrap; }
           .tb-sizes { flex-wrap: wrap; row-gap: 4px; max-width: 100%; }
+          .qr-preview { padding-top: 210px !important; justify-content: flex-start !important; }
           .tb-size-btn { padding: 6px 9px; font-size: 12px; letter-spacing: 0.04em; border-right: 1px solid rgba(245,240,236,0.18); }
         }
       `}</style>
@@ -215,7 +225,7 @@ export function QrCard({ name, url, kind, subtitle, colorBg }: Props) {
 
       {/* ── Screen preview ─────────────────────────────────────────── */}
       <div
-        className="no-print"
+        className="no-print qr-preview"
         style={{
           minHeight: "100vh", display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center",

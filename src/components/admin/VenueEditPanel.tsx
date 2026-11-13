@@ -691,7 +691,7 @@ export function VenueEditPanel({ venue, onClose, onSaved }: Props) {
           {venue && (
             <a href={`/${venue.slug}`} target="_blank" rel="noreferrer"
               className="block text-center font-sans text-[13px] font-medium uppercase tracking-wide text-gold hover:text-gold/80 transition-colors">
-              Open menu ↗
+              Speisekarte öffnen ↗
             </a>
           )}
         </div>
